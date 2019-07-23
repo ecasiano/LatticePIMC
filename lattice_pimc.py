@@ -7,7 +7,7 @@ import line_profiler
 import memory_profiler
 from src import *
 
-n_kinks = 2
+n_kinks = 3
 # Initialize random bosonic configuration
 L,N = 3,2   # Lattice size, total particles
 x = random_boson_config(L,N)
@@ -31,26 +31,15 @@ U = 2.0
 # Number of desired accept/reject steps
 M = 100
 
-# Propose M particle jump updates on configuration x
 for m in range(M):
-    exit = False # Temporary flag related to limiting the number of kinks
     particle_jump(data_struct,beta)
-    for i in range(L):
-        if len(data_struct[i]) > n_kinks : exit=True # Forces only one jump (for debugging)
-    if exit == True: break
 
-#for m in range(M):
-#    particle_jump(data_struct,beta)
-
-# Remove the tuple corresponding to tau = 0 from each site tuple
+# Remove the initializing tuple corresponding to tau = 0 from each site tuple
 for site_tuples in data_struct:
     del site_tuples[0]
 
-# Sort data_struct wrt time (this might simplify visualization?)
-for i in range(L):
-    data_struct[i].sort()
-
 # Print out results
+print("\n")
 print("Sorted by tau: (tau,n after kink)\n")
 i = 0
 for site_tuples in data_struct:
@@ -59,7 +48,7 @@ for site_tuples in data_struct:
         print(tau_tuples)
     print("\n")
     i += 1
-#
+
 # Spread tau,N,dir data to different arrays (hopefully will help with visualization???)
 # Store kink times, particles after kinks, and kink directions for each site i
 tau_list = []
