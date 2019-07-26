@@ -15,11 +15,11 @@ def random_boson_config(L,N):
 
 '----------------------------------------------------------------------------------'
 
-def worm_insert(data_struct, beta, is_worm_present):
+def worm_insert(data_struct, beta, is_worm_present,ira_loc = [], masha_loc = []):
     'Accept/reject worm head AND tail insertion'
 
     # Reject update if there is a worm present
-    if is_worm_present == True: return None
+    if is_worm_present[0] == True : return None
 
     # Number of lattice sites
     L = len(data_struct)
@@ -31,6 +31,9 @@ def worm_insert(data_struct, beta, is_worm_present):
 
     # Randomly select a lattice site i on which to insert a worm
     i = np.random.randint(L)
+
+    print("\nOriginal : ")
+    print(data_struct[i])
 
     # Randomly select a flat tau interval at which to possibly insert worm
     n_flats = len(data_struct[i])
@@ -45,11 +48,13 @@ def worm_insert(data_struct, beta, is_worm_present):
     if tau_1 == tau_2 : return None
 
     # Propose to insert worm (Metropolis Sampling)
-    weight_worm = 1
-    if np.random.random() < 1:
+    weight_insert = 1
+
+    # Accept
+    if np.random.random() < weight_insert:
         # Case 1: Ira first, then Masha
         if tau_1 < tau_2 :
-            print("Ira first , Masha second")
+            #print("Ira first , Masha second")
             n = data_struct[i][r][1] - 1
             if n == -1 : return None # Reject if there were no particles to destroy
             # Insert worm 'kink' here
@@ -60,9 +65,13 @@ def worm_insert(data_struct, beta, is_worm_present):
                 data_struct[i].insert(r+1,[tau_1,n,(i,i)])
                 data_struct[i].insert(r+2,[tau_2,n+1,(i,i)])
 
+            # Save ira and masha locations (site_idx, tau_idx)
+            ira_loc.extend([i,r+1])
+            masha_loc.extend([i,r+2])
+
         # Case 2: Masha first, then Ira
         else:
-            print("Masha first , Ira second")
+            #print("Masha first , Ira second")
             n = data_struct[i][r][1] + 1
             # Insert worm kink here
             if r == n_flats - 1:
@@ -72,26 +81,152 @@ def worm_insert(data_struct, beta, is_worm_present):
                 data_struct[i].insert(r+1,[tau_2,n,(i,i)])
                 data_struct[i].insert(r+2,[tau_1,n-1,(i,i)])
 
+            # Save ira and masha locations (site_idx, tau_idx)
+            ira_loc.extend([i,r+2])
+            masha_loc.extend([i,r+1])
+
+        print("Insert: " )
+        print(data_struct[i])
+    # Reject
     else: return None
 
     # Flag indicationg a worm is now present
-    is_worm_present = True
+    is_worm_present[0] = True
 
     return None
 
-# Test
-data_struct = [ [[0,1,-26],[0.25,2,(1,0)],[0.5,1,(0,2)],[0.75,0,(0,1)]],
-                [[0,1,-26],[0.25,0,(1,0)],[0.75,1,(0,1)]],
-                [[0,1,-26],[0.5,2,(0,2)]] ]
-beta = 1
-is_worm_present = False
-print(data_struct)
-worm_insert(data_struct,beta,is_worm_present)
-print(data_struct)
+'----------------------------------------------------------------------------------'
+
+def worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc):
+
+    # Reject update if there is no worm present
+    if is_worm_present[0] == False : return None
+
+    # Number of lattice sites
+    L = len(data_struct)
+
+    # Number of total particles in the lattice
+    N = 0
+    for site_idx in range(L):
+        N += data_struct[site_idx][-1][1] # taulist[list[(tau,N,jump_dir)]]
+
+    # Retrieve the site and tau indices of where ira and masha are located
+    # ira_loc = [site_idx,tau_idx]
+    tau_1_siteidx = ira_loc[0]
+    tau_1_tauidx = ira_loc[1]
+    tau_2_siteidx = masha_loc[0]
+    tau_2_tauidx = masha_loc[1]
+
+    # Retrieve the actual times of ira, masha, and the closest kinks (in im. time)
+    #print("Site indices for tau1, tau2: ", tau_1_siteidx,tau_2_siteidx)
+    #print("tau indices for tau1, tau2: ", tau_1_tauidx,tau_2_tauidx)
+    #print("\n")
+    #print("Pre timeshift: ")
+    #print(data_struct[tau_1_siteidx])
+    tau_1 = data_struct[tau_1_siteidx][tau_1_tauidx][0]
+    tau_2 = data_struct[tau_2_siteidx][tau_2_tauidx][0]
+
+    # Similar to above, but find the locs of closest kinks to ira and masha in im time
+
+    # Case 1: Ira is ahead in imaginary time
+    if tau_1_tauidx > tau_2_tauidx:
+        past_kink_tauidx = tau_2_tauidx - 1                # idx of kink before masha
+        future_kink_tauidx = tau_1_tauidx + 1              # idx of kink after ira
+        if future_kink_tauidx == len(data_struct[tau_1_siteidx]):
+            tau_future = beta  # This covers the case when there's no kinks after ira
+        else:
+            tau_future = data_struct[tau_1_siteidx][future_kink_tauidx][0] #actual times
+        tau_past = data_struct[tau_2_siteidx][past_kink_tauidx][0]
+
+        tau_1 = tau_2 + np.random.random()*(tau_future - tau_2)  # Ira's proposed time
+
+    # Case 2: Ira is behind in imaginary time
+    else:
+        past_kink_tauidx = tau_1_tauidx - 1                 # idx of kink before ira
+        future_kink_tauidx = tau_2_tauidx + 1               # idx of kink after masha
+        if future_kink_tauidx == len(data_struct[tau_2_siteidx]):
+            tau_future = beta  # This covers the case when there's no kinks after ira
+        else:
+            tau_future = data_struct[tau_2_siteidx][future_kink_tauidx][0] # actual times
+        tau_past = data_struct[tau_1_siteidx][past_kink_tauidx][0]
+
+        tau_1 = tau_past + np.random.random()*(tau_2 - tau_past)
+
+    # Metropolis sampling
+    # Accept
+    weight_timeshift = 1
+    if np.random.random() < weight_timeshift:
+        data_struct[tau_1_siteidx][tau_1_tauidx][0] = tau_1
+        print("Timeshift: ")
+        print(data_struct[tau_1_siteidx])
+        return None
+
+    # Reject
+    return None
 
 '----------------------------------------------------------------------------------'
 
-def view_worldlines(data_struct,beta):
+def worm_spaceshift(data_struct,beta,is_worm_present,ira_loc,masha_loc):
+
+    # Retrieve the site and tau indices of where ira and masha are located
+    # ira_loc = [site_idx,tau_idx]
+    tau_1_siteidx = ira_loc[0]
+    tau_1_tauidx = ira_loc[1]
+    tau_2_siteidx = masha_loc[0]
+    tau_2_tauidx = masha_loc[1]
+
+    return None
+
+'----------------------------------------------------------------------------------'
+
+def worm_delete(data_struct,beta,is_worm_present,ira_loc,masha_loc):
+
+    # Check if there's a worm
+    if is_worm_present[0] == False : return None
+
+    # Number of lattice sites
+    L = len(data_struct)
+
+    # Number of total particles in the lattice
+    N = 0
+    for site_idx in range(L):
+        N += data_struct[site_idx][-1][1] # taulist[list[(tau,N,jump_dir)]]
+
+    # Retrieve the site and tau indices of where ira and masha are located
+    # ira_loc = [site_idx,tau_idx]
+    tau_1_siteidx = ira_loc[0]
+    tau_1_tauidx = ira_loc[1]
+    tau_2_siteidx = masha_loc[0]
+    tau_2_tauidx = masha_loc[1]
+
+    # Metropolis sampling
+    # Accept
+    weight_delete = 1
+    if np.random.random() < weight_delete:
+        if tau_1_tauidx > tau_2_tauidx : # Ira ahead
+            del data_struct[tau_1_siteidx][tau_1_tauidx] # Deletes ira
+            del data_struct[tau_2_siteidx][tau_2_tauidx] # Deletes masha
+        else: # Ira behind
+            del data_struct[tau_2_siteidx][tau_2_tauidx] # Deletes masha
+            del data_struct[tau_1_siteidx][tau_1_tauidx] # Deletes ira
+
+        print("Delete: ")
+        print(data_struct[tau_1_siteidx])
+
+        # Update the worm flag and ira_loc,masha_loc
+        is_worm_present[0] = False
+        del ira_loc[:]
+        del masha_loc[:]
+
+        return None
+
+    # Reject
+    else:
+        return None
+
+'----------------------------------------------------------------------------------'
+
+def view_worldlines(data_struct,beta,figure_name):
 
     # Set initial configuration
     # Number of lattice sites
@@ -164,7 +299,7 @@ def view_worldlines(data_struct,beta):
                 if n == 0: ls,lw = ':',1
                 elif n == 1: ls,lw = '-',1
                 elif n == 2: ls,lw = '-',3
-                elif n == 3: ls,lw = '-',5
+                elif n == 3: ls,lw = '-',5.5
                 src_site = dirs_list[i][j][0]    # Index of source site
                 dest_site = dirs_list[i][j][1]  # Index of destination site
 
@@ -175,8 +310,8 @@ def view_worldlines(data_struct,beta):
                     #plt.plot(i,tau_initial,marker='_',ms=5,lw=5)
                     plt.hlines(tau_initial,i-0.06,i+0.06,lw=1)
                 # Draw kinks
-                print(dirs_list)
-                print(N_list)
+                #print(dirs_list)
+                #print(N_list)
                 src_site = dirs_list[i][j][0]    # Index of source site
                 dest_site = dirs_list[i][j][1]  # Index of destination site
 
@@ -192,18 +327,6 @@ def view_worldlines(data_struct,beta):
                 else:
                     plt.hlines(tau_list[i][j],src_site,dest_site,linewidth=1)
 
-    # Plot final segments for each site
-#    for i in range(L):
-#            if len(tau_list[i]) > 0:
-#                n = N_list[i][-1]
-     #           print(i," final", N_list[i][-1])
-#                tau_initial = tau_list[i][-1]
-#                tau_final = 1
-#                if n == 0: ls,lw = ':',1.3
-#                elif n == 1: ls,lw = '-',1.3
-#                elif n == 2: ls,lw = '-',4
-#                plt.vlines(i,tau_initial,tau_final,linestyle=ls,linewidth=lw)
-
     plt.xticks(range(0,L))
     plt.xlim(-0.5,L-1+0.5)
     plt.ylim(0,1)
@@ -211,13 +334,38 @@ def view_worldlines(data_struct,beta):
     plt.tick_params(axis='x',which='both',top=False,bottom=False)
     plt.xlabel(r"$i$")
     plt.ylabel(r"$\tau/\beta$")
-    #plt.savefig("worldlines.pdf")
-    #plt.savefig("worldlines_bad.pdf")
-    plt.show()
+    plt.savefig(file_name)
+    #plt.show()
 
     return None
 
-view_worldlines(data_struct,beta)
+# Test insert
+data_struct = [ [[0,1,-26],[0.25,2,(1,0)],[0.5,1,(0,2)],[0.75,0,(0,1)]],
+                [[0,1,-26],[0.25,0,(1,0)],[0.75,1,(0,1)]],
+                [[0,1,-26],[0.5,2,(0,2)]] ]
+beta = 1
+is_worm_present = [False] # made flag a list so it can be passed "by reference"
+ira_loc = []    # If there's a worm present, these will store
+masha_loc = []  # the site_idx and tau_idx "by reference"
+#print("Worm present: ",is_worm_present)
+#print(data_struct)
+worm_insert(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+#print(data_struct)
+#print("Worm present: ",is_worm_present, "Ira at: ",ira_loc, "Masha at: ", masha_loc)
+
+file_name = "worldlines_insert.pdf"
+#view_worldlines(data_struct,beta,file_name)
+
+# Test timeshift
+worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+
+file_name = "worldlines_timeshift.pdf"
+#view_worldlines(data_struct,beta,file_name)
+
+# Test delete
+worm_delete(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+#print(is_worm_present,ira_loc,masha_loc)
+
 '----------------------------------------------------------------------------------'
 
 def particle_jump(data_struct, beta):
