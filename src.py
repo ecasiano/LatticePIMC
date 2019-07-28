@@ -34,7 +34,7 @@ def worm_insert(data_struct, beta, is_worm_present,ira_loc = [], masha_loc = [])
 
     print("\nOriginal : ")
     print(data_struct[i])
-
+#
     # Randomly select a flat tau interval at which to possibly insert worm
     n_flats = len(data_struct[i])
     r = np.random.randint(n_flats) # Index of lower bound time of worm
