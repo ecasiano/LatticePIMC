@@ -5,5 +5,4 @@ LatticePIMC_Notes/
 __pycache__/
 
 # Ignore .git* files
-.gitattributes
-.gitignore
+.git*
