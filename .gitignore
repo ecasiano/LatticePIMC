@@ -1,2 +1,9 @@
 # Ignore folder with PIMC notes and talk made by ecasiano
 LatticePIMC_Notes/
+
+# Ignore __pycache__ folder
+__pycache__/
+
+# Ignore .git* files
+.gitattributes
+.gitignore
