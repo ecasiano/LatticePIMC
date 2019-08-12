@@ -43,16 +43,16 @@ def worm_insert(data_struct, beta, is_worm_present,ira_loc = [], masha_loc = [])
 
     ##############################################
     # Forces worm instead of antiworm
-    if tau_2 > tau_1:
-        tmp = tau_1
-        tau_1 = tau_2
-        tau_2 = tmp
+    #if tau_2 > tau_1:
+    #    tmp = tau_1
+    #    tau_1 = tau_2
+    #    tau_2 = tmp
 
     # Forces insert antiworm instead of worm
-    #if tau_1 > tau_2:
-    #    tmp = tau_2
-    #    tau_2 = tau_1
-    #    tau_1 = tmp
+    if tau_1 > tau_2:
+        tmp = tau_2
+        tau_2 = tau_1
+        tau_1 = tmp
     ##############################################
 
     # Propose to insert worm (Metropolis Sampling)
@@ -176,92 +176,161 @@ def worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc):
     tau_1 = data_struct[ix][ik][0]
     tau_2 = data_struct[mx][mk][0]
 
-    # Check if there's a kink before Ira to see if the delete part of this update is possible
-    #is_delete_possible = False
-    #kink_before_ira = data_struct[ix][ik-1]
-    #kink_source = kink_before_ira[2][0]
-    #kink_dest = kink_before_ira[2][1]
-    #if kink_source != kink_dest: # delete only possible if kink before is an actual kink and not worm end or initial data_struct
-    #    is_delete_possible = True
-
-    # Flip a coin to decide if to attempt a delete kink or insert kink (before Ira)
-    #insert = True
-    #if is_delete_possible:
-    #    if np.random.random() < 0.5:
-    #        insert = False
-
-    # Randomly select the neighboring site at which to send Ira
+    # Randomly choose to do the insert or delete kink part of this update
     if np.random.random() < 0.5:
-        j = ix + 1
-        if j == L : j = 0      # PBC
+        insert = True
     else:
-        j = ix - 1
-        if j == -1 : j = L - 1 # PBC
+        insert = False
 
-    print("j_th site before/after ss_before (insert kink part)")
-    print(data_struct[j])
-
-    # Determine lower and upper bound in im. time at which to insert the kink
-    tau_max = tau_1 # tau_max is at Ira's time
-
-    # tau_min candidate on site i
-    if len(data_struct[ix]) == 1: tau_min_i = 0
-    else: tau_min_i = data_struct[ix][ik-1][0]
-
-    # tau_min candidate on site j
-    for k in range(len(data_struct[j])):
-        if len(data_struct[j]) == 1:
-            tau_min_j = 0
-            flat_min_idx_j = 0
+    # --- Insert kink branch --- #
+    if insert == True:
+        # Randomly select the neighboring site at which to send Ira
+        if np.random.random() < 0.5:
+            j = ix + 1
+            if j == L : j = 0      # PBC
         else:
-            if data_struct[j][k][0] > tau_max: break # want the kink with tau preceding tau_max
-            tau_min_j = data_struct[j][k][0]
-            flat_min_idx_j = k
+            j = ix - 1
+            if j == -1 : j = L - 1 # PBC
 
-    # Select the tau_min value between the i and j candidates
-    if tau_min_i > tau_min_j : tau_min = tau_min_i
-    else : tau_min = tau_min_j
+        print("Welcome to the insert branch of ss_before!")
+        print("--- Initial ---")
+        print("i=0 : ", data_struct[0])
+        print("i=1 : ", data_struct[1])
+        print("i=2 : ", data_struct[2])
+        # Determine lower and upper bound in im. time at which to insert the kink
+        tau_max = tau_1 # tau_max is at Ira's time
 
-    # Randomly choose the kink time between tau_min and tau_max
-    tau_kink = tau_min + np.random.random()*(tau_max - tau_min)
+        # tau_min candidate on site i
+        if len(data_struct[ix]) == 1: tau_min_i = 0
+        else: tau_min_i = data_struct[ix][ik-1][0]
 
-    # Insertion not possible if the proposed kink time happens at the time of another kink
-    if tau_kink == tau_min :  return None
+        # tau_min candidate on site j
+        for k in range(len(data_struct[j])):
+            if len(data_struct[j]) == 1:
+                tau_min_j = 0
+                flat_min_idx_j = 0
+            else:
+                if data_struct[j][k][0] > tau_max: break # want the kink with tau preceding tau_max
+                tau_min_j = data_struct[j][k][0]
+                flat_min_idx_j = k
 
-    # Build the kinks to be inserted if update is accepted
-    N_i = data_struct[ix][ik][1]                            # particles on i after kink
-    N_j = data_struct[j][flat_min_idx_j][1] + 1             # particles on j after kink
-    N_after_ira = N_j - 1                                   # particles on j after Ira
-    new_kink_i = [tau_kink,N_i,(ix,j)]
-    new_kink_j = [tau_kink,N_j,(ix,j)]
-    ira_kink = [tau_max,N_after_ira,(j,j)]
+        # Select the tau_min value between the i and j candidates
+        if tau_min_i > tau_min_j : tau_min = tau_min_i
+        else : tau_min = tau_min_j
 
-    # Metropolis Sampling
-    spaceshift_before_weight = 1
-    # Accept
-    if np.random.random() < spaceshift_before_weight:
-        data_struct[ix].insert(ik,new_kink_i)
-        del data_struct[ix][ik+1]
-        if flat_min_idx_j == len(data_struct[j]) - 1:
-            data_struct[j].append(new_kink_j)
-            data_struct[j].append(ira_kink)
+        # Randomly choose the kink time between tau_min and tau_max
+        tau_kink = tau_min + np.random.random()*(tau_max - tau_min)
+
+        # Insertion not possible if the proposed kink time happens at the time of another kink
+        if tau_kink == tau_min :  return None
+
+        # Build the kinks to be inserted if update is accepted
+        N_i = data_struct[ix][ik][1]                            # particles on i after kink
+        N_j = data_struct[j][flat_min_idx_j][1] + 1             # particles on j after kink
+        N_after_ira = N_j - 1                                   # particles on j after Ira
+        new_kink_i = [tau_kink,N_i,(ix,j)]
+        new_kink_j = [tau_kink,N_j,(ix,j)]
+        ira_kink = [tau_max,N_after_ira,(j,j)]
+
+        # Metropolis Sampling
+        spaceshift_before_weight = 1
+        # Accept
+        if np.random.random() < spaceshift_before_weight:
+            data_struct[ix].insert(ik,new_kink_i)
+            del data_struct[ix][ik+1]
+            if flat_min_idx_j == len(data_struct[j]) - 1:
+                data_struct[j].append(new_kink_j)
+                data_struct[j].append(ira_kink)
+            else:
+                data_struct[j].insert(flat_min_idx_j+1,new_kink_j)
+                data_struct[j].insert(flat_min_idx_j+2,ira_kink)
+
+            # Reindex ira
+            ira_loc[0] = j
+            ira_loc[1] = flat_min_idx_j+2
+            # Reindex masha if necessary
+            if j == mx and tau_2 > tau_1:
+                masha_loc[1] += 2
+
+            print("--- Final ---")
+            print("i=0 : ", data_struct[0])
+            print("i=1 : ", data_struct[1])
+            print("i=2 : ", data_struct[2])
+            return None
+
+        # Reject
+        else : return None
+
+
+    # --- Delete kink branch --- #
+    else:
+        # Deletion only possible if there's a kink preceding Ira
+        is_delete_possible = False
+        kink_before_ira = data_struct[ix][ik-1]
+        kink_source = kink_before_ira[2][0]
+        kink_dest = kink_before_ira[2][1]
+        if kink_source != kink_dest: # kinks with equal src and dest are not actual kinks. they are worm ends or initial values.
+            is_delete_possible = True
+        # Reject update if there was no kink preceding Ira
+        if is_delete_possible == False: return None
+
+        # If kink is deleted, Ira will be sent to the src_site of its preceding kink
+        j = data_struct[ix][ik-1][2][0]
+
+        print("Welcome to the delete branch of ss_before!")
+        print("--- Initial ---")
+        print("i=0 : ", data_struct[0])
+        print("i=1 : ", data_struct[1])
+        print("i=2 : ", data_struct[2])
+        # Determine the tau of the kink preceding Ira. Will be used later for deletion.
+        tau_kink = data_struct[ix][ik-1][0]
+        tau_kink_idx_i = ik - 1
+
+        # Determine the kink idx in j of the kink
+        #print(data_struct[j])
+        for k in range(len(data_struct[j])):
+            print(data_struct[j][k][0],tau_kink,data_struct[j][k][0]==tau_kink)
+            if data_struct[j][k][0] == tau_kink:
+                tau_kink_idx_j = k
+                break
+
+        # The kink cannot be deleted if it interferes with another kink or wormend on site j
+        if tau_kink_idx_j < len(data_struct[j]) - 1:
+            if tau_1 > data_struct[j][tau_kink_idx_j+1][0]:
+                return None
+
+        # Build the Ira kink to be moved to j
+        N_after_ira = data_struct[j][tau_kink_idx_j][1]
+        ira_kink = [tau_1,N_after_ira,(j,j)]
+
+        # Metropolis Sampling
+        spaceshift_before_weight = 1
+        # Accept
+        if np.random.random() < spaceshift_before_weight:
+            del data_struct[ix][ik]
+            del data_struct[ix][ik-1]
+            if tau_kink_idx_j == len(data_struct[j]) - 1: # kink precedes beta
+                data_struct[j].append(ira_kink)
+            else:
+                data_struct[j].insert(tau_kink_idx_j+1,ira_kink)
+            del data_struct[j][tau_kink_idx_j]
+
+            # Reindex Ira
+            ira_loc[0] = j
+            ira_loc[1] = tau_kink_idx_j
+            # Reindex Masha if necessary:
+            if ix == mx and tau_2 > tau_1:
+                masha_loc[1] -= 2
+
+            print("--- Final ---")
+            print("i=0 : ", data_struct[0])
+            print("i=1 : ", data_struct[1])
+            print("i=2 : ", data_struct[2])
+            return None
+
+        # Reject
         else:
-            data_struct[j].insert(flat_min_idx_j+1,new_kink_j)
-            data_struct[j].insert(flat_min_idx_j+2,ira_kink)
-
-        # Reindex ira
-        ira_loc[0] = j
-        ira_loc[1] = flat_min_idx_j+2
-        # Reindex masha if necessary
-        if j == mx and tau_2 > tau_1:
-            masha_loc[1] += 2
-
-        print(data_struct[j])
-
-        return None
-
-    # Reject
-    else : return None
+            return None
 
 '----------------------------------------------------------------------------------'
 
@@ -304,8 +373,6 @@ def worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc):
         j = ix - 1
         if j == -1 : j = L - 1 # PBC
 
-    print("j_th site before/after ss_after (insert kink part)")
-    print(data_struct[j])
     # Determine the lower and upper bounds for the kink to be inserted
     tau_min = tau_1
 
@@ -314,7 +381,6 @@ def worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc):
     else: tau_max_i = data_struct[ix][ik+1][0]
 
     # tau_max candidate on site j
-    print("len(data_struct[j]): ",len(data_struct[j]))
     for k in range(len(data_struct[j])):
         if len(data_struct[j]) == 1 :
             tau_max_j = beta
@@ -354,7 +420,6 @@ def worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc):
     if np.random.random() < spaceshift_after_weight:
         data_struct[ix].insert(ik,new_kink_i)
         del data_struct[ix][ik+1]
-        print("flat_min_idx_j: ",flat_min_idx_j)
         if flat_min_idx_j == len(data_struct[j]) - 1: # takes care of data_struct w/ 1 element or flat_min at last interval
             data_struct[j].append(ira_kink)
             data_struct[j].append(new_kink_j)
@@ -369,7 +434,6 @@ def worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc):
         if j == mx and tau_2 > tau_1:
             masha_loc[1] += 2
 
-        print(data_struct[j])
         return None
 
     # Reject
@@ -515,7 +579,7 @@ is_worm_present = [False] # made flag a list so it can be passed "by reference"
 ira_loc = []    # If there's a worm present, these will store
 masha_loc = []  # the site_idx and tau_idx "by reference"
 
-M = 7
+M = 50
 ctr00, ctr01, ctr02, ctr03, ctr04, ctr05 = 0, 0, 0, 0, 0, 0
 # Plot original configuration
 file_name = "worldlines_0%d_00.pdf"%ctr00
@@ -545,9 +609,9 @@ for n in range(M):
         break
 
     # Test spaceshift_after and plot it
-    worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc)
-    file_name = "worldlines_0%d_04.pdf"%ctr04
-    view_worldlines(data_struct,beta,file_name)
+    #worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+    #file_name = "worldlines_0%d_04.pdf"%ctr04
+    #view_worldlines(data_struct,beta,file_name)
     ctr04 += 1
 
     if data_struct[ira_loc[0]] != sorted(data_struct[ira_loc[0]]):
