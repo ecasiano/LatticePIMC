@@ -609,9 +609,9 @@ for n in range(M):
         break
 
     # Test spaceshift_after and plot it
-    #worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc)
-    #file_name = "worldlines_0%d_04.pdf"%ctr04
-    #view_worldlines(data_struct,beta,file_name)
+    worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+    file_name = "worldlines_0%d_04.pdf"%ctr04
+    view_worldlines(data_struct,beta,file_name)
     ctr04 += 1
 
     if data_struct[ira_loc[0]] != sorted(data_struct[ira_loc[0]]):
