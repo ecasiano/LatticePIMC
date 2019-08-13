@@ -43,16 +43,16 @@ def worm_insert(data_struct, beta, is_worm_present,ira_loc = [], masha_loc = [])
 
     ##############################################
     # Forces worm instead of antiworm
-    #if tau_2 > tau_1:
-    #    tmp = tau_1
-    #    tau_1 = tau_2
-    #    tau_2 = tmp
+    if tau_2 > tau_1:
+        tmp = tau_1
+        tau_1 = tau_2
+        tau_2 = tmp
 
     # Forces insert antiworm instead of worm
-    if tau_1 > tau_2:
-        tmp = tau_2
-        tau_2 = tau_1
-        tau_1 = tmp
+    #if tau_1 > tau_2:
+    #    tmp = tau_2
+    #    tau_2 = tau_1
+    #    tau_1 = tmp
     ##############################################
 
     # Propose to insert worm (Metropolis Sampling)
@@ -176,27 +176,23 @@ def worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc):
     tau_1 = data_struct[ix][ik][0]
     tau_2 = data_struct[mx][mk][0]
 
-    # Randomly choose to do the insert or delete kink part of this update
+    # Randomly select the neighboring site at which to send Ira
     if np.random.random() < 0.5:
-        insert = True
+        j = ix + 1
+        if j == L : j = 0      # PBC
     else:
-        insert = False
+        j = ix - 1
+        if j == -1 : j = L - 1 # PBC
+
+    # Randomly choose to send Ira to j via: a) insert kink b) delete kink
+    if np.random.random() < 0.5:
+        insert_kink = True
+    else:
+        insert_kink = False
 
     # --- Insert kink branch --- #
-    if insert == True:
-        # Randomly select the neighboring site at which to send Ira
-        if np.random.random() < 0.5:
-            j = ix + 1
-            if j == L : j = 0      # PBC
-        else:
-            j = ix - 1
-            if j == -1 : j = L - 1 # PBC
+    if insert_kink == True:
 
-        print("Welcome to the insert branch of ss_before!")
-        print("--- Initial ---")
-        print("i=0 : ", data_struct[0])
-        print("i=1 : ", data_struct[1])
-        print("i=2 : ", data_struct[2])
         # Determine lower and upper bound in im. time at which to insert the kink
         tau_max = tau_1 # tau_max is at Ira's time
 
@@ -252,10 +248,6 @@ def worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc):
             if j == mx and tau_2 > tau_1:
                 masha_loc[1] += 2
 
-            print("--- Final ---")
-            print("i=0 : ", data_struct[0])
-            print("i=1 : ", data_struct[1])
-            print("i=2 : ", data_struct[2])
             return None
 
         # Reject
@@ -271,25 +263,19 @@ def worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc):
         kink_dest = kink_before_ira[2][1]
         if kink_source != kink_dest: # kinks with equal src and dest are not actual kinks. they are worm ends or initial values.
             is_delete_possible = True
+
         # Reject update if there was no kink preceding Ira
         if is_delete_possible == False: return None
 
-        # If kink is deleted, Ira will be sent to the src_site of its preceding kink
-        j = data_struct[ix][ik-1][2][0]
+        # To send Ira to j via delete_kink, the kink's source must also be j
+        if kink_source != j: return None
 
-        print("Welcome to the delete branch of ss_before!")
-        print("--- Initial ---")
-        print("i=0 : ", data_struct[0])
-        print("i=1 : ", data_struct[1])
-        print("i=2 : ", data_struct[2])
         # Determine the tau of the kink preceding Ira. Will be used later for deletion.
         tau_kink = data_struct[ix][ik-1][0]
         tau_kink_idx_i = ik - 1
 
         # Determine the kink idx in j of the kink
-        #print(data_struct[j])
         for k in range(len(data_struct[j])):
-            print(data_struct[j][k][0],tau_kink,data_struct[j][k][0]==tau_kink)
             if data_struct[j][k][0] == tau_kink:
                 tau_kink_idx_j = k
                 break
@@ -322,10 +308,6 @@ def worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc):
             if ix == mx and tau_2 > tau_1:
                 masha_loc[1] -= 2
 
-            print("--- Final ---")
-            print("i=0 : ", data_struct[0])
-            print("i=1 : ", data_struct[1])
-            print("i=2 : ", data_struct[2])
             return None
 
         # Reject
@@ -350,20 +332,6 @@ def worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc):
     mk = masha_loc[1]
     tau_1 = data_struct[ix][ik][0]
     tau_2 = data_struct[mx][mk][0]
-
-    # Check if there's a kink before Ira to see if the delete part of this update is possible
-    #is_delete_possible = False
-    #kink_before_ira = data_struct[ix][ik-1]
-    #kink_source = kink_before_ira[2][0]
-    #kink_dest = kink_before_ira[2][1]
-    #if kink_source != kink_dest: # delete only possible if kink before is an actual kink and not worm end or initial data_struct
-    #    is_delete_possible = True
-
-    # Flip a coin to decide if to attempt a delete kink or insert kink (before Ira)
-    #insert = True
-    #if is_delete_possible:
-    #    if np.random.random() < 0.5:
-    #        insert = False
 
     # Randomly select the neighboring site at which to send Ira
     if np.random.random() < 0.5:
@@ -584,8 +552,8 @@ ctr00, ctr01, ctr02, ctr03, ctr04, ctr05 = 0, 0, 0, 0, 0, 0
 # Plot original configuration
 file_name = "worldlines_0%d_00.pdf"%ctr00
 view_worldlines(data_struct,beta,file_name)
-for n in range(M):
-
+print(" --- Progress --- ")
+for m in range(M):
     # Test insert and plot it
     worm_insert(data_struct,beta,is_worm_present,ira_loc,masha_loc)
     file_name = "worldlines_0%d_01.pdf"%ctr01
@@ -618,9 +586,17 @@ for n in range(M):
         print("ss_after ruined the sort!!!!")
         break
 
+    # Progress
+    print("%.2f%%"%((m+1)/M*100))
+
 # Test delete and plot
 ctr05 += ctr04
 worm_delete(data_struct,beta,is_worm_present,ira_loc,masha_loc)
 file_name = "worldlines_0%d_05.pdf"%ctr05
 view_worldlines(data_struct,beta,file_name)
 #ctr04 += 1
+#print("Welcome to the insert branch of ss_before!")
+#print("--- Initial ---")
+#print("i=0 : ", data_struct[0])
+#print("i=1 : ", data_struct[1])
+#print("i=2 : ", data_struct[2])
