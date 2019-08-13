@@ -15,91 +15,131 @@ def random_boson_config(L,N):
 
 '----------------------------------------------------------------------------------'
 
-def worm_insert(data_struct, beta, is_worm_present,ira_loc = [], masha_loc = []):
-    'Accept/reject worm head AND tail insertion'
+def worm(data_struct, beta, is_worm_present,ira_loc, masha_loc):
 
-    # Reject update if there is a worm present
-    if is_worm_present[0] == True :
-        return None
+    '''Inserts or deletes a worm or antiworm'''
 
-    # Number of lattice sites
-    L = len(data_struct)
+    # --- Insert worm branch --- #
+    if is_worm_present[0] == False :
 
-    # Randomly select a lattice site i on which to insert a worm
-    i = np.random.randint(L)
+        # Number of lattice sites
+        L = len(data_struct)
 
-    # Randomly select a flat tau interval at which to possibly insert worm
-    n_flats = len(data_struct[i])
-    r = np.random.randint(n_flats) # Index of lower bound time of worm
-    tau_min = data_struct[i][r][0]
-    if r == n_flats - 1 : tau_max = beta  # Avoids running out of range
-    else : tau_max = data_struct[i][r+1][0]
+        # Randomly select a lattice site i on which to insert a worm or antiworm
+        i = np.random.randint(L)
 
-    # Randomly select imaginary times at which worm ends will be inserted
-    tau_1 = tau_min + np.random.random()*(tau_max - tau_min) # Ira (anihilation)
-    tau_2 = tau_min + np.random.random()*(tau_max - tau_min) # Masha (creation)
-    if tau_1 == tau_2 :
-        return None
+        # Randomly select a flat tau interval at which to possibly insert worm
+        n_flats = len(data_struct[i])
+        flat_min_idx = np.random.randint(n_flats) # Index of lower bound time of worm
+        tau_min = data_struct[i][flat_min_idx][0]
+        if flat_min_idx == n_flats - 1 : tau_max = beta  # Avoids running out of range
+        else : tau_max = data_struct[i][flat_min_idx+1][0]
 
-    ##############################################
-    # Forces worm instead of antiworm
-    if tau_2 > tau_1:
-        tmp = tau_1
-        tau_1 = tau_2
-        tau_2 = tmp
+        # Randomly select imaginary times at which worm ends will be inserted
+        tau_1 = tau_min + np.random.random()*(tau_max - tau_min) # Ira (anihilation)
+        tau_2 = tau_min + np.random.random()*(tau_max - tau_min) # Masha (creation)
 
-    # Forces insert antiworm instead of worm
-    #if tau_1 > tau_2:
-    #    tmp = tau_2
-    #    tau_2 = tau_1
-    #    tau_1 = tmp
-    ##############################################
+        # Reject update if both worm ends are at the same tau
+        if tau_1 == tau_2 :
+            return None
 
-    # Propose to insert worm (Metropolis Sampling)
-    weight_insert = 1
+        ##############################################
+        # Forces worm instead of antiworm
+        #if tau_2 > tau_1:
+        #    tmp = tau_1
+        #   tau_1 = tau_2
+        #    tau_2 = tmp
 
-    # Accept
-    if np.random.random() < weight_insert:
-        # Case 1: Ira first, then Masha
-        if tau_1 < tau_2 :
-            #print("Ira first , Masha second")
-            n = data_struct[i][r][1] - 1
-            if n == -1 :
-                return None # Reject if there were no particles to destroy
-            # Insert worm 'kink' here
-            if r == n_flats - 1:
-                data_struct[i].append([tau_1,n,(i,i)])
-                data_struct[i].append([tau_2,n+1,(i,i)])
+        # Forces insert antiworm instead of worm
+        #if tau_1 > tau_2:
+        #    tmp = tau_2
+        #    tau_2 = tau_1
+        #    tau_1 = tmp
+        ##############################################
+
+        # Build the worm end kinks to be inserted on i
+        if tau_1 < tau_2: # Antiworm
+            N_after_ira = data_struct[i][flat_min_idx][1] - 1
+            if N_after_ira == -1 : return None # Reject update if there were no particles for Ira to destroy
+            N_after_masha = N_after_ira + 1
+            ira_kink = [tau_1,N_after_ira,(i,i)]
+            masha_kink = [tau_2,N_after_masha,(i,i)]
+        else: # Worm
+            N_after_masha = data_struct[i][flat_min_idx][1] + 1
+            N_after_ira = N_after_masha - 1
+            masha_kink = [tau_2,N_after_masha,(i,i)]
+            ira_kink = [tau_1,N_after_ira,(i,i)]
+
+        # Metropolis Sampling
+        worm_weight = 1
+        # Accept
+        if np.random.random() < worm_weight:
+            # Insert antiworm
+            if tau_1 < tau_2:
+                if flat_min_idx == n_flats - 1:
+                    data_struct[i].append(ira_kink)
+                    data_struct[i].append(masha_kink)
+                else:
+                    data_struct[i].insert(flat_min_idx+1,ira_kink)
+                    data_struct[i].insert(flat_min_idx+2,masha_kink)
+
+                # Save ira and masha locations (site_idx, tau_idx)
+                ira_loc.extend([i,flat_min_idx+1])
+                masha_loc.extend([i,flat_min_idx+2])
+
+            # Insert worm
             else:
-                data_struct[i].insert(r+1,[tau_1,n,(i,i)])
-                data_struct[i].insert(r+2,[tau_2,n+1,(i,i)])
+                if flat_min_idx == n_flats - 1:
+                    data_struct[i].append(masha_kink)
+                    data_struct[i].append(ira_kink)
+                else:
+                    data_struct[i].insert(flat_min_idx+1,masha_kink)
+                    data_struct[i].insert(flat_min_idx+2,ira_kink)
 
-            # Save ira and masha locations (site_idx, tau_idx)
-            ira_loc.extend([i,r+1])
-            masha_loc.extend([i,r+2])
+                # Save ira and masha locations (site_idx, tau_idx)
+                masha_loc.extend([i,flat_min_idx+1])
+                ira_loc.extend([i,flat_min_idx+2])
 
-        # Case 2: Masha first, then Ira
+            # Flag indicationg a worm is now present
+            is_worm_present[0] = True
+
+        # Reject
         else:
-            #print("Masha first , Ira second")
-            n = data_struct[i][r][1] + 1
-            # Insert worm kink here
-            if r == n_flats - 1:
-                data_struct[i].append([tau_2,n,(i,i)])
-                data_struct[i].append([tau_1,n-1,(i,i)])
-            else:
-                data_struct[i].insert(r+1,[tau_2,n,(i,i)])
-                data_struct[i].insert(r+2,[tau_1,n-1,(i,i)])
+            return None
 
-            # Save ira and masha locations (site_idx, tau_idx)
-            ira_loc.extend([i,r+2])
-            masha_loc.extend([i,r+1])
-
-        # Flag indicationg a worm is now present
-        is_worm_present[0] = True
-
-    # Reject
+    # --- Delete worm branch --- #
     else:
-        return None
+        # Only delete if worm ends are on the same site and on the same flat interval
+        if ira_loc[0] != masha_loc[0] or abs(ira_loc[1]-masha_loc[1]) != 1: return None
+
+        # Retrieve the site and tau indices of where ira and masha are located
+        # ira_loc = [site_idx,tau_idx]
+        ix = ira_loc[0]
+        ik = ira_loc[1]
+        mx = masha_loc[0]
+        mk = masha_loc[1]
+
+        # Metropolis sampling
+        # Accept
+        worm_weight = 1
+        if np.random.random() < worm_weight:
+            # Delete the worm ends
+            if ik > mk : # Ira ahead
+                del data_struct[ix][ik] # Deletes ira
+                del data_struct[mx][mk] # Deletes masha
+            else: # Ira behind
+                del data_struct[mx][mk] # Deletes masha
+                del data_struct[ix][ik] # Deletes ira
+
+            # Update the worm flag and ira_loc,masha_loc
+            is_worm_present[0] = False
+            del ira_loc[:]
+            del masha_loc[:]
+
+            return None
+
+        # Reject
+        else : return None
 
 '----------------------------------------------------------------------------------'
 
@@ -115,8 +155,6 @@ def worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc):
     mx = masha_loc[0]
     mk = masha_loc[1]
 
-    #print("ira site before/after timeshift: ")
-    #print(data_struct[ix])
     # Retrieve the actual times of Ira and Masha
     tau_1 = data_struct[ix][ik][0]
     tau_2 = data_struct[mx][mk][0]
@@ -139,9 +177,6 @@ def worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc):
     # Randomly propose a time for Ira between tau_min and tau_max
     tau_1 = tau_min + np.random.random()*(tau_max - tau_min)
 
-    # NOTE: Can Ira shift back all the way to Masha? If so, the worm will be destroyed
-    # and technically, only the worm_delete update can do that
-
     # Delete the worm if the end is shifted to the location of the other
     if tau_1 == tau_2 and ix == mx:
         worm_delete(data_struct,beta,is_worm_present,ira_loc,masha_loc)
@@ -151,7 +186,6 @@ def worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc):
     weight_timeshift = 1
     if np.random.random() < weight_timeshift:
         data_struct[ix][ik][0] = tau_1 # Modify Ira time
-        #print(data_struct[ix])
         return None
 
     # Reject
@@ -474,47 +508,6 @@ def worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc):
         else:
             return None
 
-
-
-'----------------------------------------------------------------------------------'
-
-def worm_delete(data_struct,beta,is_worm_present,ira_loc,masha_loc):
-
-    # Check if there's a worm
-    if is_worm_present[0] == False : return None
-
-    # Only delete if worm ends are on the same site and on the same flat interval
-    if ira_loc[0] != masha_loc[0] or abs(ira_loc[0]-masha_loc[0]) != 1: return None
-
-    # Retrieve the site and tau indices of where ira and masha are located
-    # ira_loc = [site_idx,tau_idx]
-    ix = ira_loc[0]
-    ik = ira_loc[1]
-    mx = masha_loc[0]
-    mk = masha_loc[1]
-
-    # Metropolis sampling
-    # Accept
-    weight_delete = 1
-    if np.random.random() < weight_delete:
-        # Delete the worm ends
-        if ik > mk : # Ira ahead
-            del data_struct[ix][ik] # Deletes ira
-            del data_struct[mx][mk] # Deletes masha
-        else: # Ira behind
-            del data_struct[mx][mk] # Deletes masha
-            del data_struct[ix][ik] # Deletes ira
-
-        # Update the worm flag and ira_loc,masha_loc
-        is_worm_present[0] = False
-        del ira_loc[:]
-        del masha_loc[:]
-
-        return None
-
-    # Reject
-    else : return None
-
 '----------------------------------------------------------------------------------'
 
 def view_worldlines(data_struct,beta,figure_name):
@@ -617,56 +610,36 @@ ira_loc = []    # If there's a worm present, these will store
 masha_loc = []  # the site_idx and tau_idx "by reference"
 
 M = 50
-ctr00, ctr01, ctr02, ctr03, ctr04, ctr05 = 0, 0, 0, 0, 0, 0
+ctr00, ctr01, ctr02, ctr03, ctr04 = 0, 0, 0, 0, 0
 # Plot original configuration
 file_name = "worldlines_0%d_00.pdf"%ctr00
 view_worldlines(data_struct,beta,file_name)
 print(" --- Progress --- ")
 for m in range(M):
-    # Test insert and plot it
-    worm_insert(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+    # Test insert/delete worm and plot it
+    worm(data_struct,beta,is_worm_present,ira_loc,masha_loc)
     file_name = "worldlines_0%d_01.pdf"%ctr01
     view_worldlines(data_struct,beta,file_name)
     ctr01 += 1
 
     # Test timeshift and plot it
-#    worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc)
-#    file_name = "worldlines_0%d_02.pdf"%ctr02
-#    view_worldlines(data_struct,beta,file_name)
-#    ctr02 += 1
+    worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+    file_name = "worldlines_0%d_02.pdf"%ctr02
+    view_worldlines(data_struct,beta,file_name)
+    ctr02 += 1
 
     # Test spaceshift_before_insert and plot it
-#    worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc)
-#    file_name = "worldlines_0%d_03.pdf"%ctr03
-#    view_worldlines(data_struct,beta,file_name)
-#    ctr03 += 1
-
-    if data_struct[ira_loc[0]] != sorted(data_struct[ira_loc[0]]):
-        print("ss_before ruined the sort!!!!")
-        break
+    worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+    file_name = "worldlines_0%d_03.pdf"%ctr03
+    view_worldlines(data_struct,beta,file_name)
+    ctr03 += 1
 
     # Test spaceshift_after and plot it
-#    worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc)
-#    file_name = "worldlines_0%d_04.pdf"%ctr04
-#    view_worldlines(data_struct,beta,file_name)
-#    ctr04 += 1
-
-    if data_struct[ira_loc[0]] != sorted(data_struct[ira_loc[0]]):
-        print("ss_after ruined the sort!!!!")
-        break
-
-    # Test delete and plot
-    worm_delete(data_struct,beta,is_worm_present,ira_loc,masha_loc)
-    file_name = "worldlines_0%d_05.pdf"%ctr05
+    worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+    file_name = "worldlines_0%d_04.pdf"%ctr04
     view_worldlines(data_struct,beta,file_name)
-    ctr05 += 1
+    ctr04 += 1
 
     # Progress
     print("%.2f%%"%((m+1)/M*100))
 
-#ctr04 += 1
-#print("Welcome to the insert branch of ss_before!")
-#print("--- Initial ---")
-#print("i=0 : ", data_struct[0])
-#print("i=1 : ", data_struct[1])
-#print("i=2 : ", data_struct[2])
