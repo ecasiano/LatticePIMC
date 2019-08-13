@@ -159,33 +159,47 @@ def worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc):
     tau_1 = data_struct[ix][ik][0]
     tau_2 = data_struct[mx][mk][0]
 
-    # Determine the lower and upper bounds of Ira for the timeshift
-    tau_max_idx = ik + 1
-    tau_min_idx = ik - 1
+    # Randomly choose to shift Ira or Masha
+    if np.random.random() < 0.5:
+        shift_ira = True
+    else:
+        shift_ira = False
+
+    # Save the site and kink indices of the end that will be moved
+    if shift_ira == True :
+        x = ix
+        k = ik
+    else:
+        x = mx
+        k = mk
+
+    # Determine the lower and upper bounds of the worm end for the timeshift
+    tau_max_idx = k + 1
+    tau_min_idx = k - 1
 
     # Get tau_max
-    if tau_max_idx == len(data_struct[ix]):
-        tau_max = beta  # This covers the case when there's no kinks after ira
+    if tau_max_idx == len(data_struct[x]):
+        tau_max = beta  # This covers the case when there's no kinks after the worm end
     else:
-        tau_max = data_struct[ix][tau_max_idx][0] #actual times
+        tau_max = data_struct[x][tau_max_idx][0] #actual times
     # Get tau_min
     if tau_min_idx == 0:
         tau_min = 0
     else:
-        tau_min = data_struct[ix][tau_min_idx][0]
+        tau_min = data_struct[x][tau_min_idx][0]
 
-    # Randomly propose a time for Ira between tau_min and tau_max
-    tau_1 = tau_min + np.random.random()*(tau_max - tau_min)
+    # Randomly propose a time for the worm end between tau_min and tau_max
+    tau_new = tau_min + np.random.random()*(tau_max - tau_min)
 
     # Delete the worm if the end is shifted to the location of the other
-    if tau_1 == tau_2 and ix == mx:
+    if tau_new == tau_1 or tau_new == tau_2 and ix == mx:
         worm_delete(data_struct,beta,is_worm_present,ira_loc,masha_loc)
 
     # Metropolis sampling
     # Accept
     weight_timeshift = 1
     if np.random.random() < weight_timeshift:
-        data_struct[ix][ik][0] = tau_1 # Modify Ira time
+        data_struct[x][k][0] = tau_new # Modify Ira time
         return None
 
     # Reject
@@ -219,7 +233,7 @@ def worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc):
         if j == -1 : j = L - 1 # PBC
 
     # Randomly choose to send Ira to j via: a) insert kink b) delete kink
-    if np.random.random() < 0.2:
+    if np.random.random() < 0.5:
         insert_kink = True
     else:
         insert_kink = False
@@ -379,7 +393,7 @@ def worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc):
     tau_min = tau_1
 
     # Randomly choose to send Ira to j via: a) insert kink b) delete kink
-    if np.random.random() < 0.2:
+    if np.random.random() < 0.5:
         insert_kink = True
     else:
         insert_kink = False
@@ -609,7 +623,7 @@ is_worm_present = [False] # made flag a list so it can be passed "by reference"
 ira_loc = []    # If there's a worm present, these will store
 masha_loc = []  # the site_idx and tau_idx "by reference"
 
-M = 50
+M = 24
 ctr00, ctr01, ctr02, ctr03, ctr04 = 0, 0, 0, 0, 0
 # Plot original configuration
 file_name = "worldlines_0%d_00.pdf"%ctr00
