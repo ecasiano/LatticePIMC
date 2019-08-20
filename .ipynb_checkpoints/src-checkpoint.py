@@ -3,11 +3,6 @@ import numpy as np
 import bisect
 import matplotlib.pyplot as plt
 
-# Sorry ... but global variables for now :'(
-U = 1       # interaction potential
-mu_i = 1    # chemical potential
-eta = 1     # fugacity
-
 def random_boson_config(L,N):
     '''Generates a random configuration of N bosons in a 1D lattice of size L'''
 
@@ -32,41 +27,17 @@ def worm(data_struct, beta, is_worm_present,ira_loc, masha_loc):
 
         # Randomly select a lattice site i on which to insert a worm or antiworm
         i = np.random.randint(L)
-        p_L = 1/L # probability of selecting the L site
 
         # Randomly select a flat tau interval at which to possibly insert worm
         n_flats = len(data_struct[i])
-        flat_min_idx = np.random.randint(n_flats)           # Index of lower bound time of worm
+        flat_min_idx = np.random.randint(n_flats) # Index of lower bound time of worm
         tau_min = data_struct[i][flat_min_idx][0]
-        if flat_min_idx == n_flats - 1 : tau_max = beta     # Avoids running out of range
+        if flat_min_idx == n_flats - 1 : tau_max = beta  # Avoids running out of range
         else : tau_max = data_struct[i][flat_min_idx+1][0]
-        p_flat = 1/n_flats                                  # prob. of selecting the flat interval
-        dtau_flat = tau_max - tau_min                       # length of the flat interval
 
-        # Randomly choose to insert worm or antiworm (if possible)
-        N_in_flat = data_struct[i][flat_min_idx][1]  # initial number of particles in the flat interval
-        if N_in_flat == 0 : # only worm can be inserted
-            insert_worm = False
-            p_wormtype = 1
-        else:
-            if np.random.random() < 0.5:
-                insert_worm = False
-            else:
-                insert_worm = True
-            p_wormtype = 0.5 # prob. of the worm being a worm or antiworm
-
-        # Randomly choose the length of the worm or antiworm
-        dtau_worm  = np.random.random()*(dtau_flat)
-        p_wormlen = 1/(dtau_flat) # prob. of the worm being of the set length
-
-        # Randomly choose the time where the first worm end will be inserted
-        if insert_worm == True:
-            tau_2 = tau_min + np.random.random()*(dtau_flat - dtau_worm) # worm tail (creates a particle)
-            tau_1 = tau_2 + dtau_worm                                    # worm head (destroys a particle)
-        else:
-            tau_1 = tau_min + np.random.random()*(dtau_flat - dtau_worm)
-            tau_2 = tau_1 + dtau_worm
-        p_tau = 1/(dtau_flat-dtau_worm)     # prob. of inserting the worm end at the chosen time
+        # Randomly select imaginary times at which worm ends will be inserted
+        tau_1 = tau_min + np.random.random()*(tau_max - tau_min) # Ira (anihilation)
+        tau_2 = tau_min + np.random.random()*(tau_max - tau_min) # Masha (creation)
 
         # Reject update if both worm ends are at the same tau
         if tau_1 == tau_2 :
@@ -99,23 +70,9 @@ def worm(data_struct, beta, is_worm_present,ira_loc, masha_loc):
             masha_kink = [tau_2,N_after_masha,(i,i)]
             ira_kink = [tau_1,N_after_ira,(i,i)]
 
-        # Calculate the change in potential energy (will be a factor of the Metropolis condition later on)
-        if insert_worm == True:            # case: inserted worm
-            dV = U*N_in_flat + mu_i
-        else:
-            dV = U*(1-N_in_flat) - mu_i    # case: inserted antiworm
-
-        # Build the Metropolis ratio (R)
-        p_ratio = 1                                     # p_delete / p_insert
-        weight_ratio = eta**2 * np.exp(-dtau_worm*dV)   # w_+ / w_- = worm_config / wormless_config
-        R = p_ratio * weight_ratio / (p_L * p_flat * p_wormtype * p_wormlen * p_tau)
-
         # Metropolis Sampling
-
-        # To Do:  BUILD THE METROPOLIS CONDITION
-
-        # Accept
         worm_weight = 1
+        # Accept
         if np.random.random() < worm_weight:
             # Insert antiworm
             if tau_1 < tau_2:
@@ -676,25 +633,25 @@ for m in range(M):
     # Test insert/delete worm and plot it
     worm(data_struct,beta,is_worm_present,ira_loc,masha_loc)
     file_name = "worldlines_0%d_01.pdf"%ctr01
-    #view_worldlines(data_struct,beta,file_name)
+    view_worldlines(data_struct,beta,file_name)
     ctr01 += 1
 
     # Test timeshift and plot it
     worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc)
     file_name = "worldlines_0%d_02.pdf"%ctr02
-    #view_worldlines(data_struct,beta,file_name)
+    view_worldlines(data_struct,beta,file_name)
     ctr02 += 1
 
     # Test spaceshift_before_insert and plot it
     worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc)
     file_name = "worldlines_0%d_03.pdf"%ctr03
-    #view_worldlines(data_struct,beta,file_name)
+    view_worldlines(data_struct,beta,file_name)
     ctr03 += 1
 
     # Test spaceshift_after and plot it
     worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc)
     file_name = "worldlines_0%d_04.pdf"%ctr04
-    #view_worldlines(data_struct,beta,file_name)
+    view_worldlines(data_struct,beta,file_name)
     ctr04 += 1
 
     # Progress
