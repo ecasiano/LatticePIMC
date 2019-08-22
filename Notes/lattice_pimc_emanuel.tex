@@ -30,11 +30,104 @@
 
 \begin{document}
 
-\section{Metropolis conditions for Worm Updates}
+\section{Lattice Worm Algorithm (WA) Updates}
+
+In this section, a set of ergodic lattice worm updates is introduced. First, an explanation of how each update changes the system is given.. Then, a walkthrough of the decisions that comprise each update will be given, including the probabilities for each desicion's outcome. Finally, the Metropolis conditions are derived or the direct sampling explained, depending on the update.
+
 	\subsection{Insert/Delete worm}
+        
+    The insert worm update creates a particle on a flat region of a worldline, then destroys it after a certain time, also inside the same flat region. Formally, the particle is created by acting on the state at that imaginary time with the bosonic creation operator (worm tail) and anihilated by acting with the bosonic anihilation operator (worm head). An antiworm can instead be inserted by first inserting the worm head and then the tail. In other words, an antiworm will first anihilate a particle and create one at a later time inside the flat region. The update proceeds as follows:
+%
+    \begin{enumerate}
+        \setcounter{enumi}{-1}
+    \item Do with probability $p_{iw}$ {\color{red} What is this actually? There's already an attempt and acceptance prob.}
+        \item Randomly choose an integer $i \in [0,L-1]$, where $L$ is the number of sites on the lattice. The $i^{th}$ site will be chosen wih probability $p_i = 1/L$.
+        \item Randomly choose an integer $f \in [0,F - 1]$, where $F$ is the number of flat regions on site $i$. The $f^{th}$ flat region will be chosen with probability $p_{f} = 1/F$
+        \item Count the number of particles $n_{flat}$ on the flat region and check if inserting an antiworm is possible:
+            \begin{enumerate}
+            \item If $n_{flat} = 0$ : Only a worm can be inserted with probability $p_{type} = 1$
+            \item Else: A worm or antiworm can be inserted with probability $p_{type} = 1/2$
+            \end{enumerate}
+        \item Randomly choose a real number $\Delta\tau_{worm} = rand()*\Delta\tau_{flat}$, where $\Delta\tau_{flat}$ is the length of the flat region and $rand()$ is a random number from the uniform distribution in the interval $[0,1)$. The probability of the worm being of length $\Delta\tau_{worm}$ is $p_{len} = 1/{\Delta\tau_{flat}}$
+        \item Randomly select a real number $\tau = \tau_{min} + rand()*(\Delta\tau_{flat}-\Delta\tau_{worm})$, where $\tau_{min}$ is the lower bound of the flat region. The probability of inserting the worm (antiworm) tail (head) at $\tau$ is $p_{\tau} = 1/(\Delta\tau_{flat} - \Delta\tau_{worm})$.
+        \item Calculate the ratio of weights of configurations pre and post worm insertion:
+            %
+            \begin{equation}
+            \frac{W_+}{W_-} = \eta^2 e^{-\Delta\tau_{worm} \Delta V}
+            \label{eq:insert_ratios}
+            \end{equation}
+            %
+            where $W_+$ and $W_-$ are the weights of the configuration with a worm and no worm, respectively, $\eta$ is the worm fugacity and $\Delta V$ is the change in potential energy pre and post worm insertion. 
+    \end{enumerate}
+    %
+    {\color{red}-Derive $\Delta V$ here for insert worm and antiworm} \\ 
+    {\color{red}-Give a similar walkthrough of the delete worm update} \\
+    {\color{red}-Derive the Metropolis condition from Detailed Balance} \\
+%
+    %
+    \begin{equation}
+    \pi \approx 3.14159...
+    \label{eq:detailed_balance}
+    \end{equation}
+    %
+
+    \subsection{Insert/Delete ground state (gs) worm}
+    These updates will be very similar to the insert/delete worm update. The main difference is that these are particular to the case of zero temperature. Remember that at zero temperature, imaginary time is not subject to periodic boundary conditions, as is the case at finite temperature. Instead, open boundary conditions are imposed in the imaginary time direction, while keeping the space direction periodic. 
+
+    The open boundary conditions will allow now for the insertion of worms that will have one of its ends go past either the $\tau = 0$ or the $\tau = \beta$ boundaries. These worms that go past the imaginary time boundaries will be called ground state (gs) worms. In practice, inserting a gs-worm will look like inserting only one worm end to the worldline configuration at a time, and analogously for deletion. 
+
+
+
 	\subsection{Timeshift}
+    \subsubsection{Forward}
+    The timeshift update consists of moving either a worm head or tail either forward or backwards in imaginary time. The update proceeds as follow:
+    % Timeshift forward
+    \begin{enumerate}
+        \setcounter{enumi}{-1}
+        \item Do with probability $p_{fw}$ :
+        \item Choose which worm end will move, head or tail, with probability $p = 1/2$
+        \item Randomly choose a real number $\tau_{new} = \tau + rand()*(\tau_{max}-\tau)$, where $\tau_{max}$ is the upper bound of the flat region delimited by the moving end and the next kink or worm end and $\tau$ is the original time of the moving worm end. The probability that the worm end will move to this time is $p = 1/(\tau_{max}-\tau)$
+        \item Calculate the ratio of weights of configurations pre and post timeshifting forward:
+            %
+            \begin{equation}
+            \frac{W_+}{W_-} = e^{-\Delta\tau_{worm} \Delta V} = 1
+            \label{eq:forward_ratios}
+            \end{equation}
+            %
+            where $W_+$ and $W_-$ are the weights of the configuration post and pre moving forward, respectively, and $\Delta V$ is the change in potential energy. Since the number of particles on each site remains constant before and after the update, the change in potential energy is $dV = 0$ and thus the exponential becomes unity.
+
+    \end{enumerate}
+    %
+    \subsubsection{Backward}
+    % Timeshift backward
+    \begin{enumerate}
+        \setcounter{enumi}{-1}
+        \item Do with probability $p_{bw}$ :
+        \item Choose which worm end will move, head or tail, with probability $p = 1/2$
+        \item Randomly choose a real number $\tau_{new} = \tau_{min} + rand()*(\tau-\tau_{min})$, where $\tau_{min}$ is the lower bound of the flat region delimited by the moving end and the preceding kink or worm end and $\tau$ is the original time of the moving worm end. The probability that the worm end will move to this time is $p = 1/(\tau-\tau_{min})$
+        \item Calculate the ratio of weights of configurations pre and post timeshifting backward:
+            %
+            \begin{equation}
+            \frac{W_-}{W_+} = e^{\Delta\tau_{worm} \Delta V} = 1
+            \label{eq:tsbw_ratios}
+            \end{equation}
+            %
+    \end{enumerate}
+
+    % Detailed balance of timeshift
+    \subsubsection{Detailed balance}
+    %
+    \begin{equation}
+    p_{fw}^{att} p_{fw}^{acc} W_- = p_{fw}^{att} p_{fw}^{acc} W_+
+    \end{equation}
+    %
+    The attempt probabilities for the forward and backward timeshift can be read off from the description of the update. Substituting them in and solving for $p_{fw}^{acc}/p_{bw}^{acc}$:
+    %
+    \begin{equation}
+    \frac{p_{fw}^{acc}}{p_{bw}^{acc}} = \frac{\tau_{max}-\tau}{\tau-\tau_{min}} = R
+    \end{equation}
+    %
+
 	\subsection{Spaceshift before}
 	\subsection{Spaceshift after}
-	\subsection{Insert/Delete worm head or tail}
-
 \end{document}
