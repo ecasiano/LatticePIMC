@@ -20,6 +20,18 @@ def random_boson_config(L,N):
 
 '----------------------------------------------------------------------------------'
 
+def create_data_struct(x):
+    '''Generate the [tau,N,(src,dest)] data_struct from the configuration'''
+    L = len(x)
+
+    data_struct = []
+    for i in range(L):
+        data_struct.append([[0,x[i],(i,i)]])
+
+    return data_struct
+
+'----------------------------------------------------------------------------------'
+
 def worm(data_struct, beta, is_worm_present,ira_loc, masha_loc):
 
     '''Inserts or deletes a worm or antiworm'''
@@ -235,8 +247,8 @@ def worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc):
     tau_new = tau_min + np.random.random()*(tau_max - tau_min)
 
     # Delete the worm if the end is shifted to the location of the other
-    if tau_new == tau_1 or tau_new == tau_2 and ix == mx:
-        worm_delete(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+    # if tau_new == tau_1 or tau_new == tau_2 and ix == mx:
+    #    worm_delete(data_struct,beta,is_worm_present,ira_loc,masha_loc)
 
     # Metropolis sampling
     # Accept
@@ -661,16 +673,24 @@ data_struct = [ [[0,1,(0,0)],[0.25,2,(1,0)],[0.5,1,(0,2)],[0.75,0,(0,1)]],
 data_struct = [ [[0,1,(0,0)]],
                 [[0,1,(1,1)]],
                 [[0,1,(2,2)]] ]
+
+L = int(1E+05)
+N = L # unit filling
+x = random_boson_config(L,N)
+data_struct = create_data_struct(x)
+#print(data_struct)
+
 beta = 1
 is_worm_present = [False] # made flag a list so it can be passed "by reference"
 ira_loc = []    # If there's a worm present, these will store
 masha_loc = []  # the site_idx and tau_idx "by reference"
 
-M = 24
+M = int(1E+05)
+
 ctr00, ctr01, ctr02, ctr03, ctr04 = 0, 0, 0, 0, 0
 # Plot original configuration
 file_name = "worldlines_0%d_00.pdf"%ctr00
-view_worldlines(data_struct,beta,file_name)
+#view_worldlines(data_struct,beta,file_name)
 print(" --- Progress --- ")
 for m in range(M):
     # Test insert/delete worm and plot it
