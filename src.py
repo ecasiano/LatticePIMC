@@ -150,6 +150,7 @@ def worm(data_struct, beta, ira_loc, masha_loc):
         return None
 
 '----------------------------------------------------------------------------------'
+
 def worm_delete(data_struct, beta, ira_loc, masha_loc):
 
     # Can only propose worm deletion if both worm ends are present
@@ -321,6 +322,48 @@ def gsworm_insert(data_struct, beta, is_worm_present, ira_loc, masha_loc):
         return None
 
 '----------------------------------------------------------------------------------'
+
+def gsworm_delete(data_struct, beta, ira_loc, masha_loc):
+
+    #### THIS IS CURRENTLY THE SAME AS worm_delete() ###
+    ### ### ### a;sldjfhas;dufhad ### ### ## ###
+
+    # Can only propose worm deletion if both worm ends are present
+    if ira_loc == [] or masha_loc == [] : return None
+
+    # Only delete if worm ends are on the same site and on the same flat interval
+    if ira_loc[0] != masha_loc[0] or abs(ira_loc[1]-masha_loc[1]) != 1: return None
+
+    # Retrieve the site and tau indices of where ira and masha are located
+    # ira_loc = [site_idx,tau_idx]
+    ix = ira_loc[0]
+    ik = ira_loc[1]
+    mx = masha_loc[0]
+    mk = masha_loc[1]
+
+    # Metropolis sampling
+    # Accept
+    delete_weight = 1
+    if np.random.random() < delete_weight:
+        # Delete the worm ends
+        if ik > mk : # worm
+            del data_struct[ix][ik] # Deletes ira
+            del data_struct[mx][mk] # Deletes masha
+        else: # antiworm
+            del data_struct[mx][mk] # Deletes masha
+            del data_struct[ix][ik] # Deletes ira
+
+        # Update the worm flag and ira_loc,masha_loc
+        del ira_loc[:]
+        del masha_loc[:]
+
+        return None
+
+    # Reject
+    else : return None
+
+'----------------------------------------------------------------------------------'
+
 def worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc):
 
     # Reject update if there is no worm present
