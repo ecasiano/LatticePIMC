@@ -58,13 +58,13 @@ def worm(data_struct, beta, is_worm_present,ira_loc, masha_loc):
         # Randomly choose to insert worm or antiworm (if possible)
         N_in_flat = data_struct[i][flat_min_idx][1]  # initial number of particles in the flat interval
         if N_in_flat == 0 : # only worm can be inserted
-            insert_worm = False
+            insert_worm = True
             p_wormtype = 1
         else:
             if np.random.random() < 0.5:
-                insert_worm = False
-            else:
                 insert_worm = True
+            else:
+                insert_worm = False
             p_wormtype = 0.5 # prob. of the worm being a worm or antiworm
 
         # Randomly choose the length of the worm or antiworm
@@ -131,7 +131,7 @@ def worm(data_struct, beta, is_worm_present,ira_loc, masha_loc):
         if np.random.random() < worm_weight:
             # Insert antiworm
             if tau_1 < tau_2:
-                if flat_min_idx == n_flats - 1:
+                if flat_min_idx == n_flats - 1: # last flat
                     data_struct[i].append(ira_kink)
                     data_struct[i].append(masha_kink)
                 else:
@@ -198,6 +198,137 @@ def worm(data_struct, beta, is_worm_present,ira_loc, masha_loc):
 
 '----------------------------------------------------------------------------------'
 
+def gsworm_insert(data_struct, beta, is_worm_present, ira_loc, masha_loc):
+
+    '''Insert a ground state (T=0) worm or antiworm (looks like inserting only one end)'''
+
+    # Update only possible if there's either zero or one worm ends
+    if ira_loc != [] and masha_loc != []: return None
+
+    # Number of lattice sites
+    L = len(data_struct)
+
+    # Randomly select a lattice site i on which to insert a worm or antiworm
+    i = np.random.randint(L)
+    p_L = 1/L # probability of selecting the L site
+
+    # Randomly choose to insert at the first or last flat interval
+    if len(data_struct[i]) != 1: # Worldline with kinks
+        if np.random.random() < 0.5:
+            is_first_flat = True
+        else:
+            is_first_flat = False
+        p_flat = 0.5
+
+    else: # Case of i_th worldline having no kinks
+        is_first_flat = False # Due to data_struct, convenient to treat worldline as last flat
+        p_flat = 1
+
+    # Determine the lower and upper bounds of the worm insertion
+    if is_first_flat:
+        flat_min_idx = 0
+        tau_min = 0
+        tau_max = data_struct[i][flat_min_idx][0]
+    else:
+        flat_min_idx = -1
+        tau_min = data_struct[i][flat_min_idx][0]
+        tau_max = beta
+
+    # Randomly choose to insert a ground state worm OR antiworm
+    n_i = data_struct[i][flat_min_idx][1] # particles on the selected flat
+    if n_i == 0:
+        insert_worm = True
+        p_wormtype = 1
+    else:
+        if np.random.random() < 0.5:
+            insert_worm = True
+        else:
+            insert_worm = False
+        p_wormtype = 0.5
+
+    # Randomly choose the time where the worm will be inserted
+    dtau_flat = tau_max - tau_min                 # length of the flat interval
+    tau = tau_min + np.random.random()*dtau_flat  # insertion time
+    p_tau = 1/dtau_flat
+
+    # Reject update if the insertion time is the same as the kink time
+    if tau == tau_min :
+        return None
+
+    # Build the worm end kink to be inserted on i & the previous one if it were to be modified
+    if insert_worm:
+        if is_first_flat:
+            worm_kink = [tau,n_i,(i,i)]
+            before_worm_kink = [tau_min,n_i+1,(i,i)]
+        else: # last flat
+            worm_kink = [tau,n_i+1,(i,i)]
+            before_worm_kink = [tau_min,n_i,(i,i)]
+    else: # insert antiworm
+        if is_first_flat:
+            worm_kink = [tau,n_i,(i,i)]
+            before_worm_kink = [tau_min,n_i-1,(i,i)]
+        else: # last flat
+            worm_kink = [tau,n_i-1,(i,i)]
+            before_worm_kink = [tau_min,n_i,(i,i)]
+
+    # Calculate the change in potential energy (will be a factor of the Metropolis condition later on)
+    if insert_worm == True:            # case: inserted worm
+        dV = U*n_i + mu_i
+    else:
+        dV = U*(1-n_i) - mu_i    # case: inserted antiworm
+
+    # Build the Metropolis ratio (R)
+    p_ratio = 1                                     # p_delete / p_insert
+    #weight_ratio = eta**2 * np.exp(-dtau_worm*dV)   # w_+ / w_- = worm_config / wormless_config
+    #R = p_ratio * weight_ratio / (p_L * p_flat * p_wormtype * p_wormlen * p_tau)
+
+    # Metropolis Sampling
+
+    # To Do:  BUILD THE METROPOLIS CONDITION
+
+    # Accept
+    worm_weight = 1
+    if np.random.random() < 0.5:
+        if insert_worm:
+            if is_first_flat:
+                data_struct[i][flat_min_idx] = before_worm_kink
+                data_struct[i].insert(flat_min_idx+1,worm_kink)
+
+                # Update worm end location
+                ira_loc.extend([i,flat_min_idx+1])
+
+            else:
+                data_struct[i][flat_min_idx] = before_worm_kink
+                data_struct[i].insert(flat_min_idx+1,worm_kink)
+
+                # Update worm end location
+                masha_loc.extend([i,flat_min_idx+1])
+
+        else: # insert antiworm
+            if is_first_flat:
+                data_struct[i][flat_min_idx] = before_worm_kink
+                data_struct[i].insert(flat_min_idx+1,worm_kink)
+
+                # Update worm end location
+                masha_loc.extend([i,flat_min_idx+1])
+
+            else:
+                data_struct[i][flat_min_idx] = before_worm_kink
+                data_struct[i].insert(flat_min_idx+1,worm_kink)
+
+                # Update worm end location
+                ira_loc.extend([i,flat_min_idx+1])
+
+        # Check if there is now a worm
+        if ira_loc != [] and masha_loc != []: is_worm_present = True
+
+        return None
+
+    # Reject
+    else:
+        return None
+
+'----------------------------------------------------------------------------------'
 def worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc):
 
     # Reject update if there is no worm present
@@ -674,10 +805,10 @@ data_struct = [ [[0,1,(0,0)]],
                 [[0,1,(1,1)]],
                 [[0,1,(2,2)]] ]
 
-L = int(1E+05)
-N = L # unit filling
-x = random_boson_config(L,N)
-data_struct = create_data_struct(x)
+#L = int(1E+05)
+#N = L # unit filling
+#x = random_boson_config(L,N)
+#data_struct = create_data_struct(x)
 #print(data_struct)
 
 beta = 1
@@ -685,8 +816,7 @@ is_worm_present = [False] # made flag a list so it can be passed "by reference"
 ira_loc = []    # If there's a worm present, these will store
 masha_loc = []  # the site_idx and tau_idx "by reference"
 
-M = int(1E+05)
-
+M = int(1E+03)
 ctr00, ctr01, ctr02, ctr03, ctr04 = 0, 0, 0, 0, 0
 # Plot original configuration
 file_name = "worldlines_0%d_00.pdf"%ctr00
@@ -716,6 +846,10 @@ for m in range(M):
     file_name = "worldlines_0%d_04.pdf"%ctr04
     #view_worldlines(data_struct,beta,file_name)
     ctr04 += 1
+
+    # Test gsworm_insert
+    gsworm_insert(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+
 
     # Progress
     print("%.2f%%"%((m+1)/M*100))
