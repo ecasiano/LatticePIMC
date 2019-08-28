@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.5.8)  22 AUG 2019 11:55
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.5.8)  28 AUG 2019 14:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -756,25 +756,29 @@ Underfull \hbox (badness 10000) in paragraph at lines 63--68
 
  []
 
-[2]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 133.
- [3]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 133.
+[2] [3]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 193.
+ [4]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 193.
  (./lattice_pimc_emanuel.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 133.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 133.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 193.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 193.
 Package rerunfilecheck Info: File `lattice_pimc_emanuel.out' has not changed.
-(rerunfilecheck)             Checksum: B49BFE1FEDA965FF936DEEF23CEECEAA;623.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 133.
+(rerunfilecheck)             Checksum: 1C915C0F71481555D7AAB26D13191996;880.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 193.
  ) 
 Here is how much of TeX's memory you used:
- 19630 strings out of 492616
- 364889 string characters out of 6129482
- 415432 words of memory out of 5000000
- 23359 multiletter control sequences out of 15000+600000
+ 19650 strings out of 492616
+ 365127 string characters out of 6129482
+ 415435 words of memory out of 5000000
+ 23362 multiletter control sequences out of 15000+600000
  539413 words of font info for 51 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 40i,6n,63p,616b,820s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 40i,7n,63p,616b,822s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
@@ -784,10 +788,10 @@ sr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr
 ocal/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/loca
 l/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local
 /texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb>
-Output written on lattice_pimc_emanuel.pdf (3 pages, 110348 bytes).
+Output written on lattice_pimc_emanuel.pdf (4 pages, 117275 bytes).
 PDF statistics:
- 124 PDF objects out of 1000 (max. 8388607)
- 108 compressed objects within 2 object streams
- 36 named destinations out of 1000 (max. 500000)
- 73 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 158 PDF objects out of 1000 (max. 8388607)
+ 141 compressed objects within 2 object streams
+ 53 named destinations out of 1000 (max. 500000)
+ 97 words of extra memory for PDF output out of 10000 (max. 10000000)
 

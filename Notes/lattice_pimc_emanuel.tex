@@ -76,7 +76,67 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
 
     The open boundary conditions will allow now for the insertion of worms that will have one of its ends go past either the $\tau = 0$ or the $\tau = \beta$ boundaries. These worms that go past the imaginary time boundaries will be called ground state (gs) worms. In practice, inserting a gs-worm will look like inserting only one worm end to the worldline configuration at a time, and analogously for deletion. 
 
+    \subsubsection{Insert gs-worm}
 
+    At $T=0$, a ground state (gs) worm or antiworm can be inserted. One of the ends of this worm will lie either past the $\tau=0$ or the $\tau=\beta$ boundaries. The other end, will lie in the flat region preceding this boundary (i.e, the first or the last flat region). In practice, this will look like inserting a single worm end to the worldline configuration at these flat regions. This worm end can only be inserted if there are no worm ends or one worm end present. The update proceeds as
+    follows:
+    % Insert gs-worm %
+    \begin{enumerate}
+        \setcounter{enumi}{-1}
+    \item Do with probability $p_{gsiw}$
+    \item Choose site with probability $p=1/L$
+    \item Choose first or last flat:
+        \begin{enumerate}
+            \item if $n_{flats} = 1$: treat the flat as first or last (depending on the implementation) with $p=1$
+            \item else: $p=1/2$
+        \end{enumerate}
+    \item Choose gs-worm or gs-antiworm:
+        if $n_i=0$: can only insert worm with prob. $p=1$ 
+        else: choose either with $p=1/2$
+    \item Choose the insertion time of the worm end $\tau = \tau_{min} + rand() (\tau_{max}-\tau_{min})$ with probability $p=1/(\tau_{max}-\tau_{min})$
+    \end{enumerate}
+
+    \subsubsection{Delete gs-worm}
+    The Delete gs-worm update can only be done if there's at least one worm end on the worldline configuration. A random worm end is chosen and then deleted. The update proceeds as follows:
+    % Delete gs-worm %
+    \begin{enumerate}
+        \setcounter{enumi}{-1}
+    \item Do with probability $p_{gsdw}$
+    \item Choose the worm end to be deleted with probability $p=1/2$
+    \end{enumerate}
+
+    \subsubsection{Acceptance probabilities of gs-worm insert/delete}
+
+    From detailed balance:
+    %
+    \begin{equation}
+        w_- p_{gsiw}^{att} p_{gsiw}^{acc} = W_+ p_{gsdw}^{att} p_{gsdw}^{acc}
+    \end{equation}
+    %
+
+    Solving for the ratio of acceptance probabilities:
+    %
+    \begin{equation}
+        \frac{p_{gsiw}^{acc}}{p_{gsdw}^{acc}} = \frac{p_{gsdw}^{att} W_+}{p_{gsiw}^{att} W_-}  
+    \end{equation}
+    %
+
+    Inserting the attempt probabilities:
+    %
+    \begin{equation}
+        \frac{p_{gsiw}^{att}}{p_{gsdw}^{att}} = \frac{p_{gsdw}^{att}}{p_{gsiw}^{att}} \frac{L(\tau_{max}-\tau_{min})}{p_{flat}} \frac{W_+}{W-}
+    \end{equation}
+    %
+
+    where $p_{flat}$ is the probability of choosing either the first or last flat region of the worldline. If there are no kinks in the worldline, $p_{flat}=1$, and if there are kinks, $p_{flat=1/2}$.
+
+
+    The ratio of weights for configurations after a gs-worm insertion and after it is deleted is:
+    %
+    \begin{equation}
+        \frac{W_+}{W_-} = \eta e^{-\Delta \tau \Delta V}
+    \end{equation}
+    %
 
 	\subsection{Timeshift}
     \subsubsection{Forward}

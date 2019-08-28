@@ -189,11 +189,8 @@ def worm_delete(data_struct, beta, ira_loc, masha_loc):
 
 '----------------------------------------------------------------------------------'
 
-'----------------------------------------------------------------------------------'
-
 def gsworm_insert(data_struct, beta, is_worm_present, ira_loc, masha_loc):
-
-    '''Insert a ground state (T=0) worm or antiworm (looks like inserting only one end)'''
+     '''Insert a ground state (T=0) worm or antiworm (looks like inserting only one end)'''
 
     # Update only possible if there's either zero or one worm ends
     if ira_loc != [] and masha_loc != []: return None
@@ -221,14 +218,14 @@ def gsworm_insert(data_struct, beta, is_worm_present, ira_loc, masha_loc):
     if is_first_flat:
         flat_min_idx = 0
         tau_min = 0
-        tau_max = data_struct[i][flat_min_idx][0]
+        tau_max = data_struct[i][flat_min_idx+1][0]
     else:
         flat_min_idx = -1
         tau_min = data_struct[i][flat_min_idx][0]
         tau_max = beta
 
-    # Randomly choose to insert a ground state worm OR antiworm
-    n_i = data_struct[i][flat_min_idx][1] # particles on the selected flat
+    # Randomly choose the type: ground state i) worm OR ii) antiworm
+    n_i = data_struct[i][flat_min_idx][1] # initial particles on the selected flat
     if n_i == 0:
         insert_worm = True
         p_wormtype = 1
