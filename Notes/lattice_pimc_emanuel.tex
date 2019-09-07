@@ -1,34 +1,141 @@
-\documentclass{article}
+%\title{Lattice Path Integral Monte Carlo}
+%\author{Emanuel Casiano-Diaz}
+%\date{September 6, 2019.}
 
-\usepackage{titlesec}
-\newcommand{\sectionbreak}{\clearpage}
+%Formatting Packages
+\documentclass[12pt, two sided]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper,top=1.1in,bottom=1.1in,left=1.6in,right=1.1in]{geometry}
 
-\usepackage{fancyhdr}
-%\pagestyle{fancy}
-%\lhead{Emanuel Casiano-Diaz}
-%\rhead{CSYS300: PoCS - Homework 06 - 10/12/2018}
-\renewcommand{\headrulewidth}{0.4pt}
-\renewcommand{\footrulewidth}{0.4pt}
-
+%Math Packages
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{bm}
-\usepackage{pdfpages}
+\DeclareMathOperator{\Tr}{Tr}
 
+%Physics Package
+\usepackage{physics}
+
+%Allow accentuation marks
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+%Image packages
+\usepackage{graphicx}
+\graphicspath{ {Images/} }
+
+%Enumerating lists
 \usepackage{enumerate}% http://ctan.org/pkg/enumerate
 
-\usepackage{hyperref}
+%Adjust depth of subsections
+\setcounter{secnumdepth}{3}
+
+%Adjust depth of table of contents
+\setcounter{tocdepth}{3}
+
+%References Packages
+%\usepackage{biblatex}
+%\addbibresource{references.bib}
+\usepackage[bookmarks=true]{hyperref}
 \hypersetup{
-    colorlinks=true,
+    hidelinks=true,
     linkcolor=blue,
     filecolor=magenta,      
     urlcolor=cyan,
 }
 
-\usepackage{booktabs,float,siunitx}
-%\usepackage[demo]{graphicx} % omit 'demo' option in real document
+%Commands and packages imported from particle entanglement paper
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{amssymb}
 
+\newcommand{\eket}[1]{\bigl \vert #1 \bigr \rangle}
+\newcommand{\R}{\boldsymbol{R}}
+\newcommand{\Rt}{\tilde{\R}}
+\newcommand{\ebra}[1]{\bigl \langle #1 \bigr \vert}
+\newcommand{\eexp}[1]{\bigl \langle #1 \bigr \rangle}
+\newcommand{\figref}[1]{Fig.~\ref{#1}}
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+\newcommand{\ren}{R\'{e}nyi~}
+\newcommand{\rnote}[1]{{\it \textcolor{red}{#1} }}
+\newcommand{\Eqref}[1]{Eq.~\eqref{#1}}
+
+%Copied from paper
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage[color=green!60]{todonotes}
+\usepackage{physics}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{placeins}
+\usepackage{booktabs}
+\usepackage{dsfont}
+
+%For reference formatting
+\usepackage[numbers,sort&compress]{natbib}
+\bibliographystyle{nsf_new_url}
+
+\setlength{\footskip}{22pt}
+ 
+ %Line spacing
+\usepackage{setspace}
+\doublespace
+
+% --------- Begin Document -------- %
 \begin{document}
+
+\section{Metropolis sampling}
+
+In this section, a brief walkthrough of the Metropolis-Hastings algorithm \cite{doi:10.1063/1.1699114} will be given. First, the process of obtaining acceptance ratios that satisfy the Principle of Detailed Balance will be given. Then, the Metropolis-Hastings algorithm will be stated.
+
+\subsection{Deriving Metropolis acceptance ratios}
+
+The Principle of Detailed Balance states that in an equilibrium system, the number of transitions from a configuration $x$ to a configuration $x'$, must be equal to the number of transitions from $x'$ to $x$. This principle can be expressed as:
+%
+\begin{equation}
+\label{eq:detailed_balance_principle}
+p(x)P(x \to x') = p(x') P(x' \to x)
+\end{equation}
+%
+where $p(x)$ is the steady state probability distribution, and $P(x \to x')$ is the probability of transitioning to $x'$ conditional to original state $x$. Solving for the ratio of transition probabilities:
+%
+\begin{equation}
+\label{eq:transition_ratio}
+\frac{P(x \to x')}{P(x' \to x)} = \frac{p(x')}{p(x)} 
+\end{equation}
+%
+The transition probability can rewritten as a factor of proposal and acceptance probabilities:
+%
+\begin{equation}
+P(x \to x') = g(x \to x') A(x \to x')
+\end{equation}
+%
+where $g(x \to x')$ is the probability of proposing an update that takes the state of the system from $x$ to $x'$, and $A(x \to x')$ is the probability of accepting such update. Substituting the factored transition probabilities into Eq.~\eqref{eq:transition_ratio}:
+%
+\begin{equation}
+\frac{g(x \to x') A(x \to x')}{ g(x' \to x) A(x' \to x)} = \frac{p(x')}{p(x)} 
+\end{equation}
+%
+The ratio of acceptance probabilities becomes:
+%
+\begin{equation}
+\frac{A(x \to x')}{A(x' \to x)} = \frac{p(x')g(x' \to x)}{p(x) g(x \to x')} \equiv R
+\end{equation}
+%
+
+\subsection{The Metropolis-Hastings algorithm}
+
+
+
+\begin{equation}
+\label{eq:sexytime}
+\pi \approx 3.14\dots
+\end{equation}
+
+Essentialy, Eq.~\eqref{eq:sexytime} is an approximation. In the incredible paper by Prokokkokokok \cite{Prokof_ev_1998}, the authors play some Pokemon. In the Metropolis paper \cite{doi:10.1063/1.1699114}. On the Brian Keng's website \cite{bkeng.metropolis}
 
 \section{Lattice Worm Algorithm (WA) Updates}
 
@@ -190,4 +297,15 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
 
 	\subsection{Spaceshift before}
 	\subsection{Spaceshift after}
+	
+% References
+\phantomsection 
+\addcontentsline{toc}{chapter}{References} 
+%\bibliographystyle{apalike} %acm, ieetr, apalike...
+ %\section*{Referencess
+ \singlespacing
+\bibliography{references}
+
+\doublespacing
+
 \end{document}

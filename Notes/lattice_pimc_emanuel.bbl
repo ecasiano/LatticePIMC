@@ -1,0 +1,35 @@
+\begin{thebibliography}{1}
+\newcommand{\enquote}[1]{``#1''}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{}
+\providecommand{\bibAnnoteFile}[1]{%
+  \IfFileExists{#1}{\begin{quotation}\noindent\textsc{Key:} #1\\
+  \textsc{Annotation:}\ \input{#1}\end{quotation}}{}}
+\providecommand{\bibAnnote}[2]{%
+  \begin{quotation}\noindent\textsc{Key:} #1\\
+  \textsc{Annotation:}\ #2\end{quotation}}
+
+\bibitem{Prokof_ev_1998}
+N.~V. Prokof'ev, B.~V. Svistunov, and I.~S. Tupitsyn.
+\newblock \enquote{Exact, complete, and universal continuous-time worldline
+  monte carlo approach to the statistics of discrete quantum systems.}
+\newblock Journal of Experimental and Theoretical Physics \textbf{87}, 310
+  (1998).
+\bibAnnoteFile{Prokof_ev_1998}
+\newline\urlprefix\url{https://doi.org/10.1134%2F1.558661}
+
+\bibitem{doi:10.1063/1.1699114}
+N.~Metropolis, A.~W. Rosenbluth, M.~N. Rosenbluth, A.~H. Teller, and E.~Teller.
+\newblock \enquote{Equation of state calculations by fast computing machines.}
+\newblock The Journal of Chemical Physics \textbf{21}, 1087 (1953).
+\bibAnnoteFile{doi:10.1063/1.1699114}
+\newline\urlprefix\url{https://doi.org/10.1063/1.1699114}
+
+\bibitem{bkeng.metropolis}
+B.~Keng.
+\newblock \enquote{Markov chain monte carlo methods, rejection sampling and the
+  metropolis-hastings algorithm.}
+\bibAnnoteFile{bkeng.metropolis}
+\newline\urlprefix\url{http://bjlkeng.github.io/posts/markov-chain-monte-carlo-mcmc-and-the-metropolis-hastings-algorithm/}
+
+\end{thebibliography}

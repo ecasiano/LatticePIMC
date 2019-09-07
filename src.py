@@ -190,10 +190,12 @@ def worm_delete(data_struct, beta, ira_loc, masha_loc):
 '----------------------------------------------------------------------------------'
 
 def gsworm_insert(data_struct, beta, is_worm_present, ira_loc, masha_loc):
-     '''Insert a ground state (T=0) worm or antiworm (looks like inserting only one end)'''
+
+    '''Insert a ground state (T=0) worm or antiworm (looks like inserting only one end)'''
 
     # Update only possible if there's either zero or one worm ends
-    if ira_loc != [] and masha_loc != []: return None
+    if ira_loc != [] and masha_loc != []:
+        return None
 
     # Number of lattice sites
     L = len(data_struct)
@@ -325,11 +327,8 @@ def gsworm_delete(data_struct, beta, ira_loc, masha_loc):
     #### THIS IS CURRENTLY THE SAME AS worm_delete() ###
     ### ### ### a;sldjfhas;dufhad ### ### ## ###
 
-    # Can only propose worm deletion if both worm ends are present
-    if ira_loc == [] or masha_loc == [] : return None
-
-    # Only delete if worm ends are on the same site and on the same flat interval
-    if ira_loc[0] != masha_loc[0] or abs(ira_loc[1]-masha_loc[1]) != 1: return None
+    # Can only propose worm deletion if there is one worm end present
+    if ira_loc == [] and masha_loc == [] : return None
 
     # Retrieve the site and tau indices of where ira and masha are located
     # ira_loc = [site_idx,tau_idx]
@@ -337,6 +336,23 @@ def gsworm_delete(data_struct, beta, ira_loc, masha_loc):
     ik = ira_loc[1]
     mx = masha_loc[0]
     mk = masha_loc[1]
+
+    # Count how many worm ends are deletable (i.e, part of either the first or last flat)
+    deletable = 0
+    ira_deletable = False
+    masha_deletable = False
+    if ik == 0 or ik == len(data_struct[ix]) - 1 :
+        ira_deletable = True
+        deletable+=1
+    if mk == 0 or mk == len(data_struct[mx]) - 1 :
+        masha_deletable = True
+        deletable+=1
+
+    # Reject update if neither end lies in the first or last flat region
+    if deletable == 0 : return None
+
+    # Decide which worm end to delete
+
 
     # Metropolis sampling
     # Accept
