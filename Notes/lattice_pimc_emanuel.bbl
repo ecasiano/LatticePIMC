@@ -9,6 +9,13 @@
   \begin{quotation}\noindent\textsc{Key:} #1\\
   \textsc{Annotation:}\ #2\end{quotation}}
 
+\bibitem{doi:10.1063/1.1699114}
+N.~Metropolis, A.~W. Rosenbluth, M.~N. Rosenbluth, A.~H. Teller, and E.~Teller.
+\newblock \enquote{Equation of state calculations by fast computing machines.}
+\newblock The Journal of Chemical Physics \textbf{21}, 1087 (1953).
+\bibAnnoteFile{doi:10.1063/1.1699114}
+\newline\urlprefix\url{https://doi.org/10.1063/1.1699114}
+
 \bibitem{Prokof_ev_1998}
 N.~V. Prokof'ev, B.~V. Svistunov, and I.~S. Tupitsyn.
 \newblock \enquote{Exact, complete, and universal continuous-time worldline
@@ -17,13 +24,6 @@ N.~V. Prokof'ev, B.~V. Svistunov, and I.~S. Tupitsyn.
   (1998).
 \bibAnnoteFile{Prokof_ev_1998}
 \newline\urlprefix\url{https://doi.org/10.1134%2F1.558661}
-
-\bibitem{doi:10.1063/1.1699114}
-N.~Metropolis, A.~W. Rosenbluth, M.~N. Rosenbluth, A.~H. Teller, and E.~Teller.
-\newblock \enquote{Equation of state calculations by fast computing machines.}
-\newblock The Journal of Chemical Physics \textbf{21}, 1087 (1953).
-\bibAnnoteFile{doi:10.1063/1.1699114}
-\newline\urlprefix\url{https://doi.org/10.1063/1.1699114}
 
 \bibitem{bkeng.metropolis}
 B.~Keng.

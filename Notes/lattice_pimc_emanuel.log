@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.5.8)  7 SEP 2019 13:51
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.5.8)  7 SEP 2019 15:29
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -964,49 +964,61 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
 {/usr/local/texlive/2019/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (26.89702pt too wide) in paragraph at lines 138--139
+Overfull \hbox (26.89702pt too wide) in paragraph at lines 161--162
 []\T1/cmr/m/n/12 Essentialy, Eq. [] is an ap-prox-i-ma-tion. In the in-cred-i-b
 le pa-per by Prokokkokokok
  []
 
-[2]
-Underfull \hbox (badness 10000) in paragraph at lines 170--175
+[2pdfTeX warning (ext4): destination with the same identifier (name{equation.1.
+6}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.166 
+      pdfTeX warning (ext4): destination with the same identifier (name{equatio
+n.1.6}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.166 
+      ] [3]
+Underfull \hbox (badness 10000) in paragraph at lines 193--198
 
  []
 
-[3] [4] [5] [6] (./lattice_pimc_emanuel.bbl
-LaTeX Font Info:    Try loading font information for T1+cmtt on input line 19.
+[4] [5] [6] [7] (./lattice_pimc_emanuel.bbl
+LaTeX Font Info:    Try loading font information for T1+cmtt on input line 17.
 
 (/usr/local/texlive/2019/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
-) [7]
+)
 Overfull \hbox (231.5724pt too wide) in paragraph at lines 29--34
 []$\T1/cmtt/m/n/12 http : / / bjlkeng . github . io / posts / markov-[]chain-[]
 monte-[]carlo-[]mcmc-[]and-[]the-[]metropolis-[]hastings-[]algorithm/$[] 
  []
 
 ) [8]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 311.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 311.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 334.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 334.
  (./lattice_pimc_emanuel.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 311.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 311.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 334.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 334.
 Package rerunfilecheck Info: File `lattice_pimc_emanuel.out' has not changed.
 (rerunfilecheck)             Checksum: BBCA251CF4C78C30EE8DF6D94F999489;1152.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 311.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 334.
  )
 (\end occurred inside a group at level 1)
 
 ### semi simple group (level 1) entered at line 85 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 28147 strings out of 492616
- 528516 string characters out of 6129482
- 575433 words of memory out of 5000000
- 31611 multiletter control sequences out of 15000+600000
- 544693 words of font info for 58 fonts, out of 8000000 for 9000
+ 28154 strings out of 492616
+ 528619 string characters out of 6129482
+ 574559 words of memory out of 5000000
+ 31615 multiletter control sequences out of 15000+600000
+ 546223 words of font info for 60 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 62i,6n,81p,616b,1322s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 62i,6n,81p,616b,1288s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2019/texmf-dist/fonts/enc/dvips/cm-super/cm
 -super-t1.enc}</usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmmi12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm
@@ -1020,10 +1032,10 @@ fb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb
 sr/local/texlive/2019/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></usr
 /local/texlive/2019/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/l
 ocal/texlive/2019/texmf-dist/fonts/type1/public/cm-super/sftt1200.pfb>
-Output written on lattice_pimc_emanuel.pdf (8 pages, 188455 bytes).
+Output written on lattice_pimc_emanuel.pdf (8 pages, 190220 bytes).
 PDF statistics:
- 255 PDF objects out of 1000 (max. 8388607)
- 214 compressed objects within 3 object streams
- 71 named destinations out of 1000 (max. 500000)
+ 258 PDF objects out of 1000 (max. 8388607)
+ 217 compressed objects within 3 object streams
+ 72 named destinations out of 1000 (max. 500000)
  237 words of extra memory for PDF output out of 10000 (max. 10000000)
 

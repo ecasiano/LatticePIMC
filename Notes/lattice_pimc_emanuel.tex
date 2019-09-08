@@ -122,12 +122,35 @@ where $g(x \to x')$ is the probability of proposing an update that takes the sta
 The ratio of acceptance probabilities becomes:
 %
 \begin{equation}
+\label{eq:acceptance_ratio}
 \frac{A(x \to x')}{A(x' \to x)} = \frac{p(x')g(x' \to x)}{p(x) g(x \to x')} \equiv R
 \end{equation}
 %
+Depending on the value of $R$, there are various ways in which the acceptance probabilities can be chosen, such that they satisfy Eq.~\eqref{eq:acceptance_ratio}.
+
+If $R \leq 1$:
+%
+\begin{equation}
+A(x \to x' ) = R \text{ and } A(x' \to x) = 1 \nonumber
+\end{equation}
+%
+
+If $R > 1$: 
+\begin{equation}
+A(x \to x' ) = 1 \text{ and } A(x' \to x) = 1/R \nonumber
+\end{equation}
+
+The above selections can be summarized as:
+%
+\begin{equation}
+\label{eq:general_acceptance_probs}
+A(x \to x') = min\{1,R\} \text{ and } A(x' \to x) = min\{1,1/R\}
+\end{equation}
+%
+
+As part of Metropolis sampling, proposed configurations will be accepted with the probabilities in Eq.~\eqref{eq:general_acceptance_probs}.
 
 \subsection{The Metropolis-Hastings algorithm}
-
 
 
 \begin{equation}
