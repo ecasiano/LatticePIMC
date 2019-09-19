@@ -87,6 +87,22 @@
 % --------- Begin Document -------- %
 \begin{document}
 
+\section{Partition function}
+
+\begin{equation}
+\ket{\psi_0} = \lim_{\beta\to\infty} e^{-\frac{\beta}{2} H} \ket{\psi_T}
+\end{equation}
+
+\begin{equation}
+\mathcal{Z}_0 = \bra{\psi_0} \hat{I} \ket{\psi_0} = \lim_{\beta\to\infty} \bra{\psi_T} e^{-\beta H} \ket{\psi_T}
+\end{equation}
+
+\begin{equation}
+\label{eq:Z_0}
+\mathcal{Z}_0 \approx \sum_{\alpha_0} \vert C_{\alpha_0} \vert^2 e^{-\epsilon_{\alpha_0} \beta} + \\
+\sum_{Q=1}^{\infty} \sum_{\alpha_0, \alpha_1 \dots \alpha_Q} (\prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
+\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}) C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q}
+\end{equation}
 \section{Metropolis sampling}
 
 In this section, a brief walkthrough of the Metropolis-Hastings algorithm \cite{doi:10.1063/1.1699114} will be given. First, the process of obtaining acceptance ratios that satisfy the Principle of Detailed Balance will be given. Then, the Metropolis-Hastings algorithm will be stated.
@@ -130,7 +146,7 @@ Depending on the value of $R$, there are various ways in which the acceptance pr
 
 If $R \leq 1$:
 %
-\begin{equation}
+\begin{equation} 
 A(x \to x' ) = R \text{ and } A(x' \to x) = 1 \nonumber
 \end{equation}
 %
