@@ -98,10 +98,12 @@
 \end{equation}
 
 \begin{equation}
+\begin{aligned}
 \label{eq:Z_0}
-\mathcal{Z}_0 \approx \sum_{\alpha_0} \vert C_{\alpha_0} \vert^2 e^{-\epsilon_{\alpha_0} \beta} + \\
-\sum_{Q=1}^{\infty} \sum_{\alpha_0, \alpha_1 \dots \alpha_Q} (\prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
-\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}) C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q}
+\mathcal{Z}_0 &\approx \sum_{\alpha_0} \vert C_{\alpha_0} \vert^2 e^{-\epsilon_{0} \beta} \\ &+ 
+\sum_{Q=1}^{\infty} (-1)^Q \sum_{\alpha_0, \alpha_1 \dots \alpha_Q} (\prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{q-1}(\tau_{q-1}-\tau_q)} 
+\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}) C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{Q} \tau_Q}
+\end{aligned}
 \end{equation}
 \section{Metropolis sampling}
 
