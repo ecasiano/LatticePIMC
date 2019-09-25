@@ -238,12 +238,14 @@ By evaluating the first few terms of the expansion, a generating formula for the
 First-order term:
 \begin{equation}
 \begin{aligned}
-\mathcal{Z}_T^{(1)} &= -\sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta}  \bra{\alpha_0} \mathds{1} \ket{\alpha_1} \\
-&= -\sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta}  \bra{\alpha_0} \ket{\alpha_1} \\
-&= -\sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta} \delta_{\alpha_0,\alpha_1} \\
-\mathcal{Z}_T^{(1)}  &= -\sum_{\alpha_0} \vert C_0 \vert^2 e^{-\epsilon_0 \beta}
+\mathcal{Z}_T^{(1)} &= -\sum_{\alpha_0, \alpha_1} C_0 C_1^{*}  \int_{0}^{\beta} d\tau_1 e^{-\epsilon_0 \beta} \bra{\alpha_0}  H_1(\tau_1) \ket{\alpha_1} \\
+&= -\sum_{\alpha_0, \alpha_1} C_0 C_1^{*}  \int_{0}^{\beta} d\tau_1 e^{-\epsilon_0 \beta} \bra{\alpha_0} e^{\tau_1 H_0}H_1e^{-\tau_1 H_0}  \ket{\alpha_1} \\
+&= -\sum_{\alpha_0, \alpha_1} C_0 C_1^{*}  \int_{0}^{\beta} d\tau_1 e^{-\epsilon_0(\beta-\tau_1)} e^{-\epsilon_1 \tau_1}  \bra{\alpha_0} H_1 \ket{\alpha_1}
 \end{aligned}
 \end{equation}
+
+%e^{\tau_1 H_0}H_1e^{-\tau_1 H_0} 
+%e^{-\epsilon_0(\beta-\tau_1)} e^{-\epsilon_1(\tau_1-\tau_2)} e^{-\epsilon_2 \tau_2}
 
 Second-order term:
 \begin{equation}
@@ -282,12 +284,12 @@ Thus, the weight $\mathcal{Z}_0$ approximately becomes:
 \begin{aligned}
 \label{eq:Z_0}
 \mathcal{Z}_0 &\approx \sum_{\alpha_0} \vert C_{\alpha_0} \vert^2 e^{-\epsilon_{0} \beta} \\ &+ 
-\sum_{Q=1}^{\infty} (-1)^Q C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{Q} \tau_Q} \sum_{\alpha_0, \alpha_1 \dots \alpha_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{q-1}(\tau_{q-1}-\tau_q} 
+\sum_{Q=1}^{\infty} (-1)^Q C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{Q} \tau_Q} \sum_{\alpha_0, \alpha_1 \dots \alpha_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{q-1}(\tau_{q-1}-\tau_q)} 
 \bra{\alpha_{q-1}} H_1 \ket{\alpha_q}
 \end{aligned}
 \end{equation}
 %%%%%%%%%%%%%%%%
-where the result becomes exact in the limit $\beta\to\infty$.
+where the off-diagonal elements $\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}$ are given by Eq.~\eqref{eq:off_diagonal_elements} and the diagonal elements $\epsilon_{\alpha}$ are given by Eq.~\eqref{eq:diagonal_elements} and the approximation becomes exact in the limit $\beta\to\infty$.
 
 % -------------- Metropolis Sampling --------------- %
 \section{Metropolis sampling}
