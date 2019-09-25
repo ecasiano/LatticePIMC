@@ -87,7 +87,7 @@
 % --------- Begin Document -------- %
 \begin{document}
 
-%----- Bose Hubbard Model%
+%----- Bose Hubbard Model -------%
 \section{The Bose-Hubbard Model}
 
 The Bose-Hubbard (BH) model describes the ground state of spinless itinerant bosons on a 1D lattice, subject to periodic boundary conditions, and on-site particle interactions. The Hamiltonian matrix representing the BH model is:
@@ -173,6 +173,7 @@ The ground state can be exactly obtained by:
 where $\beta = \frac{1}{k_B  T}$, $H$ is the ground state Hamiltonian, and $\ket{\psi_T}$ is a trial wavefunction. Under this definition, the ground state weight $Z_0$ can then be approximated as the expectation value of the density operator $e^{\beta H}$
 %
 \begin{equation}
+\label{eq:z_0_01}
 \mathcal{Z}_0 = \bra{\psi_0} \hat{I} \ket{\psi_0} = \lim_{\beta\to\infty} \bra{\psi_T} e^{-\beta H} \ket{\psi_T}
 \end{equation}
 %
@@ -237,27 +238,56 @@ By evaluating the first few terms of the expansion, a generating formula for the
 First-order term:
 \begin{equation}
 \begin{aligned}
-\mathcal{Z}_T^{(1)} &= \sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta}  \bra{\alpha_0} \mathds{1} \ket{\alpha_1} \\
-&= \sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta}  \bra{\alpha_0} \ket{\alpha_1} \\
-&= \sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta} \delta_{\alpha_0,\alpha_1} \\
-\mathcal{Z}_T^{(0)}  &= \sum_{\alpha_0} \vert C_0 \vert^2 e^{-\epsilon_0 \beta}
+\mathcal{Z}_T^{(1)} &= -\sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta}  \bra{\alpha_0} \mathds{1} \ket{\alpha_1} \\
+&= -\sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta}  \bra{\alpha_0} \ket{\alpha_1} \\
+&= -\sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta} \delta_{\alpha_0,\alpha_1} \\
+\mathcal{Z}_T^{(1)}  &= -\sum_{\alpha_0} \vert C_0 \vert^2 e^{-\epsilon_0 \beta}
 \end{aligned}
 \end{equation}
 
+Second-order term:
+\begin{equation}
+\begin{aligned}
+\mathcal{Z}_T^{(2)} &=  \sum_{\alpha_0, \alpha_2} C_0 C_2^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{0} \beta} \bra{\alpha_0}  H_1(\tau_1) H_1(\tau_2) ) \ket{\alpha_2} \\
+&= \sum_{\alpha_0, \alpha_1, \alpha_2} C_0 C_2^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{0} \beta} \bra{\alpha_0}  H_1(\tau_1) \ket{\alpha_1} \bra{\alpha_1}   H_1(\tau_2) )  \ket{\alpha_2} \\
+\\
+&= \sum_{\alpha_0, \alpha_1, \alpha_2} C_0 C_2^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{0} \beta} \bra{\alpha_0}  e^{\tau_1 H_0}H_1e^{-\tau_1 H_0}  \ket{\alpha_1} \bra{\alpha_1} e^{\tau_2 H_0}H_1e^{-\tau_2 H_0}  \ket{\alpha_2} \\
+\mathcal{Z}_T^{(2)} &= \sum_{\alpha_0, \alpha_1, \alpha_2} C_0 C_2^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_0(\beta-\tau_1)} e^{-\epsilon_1(\tau_1-\tau_2)} e^{-\epsilon_2 \tau_2} \bra{\alpha_0} H_1 \ket{\alpha_1} \bra{\alpha_1} H_1 \ket{\alpha_2}
+\end{aligned}
+\end{equation}
 
-
-
-
-
+Proceeding in similar fashion, the $Q$-th term of $\mathcal{Z}_T$ can be generated:
+\begin{equation}
+\label{eq:Z^q}
+\mathcal{Z}_T^{(Q)} = (-1)^{Q}  C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{Q} \tau_Q} \sum_{\alpha_1,\alpha_2,\dots,\alpha_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{q-1}(\tau_{q-1}-\tau_q)} 
+\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}
+\end{equation}
+where $Q \geq 1$ and $\tau_0 = \beta$. Summing $Z_T^{(Q)}$ over all $Q$ from $0$ to $\infty$, the full expression for $\mathcal{Z}_T$ is obtained:
+%
+\begin{equation}
+\begin{aligned}
+\mathcal{Z}_T = \mathcal{Z}_T^{(0)} + \sum_{Q=0}^{\infty} \mathcal{Z}_T^{(Q)}
+\end{aligned}
+\end{equation}
+%
+Recall from Eq.~\eqref{eq:z_0_01} that:
+%
+\begin{equation}
+\mathcal{Z}_0 = \bra{\psi_0} \hat{I} \ket{\psi_0} = \lim_{\beta\to\infty} \bra{\psi_T} e^{-\beta H} \ket{\psi_T} = \lim_{\beta\to\infty} \mathcal{Z}_T
+\end{equation}
+%
+Thus, the weight $\mathcal{Z}_0$ approximately becomes:
 %%%%%%%%%%%%%%%%
 \begin{equation}
 \begin{aligned}
 \label{eq:Z_0}
 \mathcal{Z}_0 &\approx \sum_{\alpha_0} \vert C_{\alpha_0} \vert^2 e^{-\epsilon_{0} \beta} \\ &+ 
-\sum_{Q=1}^{\infty} (-1)^Q \sum_{\alpha_0, \alpha_1 \dots \alpha_Q} (\prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{q-1}(\tau_{q-1}-\tau_q)} 
-\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}) C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{Q} \tau_Q}
+\sum_{Q=1}^{\infty} (-1)^Q C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{Q} \tau_Q} \sum_{\alpha_0, \alpha_1 \dots \alpha_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{q-1}(\tau_{q-1}-\tau_q} 
+\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}
 \end{aligned}
 \end{equation}
+%%%%%%%%%%%%%%%%
+where the result becomes exact in the limit $\beta\to\infty$.
 
 % -------------- Metropolis Sampling --------------- %
 \section{Metropolis sampling}
