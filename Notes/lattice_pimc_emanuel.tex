@@ -183,7 +183,7 @@ To save some typing effort in what follows, define a "trial weight" $\mathcal{Z}
 \mathcal{Z}_T \equiv  \bra{\psi_T} e^{-\beta H} \ket{\psi_T}
 \end{equation}
 %
-The trial weight, and hence the ground state weight can be sampled via Path Integral Monte Carlo (PIMC). To do this, $\mathcal{Z}_T$ has to be rewritten in the path integral formulation. (MOVE THIS TO SECTION INTRODUCTION)
+The trial weight, and hence the ground state weight can be sampled via Path Integral Monte Carlo (PIMC). To do this, $\mathcal{Z}_T$ has to be rewritten in the path integral formulation.
 
 Due to completeness of the wavefunction, $\ket{\psi_T}$ can be expanded as:
 %
@@ -291,6 +291,21 @@ Thus, the weight $\mathcal{Z}_0$ approximately becomes:
 %%%%%%%%%%%%%%%%
 where the off-diagonal elements $\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}$ are given by Eq.~\eqref{eq:off_diagonal_elements} and the diagonal elements $\epsilon_{\alpha}$ are given by Eq.~\eqref{eq:diagonal_elements} and the approximation becomes exact in the limit $\beta\to\infty$.
 
+NEED TO INCLUDE DERIVATION 
+
+
+"Worm kinetic energy"
+%
+\begin{equation}
+H_1^{(worm)} = \sum_i (\eta_i b_i^\dag + \eta^* b_i)
+\end{equation}
+%
+"Worm kinetic energy" matrix elements
+%
+\begin{equation}
+\bra{\alpha_p} H_1^{(worm)} \ket{\alpha_q} = \eta_i \sqrt{n_i + 1} \delta_{m_i,n_{i}+1}  + \eta_i^* \sqrt{n_i} \delta_{m_i,n_{i}-1}  \prod_{k\neq i} \delta_{m_k,n_k}
+\end{equation}
+%
 % -------------- Metropolis Sampling --------------- %
 \section{Metropolis sampling}
 
