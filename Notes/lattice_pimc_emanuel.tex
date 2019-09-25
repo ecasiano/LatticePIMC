@@ -79,7 +79,7 @@
 \bibliographystyle{nsf_new_url}
 
 \setlength{\footskip}{22pt}
- 
+
  %Line spacing
 \usepackage{setspace}
 \doublespace
@@ -87,16 +87,169 @@
 % --------- Begin Document -------- %
 \begin{document}
 
-\section{Partition function}
+%----- Bose Hubbard Model%
+\section{The Bose-Hubbard Model}
 
+The Bose-Hubbard (BH) model describes the ground state of spinless itinerant bosons on a 1D lattice, subject to periodic boundary conditions, and on-site particle interactions. The Hamiltonian matrix representing the BH model is:
+%
 \begin{equation}
-\ket{\psi_0} = \lim_{\beta\to\infty} e^{-\frac{\beta}{2} H} \ket{\psi_T}
+\label{eq:bh_hamiltonian}
+H = - \sum_{ i,j } t_{i,j} b_i^{\dag} b_j + \frac{U}{2} \sum_i n_i (n_i-1) - \sum_i \mu_i n_i
 \end{equation}
+%
+where $t_{i,j}$ is the hopping amplitude between sites $i$ and $j$, $U$ is the on-site interaction strength, $\mu_i$ is an on-site chemical potentials,  $b_i^{\dag}$ $(b_i)$ creates (annihilates) a boson on site $i$, and $n_i$ counts the number of bosons on site $i$. 
 
+In the Fock configuration basis, the interaction potential and the chemical potential terms are diagonal operators, while the first term, the kinetic energy operator, is not. The Hamiltonian can be rewritten as:
+%
+\begin{equation}
+H = H_1 + H_0
+\end{equation}
+%
+where $H_1 = - \sum_{i,j} t_{i,j} b_i^{\dag} b_j$ is the off-diagonal term, while $H_0 = \frac{U}{2} \sum_i n_i (n_i-1) - \sum_i \mu_i n_i$ is the diagonal term. Due to $H_0$ being a diagonal operator and the basis states being orthonormal, the diagonal matrix elements are rather simply obtained:
+%
+\begin{equation}
+\label{eq:diagonal_elements}
+\bra{\alpha_p} H_0 \ket{\alpha_q} =  \bra{\alpha_p}  \epsilon_q \ket{\alpha_q}  = \epsilon_q \bra{\alpha_p} \ket{\alpha_q} = \epsilon_{q} \delta_{p,q}
+\end{equation}
+%
+where $\epsilon_q$ is the off-diagonal energy of Fock configuration $\alpha_q$, and $\delta_{p,q}$ is the Kronecker-Delta function. In other words, the matrix elements vanish when the configurations $\alpha_p$ and $\alpha_q$ are different, and become $\epsilon_q$ otherwise.
+
+The off-diagonal elements of the Hamiltonian are given by:
+%
+\begin{equation}
+\label{eq:bra_H1_ket}
+\bra{\alpha_p} H_1 \ket{\alpha_q} = - \sum_{i,j} \bra{\alpha_p} t_{i,j} b_i^{\dag} b_j \ket{\alpha_q}
+\end{equation}
+%
+Recall the definition of the bosonic creation and annihilation operators:
+%
+\begin{align}
+b^\dag \ket{n} &= \sqrt{n+1} \ket{n+1} \\
+b \ket{n} &= \sqrt{n} \ket{n-1} 
+\end{align}
+%
+The basis states can be expressed as:
+%
+\begin{equation}
+\ket{\alpha_q} = \ket{n_1,n_2 \dots , n_L}
+\end{equation}
+%
+where $n_i = b_i^\dag b_i$ is the number of particles on site i, and $L$ is the number of lattice sites. In this representation, acting first with the annihilation operator on site $j$, then acting with the creation operator on site $i$ produces the following result:
+%
+\begin{equation}
+b_i^\dag b_j \ket{n_1,n_2,\dots,n_L} = \sqrt{n_j(n_i+1)} \ket{\dots , n_i+1, \dots, n_j-1, \dots} 
+\end{equation}
+%
+Only sites $i$ and $j$ are modified. The matrix element in Eq.~\eqref{eq:bra_H1_ket} becomes:
+%
+\begin{equation}
+\bra{\alpha_p} H_1 \ket{\alpha_q} = -\sum_{i,j} t_{i,j} \sqrt{n_j(n_i+1)} \bra{m_1,m_2,\dots,m_L} \ket{\dots , n_i+1, \dots, n_j-1, \dots} 
+\end{equation}
+%
+Due to orthonormality of the basis states:
+%
+\begin{equation}
+\bra{m_1,m_2,\dots,m_L} \ket{\dots , n_i+1, \dots, n_j-1, \dots}  = \delta_{m_i, n_i+1} \delta_{m_j,n_j-1} \prod_{k \neq i,j} \delta_{m_k,n_k}
+\end{equation}
+%
+where $m_i$ is the number of particles on site $i$ of the state $\ket{\alpha_p}$ (i.e, the "bra" state) and the product is carried over all sites $k$, excluding $i$ and $j$. The elements of the kinetic operator then become:
+%
+\begin{equation}
+\label{eq:off_diagonal_elements}
+\bra{\alpha_p} H_1 \ket{\alpha_q} = -\sum_{i,j} t_{i,j} \sqrt{n_j(n_i+1)} \delta_{m_i, n_i+1} \delta_{m_j,n_j-1} \prod_{k \neq i,j} \delta_{m_k,n_k}
+\end{equation}
+%
+Eqs.~\eqref{eq:diagonal_elements} and \eqref{eq:off_diagonal_elements} give the diagonal and off-diagonal elements of the Bose-Hubbard Hamiltonian \eqref{eq:bh_hamiltonian}. These elements will be necessary in order to sample the partition function of a Bose-Hubbard configuration via Path Integral Monte Carlo. In the next section, the path integral formulation of the partition will be discussed.
+ 
+%-----------------------------   Partition Function (Weights) ----------------------------------------------%
+\section{Partition function (weights)}
+
+The ground state can be exactly obtained by:
+%
+\begin{equation}
+\ket{\psi_0} = \lim_{\beta\to\infty} e^{-\frac{\beta}{2} H}\ket{\psi_T} 
+\end{equation}
+%
+where $\beta = \frac{1}{k_B  T}$, $H$ is the ground state Hamiltonian, and $\ket{\psi_T}$ is a trial wavefunction. Under this definition, the ground state weight $Z_0$ can then be approximated as the expectation value of the density operator $e^{\beta H}$
+%
 \begin{equation}
 \mathcal{Z}_0 = \bra{\psi_0} \hat{I} \ket{\psi_0} = \lim_{\beta\to\infty} \bra{\psi_T} e^{-\beta H} \ket{\psi_T}
 \end{equation}
+%
+To save some typing effort in what follows, define a "trial weight" $\mathcal{Z}_T$, such that:
+%
+\begin{equation}
+\mathcal{Z}_T \equiv  \bra{\psi_T} e^{-\beta H} \ket{\psi_T}
+\end{equation}
+%
+The trial weight, and hence the ground state weight can be sampled via Path Integral Monte Carlo (PIMC). To do this, $\mathcal{Z}_T$ has to be rewritten in the path integral formulation. (MOVE THIS TO SECTION INTRODUCTION)
 
+Due to completeness of the wavefunction, $\ket{\psi_T}$ can be expanded as:
+%
+\begin{equation}
+\ket{\psi_T} = \sum_{\alpha} C_{\alpha} \ket{\alpha}
+\end{equation}
+%
+where the $C_\alpha$'s are complex expansion coefficients, and the sum is carried over all possible states $\ket{\alpha}$ of a conveniently chosen basis. For the Bose-Hubbard model, the basis that we will "conveniently choose" is the set of all configurations of $N$ particles on a lattice of $L$ sites (i.e, the Fock states). The trial weight becomes:
+%
+\begin{equation}
+\mathcal{Z_T} = \sum_{\alpha_0, \alpha_1} C_0 C_1^{*} \bra{\alpha_0} e^{-\beta H} \ket{\alpha_1}
+\end{equation}
+%
+where each of the sums is carried over all Fock states. The state labels could be chosen arbitrarily, but with the power of hindsight, numerical subscripts have been used to distinguish the bra-ket pair, as it will ease the notation in the following steps. Nevertheless, keep in mind that both $\alpha_0$ and $\alpha_1$ will span the space of all Fock configurations.
+
+In the interaction picture of quantum mechanics, the density operator can be expressed as:
+%
+\begin{equation}
+\label{eq:density_op_01}
+e^{-\beta H} = e^{-\beta H_0} T_{\tau} e^{- \int_0^{\beta} d\tau_1 H_1(\tau_1)}
+\end{equation}
+where $T_{\tau}$ is the imaginary time-ordering operator and $\tau = it/\hbar$. The integrand is the interaction picture representation of the off-diagonal part of the Hamiltonian (kinetic energy operator):
+%
+\begin{equation}
+H_1(\tau_1) = e^{\tau_1 H_0} H_1 e^{-\tau_1 H_0}
+\end{equation}
+%
+where $H_1$ is the off-diagonal part and $H_0$, the diagonal. The time-ordered exponential can be Taylor expanded as:
+\begin{equation}
+e^{- \int_0^{\beta} d\tau_1 H_1(\tau_1)} = \mathds{1} - \int_{0}^{\beta} H_1(\tau_1) d\tau_1 + \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 H_1(\tau_1) H_1(\tau_2) - \dots 
+\end{equation}
+%
+With this Taylor expansion, the trial weight $\mathcal{Z}_T$ becomes:
+%
+\begin{equation}
+\begin{aligned}
+\mathcal{Z_T} = \sum_{\alpha_0, \alpha_1} C_0 C_1^{*} &e^{-\epsilon_0 \beta}  \bra{\alpha_0} ( \\
+& \mathds{1} - \int_{0}^{\beta} H_1(\tau_1) d\tau_1 + \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 H_1(\tau_1) H_1(\tau_2) - \dots ) \ket{\alpha_1}
+\end{aligned}
+\end{equation}
+%
+By evaluating the first few terms of the expansion, a generating formula for the weight $\mathcal{Z}_T$ can be obtained. The zeroth-order term is:
+\begin{equation}
+\begin{aligned}
+\mathcal{Z}_T^{(0)} &= \sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta}  \bra{\alpha_0} \mathds{1} \ket{\alpha_1} \\
+&= \sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta}  \bra{\alpha_0} \ket{\alpha_1} \\
+&= \sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta} \delta_{\alpha_0,\alpha_1} \\
+\mathcal{Z}_T^{(0)}  &= \sum_{\alpha_0} \vert C_0 \vert^2 e^{-\epsilon_0 \beta}
+\end{aligned}
+\end{equation}
+
+First-order term:
+\begin{equation}
+\begin{aligned}
+\mathcal{Z}_T^{(1)} &= \sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta}  \bra{\alpha_0} \mathds{1} \ket{\alpha_1} \\
+&= \sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta}  \bra{\alpha_0} \ket{\alpha_1} \\
+&= \sum_{\alpha_0, \alpha_1} C_0 C_1^{*} e^{-\epsilon_0 \beta} \delta_{\alpha_0,\alpha_1} \\
+\mathcal{Z}_T^{(0)}  &= \sum_{\alpha_0} \vert C_0 \vert^2 e^{-\epsilon_0 \beta}
+\end{aligned}
+\end{equation}
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%
 \begin{equation}
 \begin{aligned}
 \label{eq:Z_0}
@@ -105,6 +258,8 @@
 \bra{\alpha_{q-1}} H_1 \ket{\alpha_q}) C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{Q} \tau_Q}
 \end{aligned}
 \end{equation}
+
+% -------------- Metropolis Sampling --------------- %
 \section{Metropolis sampling}
 
 In this section, a brief walkthrough of the Metropolis-Hastings algorithm \cite{doi:10.1063/1.1699114} will be given. First, the process of obtaining acceptance ratios that satisfy the Principle of Detailed Balance will be given. Then, the Metropolis-Hastings algorithm will be stated.
@@ -169,7 +324,6 @@ A(x \to x') = min\{1,R\} \text{ and } A(x' \to x) = min\{1,1/R\}
 As part of Metropolis sampling, proposed configurations will be accepted with the probabilities in Eq.~\eqref{eq:general_acceptance_probs}.
 
 \subsection{The Metropolis-Hastings algorithm}
-
 
 \begin{equation}
 \label{eq:sexytime}
