@@ -5,7 +5,9 @@
 %Formatting Packages
 \documentclass[12pt, two sided]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[a4paper,top=1.1in,bottom=1.1in,left=1.6in,right=1.1in]{geometry}
+%\usepackage[letter,top=1.1in,bottom=1.1in,left=1.6in,right=1.1in]{geometry}
+\usepackage[letterpaper,margin=1in]{geometry}
+
 
 %Math Packages
 \usepackage{amsmath}
@@ -88,6 +90,8 @@
 \begin{document}
 
 %----- Bose Hubbard Model -------%
+
+
 \section{The Bose-Hubbard Model}
 
 The Bose-Hubbard (BH) model describes the ground state of spinless itinerant bosons on a 1D lattice, subject to periodic boundary conditions, and on-site particle interactions. The Hamiltonian matrix representing the BH model is:
@@ -242,12 +246,12 @@ First-order term:
 \begin{aligned}
 \mathcal{Z}_T^{(1)} &= -\sum_{\alpha_0, \alpha_1} C_{\alpha_0} C_{\alpha_1}^{*}  \int_{0}^{\beta} d\tau_1 e^{-\epsilon_{\alpha_0} \beta} \bra{\alpha_0}  H_1(\tau_1) \ket{\alpha_1} \\
 &= -\sum_{\alpha_0, \alpha_1} C_{\alpha_0} C_{\alpha_1}^{*}  \int_{0}^{\beta} d\tau_1 e^{-\epsilon_{\alpha_0} \beta} \bra{\alpha_0} e^{\tau_1 H_0}H_1e^{-\tau_1 H_0}  \ket{\alpha_1} \\
-&= -\sum_{\alpha_0, \alpha_1} C_{\alpha_0} C_{\alpha_1}^{*}  \int_{0}^{\beta} d\tau_1 e^{-\epsilon_{\alpha_0}(\beta-\tau_1)} e^{-\epsilon_1 \tau_1}  \bra{\alpha_0} H_1 \ket{\alpha_1}
+&= -\sum_{\alpha_0, \alpha_1} C_{\alpha_0} C_{\alpha_1}^{*}  \int_{0}^{\beta} d\tau_1 e^{-\epsilon_{\alpha_0}(\beta-\tau_1)} e^{-\epsilon_{\alpha_1} \tau_1}  \bra{\alpha_0} H_1 \ket{\alpha_1}
 \end{aligned}
 \end{equation}
 
 %e^{\tau_1 H_0}H_1e^{-\tau_1 H_0} 
-%e^{-\epsilon_{\alpha_0}(\beta-\tau_1)} e^{-\epsilon_1(\tau_1-\tau_2)} e^{-\epsilon_2 \tau_2}
+%e^{-\epsilon_{\alpha_0}(\beta-\tau_1)} e^{-\epsilon_{\alpha_1}(\tau_1-\tau_2)} e^{-\epsilon_{\alpha_2} \tau_2}
 
 Second-order term:
 \begin{equation}
@@ -256,7 +260,7 @@ Second-order term:
 &= \sum_{\alpha_0, \alpha_1, \alpha_2} C_{\alpha_0} C_{\alpha_2}^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{0} \beta} \bra{\alpha_0}  H_1(\tau_1) \ket{\alpha_1} \bra{\alpha_1}   H_1(\tau_2) )  \ket{\alpha_2} \\
 \\
 &= \sum_{\alpha_0, \alpha_1, \alpha_2} C_{\alpha_0} C_{\alpha_2}^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{0} \beta} \bra{\alpha_0}  e^{\tau_1 H_0}H_1e^{-\tau_1 H_0}  \ket{\alpha_1} \bra{\alpha_1} e^{\tau_2 H_0}H_1e^{-\tau_2 H_0}  \ket{\alpha_2} \\
-\mathcal{Z}_T^{(2)} &= \sum_{\alpha_0, \alpha_1, \alpha_2} C_{\alpha_0} C_{\alpha_2}^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{\alpha_0}(\beta-\tau_1)} e^{-\epsilon_1(\tau_1-\tau_2)} e^{-\epsilon_2 \tau_2} \bra{\alpha_0} H_1 \ket{\alpha_1} \bra{\alpha_1} H_1 \ket{\alpha_2}
+\mathcal{Z}_T^{(2)} &= \sum_{\alpha_0, \alpha_1, \alpha_2} C_{\alpha_0} C_{\alpha_2}^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{\alpha_0}(\beta-\tau_1)} e^{-\epsilon_{\alpha_1}(\tau_1-\tau_2)} e^{-\epsilon_{\alpha_2} \tau_2} \bra{\alpha_0} H_1 \ket{\alpha_1} \bra{\alpha_1} H_1 \ket{\alpha_2}
 \end{aligned}
 \end{equation}
 
@@ -270,7 +274,7 @@ where $Q \geq 1$ and $\tau_0 = \beta$. Summing $Z_T^{(Q)}$ over all $Q$ from $0$
 %
 \begin{equation}
 \begin{aligned}
-\mathcal{Z}_T = \mathcal{Z}_T^{(0)} + \sum_{Q=0}^{\infty} \mathcal{Z}_T^{(Q)}
+\mathcal{Z}_T = \mathcal{Z}_T^{(0)} + \sum_{Q=1}^{\infty} \mathcal{Z}_T^{(Q)}
 \end{aligned}
 \end{equation}
 %
@@ -305,7 +309,7 @@ H_1^{(worm)} = \sum_i (\eta_i b_i^\dag + \eta^* b_i)
 "Worm kinetic energy" matrix elements
 %
 \begin{equation}
-\bra{\alpha_p} H_1^{(worm)} \ket{\alpha_q} =  \sum_i\eta_i \sqrt{n_i + 1} \delta_{m_i,n_{i}+1}  + \eta_i^* \sqrt{n_i} \delta_{m_i,n_{i}-1}  \prod_{k\neq i} \delta_{m_k,n_k}
+\bra{\alpha_p} H_1^{(worm)} \ket{\alpha_q} =  \sum_i  \prod_{k\neq i} \delta_{m_k,n_k} (\eta_i \sqrt{n_i + 1} \delta_{m_i,n_{i}+1}  + \eta_i^* \sqrt{n_i} \delta_{m_i,n_{i}-1})
 \end{equation}
 %
 % -------------- Metropolis Sampling --------------- %
