@@ -303,13 +303,15 @@ NEED TO INCLUDE DERIVATION
 "Worm kinetic energy"
 %
 \begin{equation}
-H_1^{(worm)} = \sum_i (\eta_i b_i^\dag + \eta^* b_i)
+H_1^{(worm)} = - \eta \sum_i (b_i^\dag + b_i)
 \end{equation}
 %
+where $\eta \in \mathbb{R}$
+
 "Worm kinetic energy" matrix elements
 %
 \begin{equation}
-\bra{\alpha_p} H_1^{(worm)} \ket{\alpha_q} =  \sum_i  \prod_{k\neq i} \delta_{m_k,n_k} (\eta_i \sqrt{n_i + 1} \delta_{m_i,n_{i}+1}  + \eta_i^* \sqrt{n_i} \delta_{m_i,n_{i}-1})
+\bra{\alpha_p} H_1^{(worm)} \ket{\alpha_q} =  -\eta \sum_i  \prod_{k\neq i} \delta_{m_k,n_k} (\sqrt{n_i + 1} \delta_{m_i,n_{i}+1}  + \sqrt{n_i} \delta_{m_i,n_{i}-1})
 \end{equation}
 %
 % -------------- Metropolis Sampling --------------- %
