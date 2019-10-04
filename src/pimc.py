@@ -11,22 +11,22 @@ eta = 1     # fugacity
 def random_boson_config(L,N):
     '''Generates a random configuration of N bosons in a 1D lattice of size L'''
 
-    psi = np.zeros(L,dtype=int) # Stores the random configuration of bosons
+    alpha = np.zeros(L,dtype=int) # Stores the random configuration of bosons
     for i in range(N):
         r = np.random.randint(L)
-        psi[r] += 1
+        alpha[r] += 1
 
-    return psi
+    return alpha
 
 '----------------------------------------------------------------------------------'
 
-def create_data_struct(x):
+def create_data_struct(alpha):
     '''Generate the [tau,N,(src,dest)] data_struct from the configuration'''
-    L = len(x)
+    L = len(alpha)
 
     data_struct = []
     for i in range(L):
-        data_struct.append([[0,x[i],(i,i)]])
+        data_struct.append([[0,alpha[i],(i,i)]])
 
     return data_struct
 
@@ -758,7 +758,10 @@ def worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc):
 
 '----------------------------------------------------------------------------------'
 
-def view_worldlines(data_struct,beta,figure_name):
+# Visualize worldline configurations for Lattice Path Integral Monte Carlo (PIMC)
+
+def view_worldlines(data_struct,beta,figure_name=None):
+    import matplotlib.pyplot as plt
 
     # Set initial configuration
     # Number of lattice sites
@@ -839,68 +842,73 @@ def view_worldlines(data_struct,beta,figure_name):
     plt.tick_params(axis='x',which='both',top=False,bottom=False)
     plt.xlabel(r"$i$")
     plt.ylabel(r"$\tau/\beta$")
-    plt.savefig(file_name)
-    #plt.show()
-    plt.close()
+    if figure_name != None:
+        plt.savefig(figure_name)
+    plt.show()
+    #plt.close()
 
     return None
 
-# Test updates
-data_struct = [ [[0,1,(0,0)],[0.25,2,(1,0)],[0.5,1,(0,2)],[0.75,0,(0,1)]],
-                [[0,1,(1,1)],[0.25,0,(1,0)],[0.75,1,(0,1)]],
-                [[0,1,(2,2)],[0.5,2,(0,2)]] ]
-data_struct = [ [[0,1,(0,0)]],
-                [[0,1,(1,1)]],
-                [[0,1,(2,2)]] ]
-
-#L = int(1E+05)
-#N = L # unit filling
-#x = random_boson_config(L,N)
-#data_struct = create_data_struct(x)
-#print(data_struct)
-
-beta = 1
-is_worm_present = [False] # made flag a list so it can be passed "by reference"
-ira_loc = []    # If there's a worm present, these will store
-masha_loc = []  # the site_idx and tau_idx "by reference"
-
-M = int(1E+03)
-ctr00, ctr01, ctr02, ctr03, ctr04 = 0, 0, 0, 0, 0
-# Plot original configuration
-file_name = "worldlines_0%d_00.pdf"%ctr00
-#view_worldlines(data_struct,beta,file_name)
-print(" --- Progress --- ")
-for m in range(M):
-    # Test insert/delete worm and plot it
-    worm(data_struct,beta,is_worm_present,ira_loc,masha_loc)
-    file_name = "worldlines_0%d_01.pdf"%ctr01
-    #view_worldlines(data_struct,beta,file_name)
-    ctr01 += 1
-
-    # Test timeshift and plot it
-    worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc)
-    file_name = "worldlines_0%d_02.pdf"%ctr02
-    #view_worldlines(data_struct,beta,file_name)
-    ctr02 += 1
-
-    # Test spaceshift_before_insert and plot it
-    worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc)
-    file_name = "worldlines_0%d_03.pdf"%ctr03
-    #view_worldlines(data_struct,beta,file_name)
-    ctr03 += 1
-
-    # Test spaceshift_after and plot it
-    worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc)
-    file_name = "worldlines_0%d_04.pdf"%ctr04
-    #view_worldlines(data_struct,beta,file_name)
-    ctr04 += 1
-
-    # Test gsworm_insert
-    gsworm_insert(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+# -------------------------------------------------------------------------------------- #
 
 
-    # Progress
-    print("%.2f%%"%((m+1)/M*100))
+# ----- Main ----- #
+# # Test updates
+# data_struct = [ [[0,1,(0,0)],[0.25,2,(1,0)],[0.5,1,(0,2)],[0.75,0,(0,1)]],
+#                 [[0,1,(1,1)],[0.25,0,(1,0)],[0.75,1,(0,1)]],
+#                 [[0,1,(2,2)],[0.5,2,(0,2)]] ]
+# data_struct = [ [[0,1,(0,0)]],
+#                 [[0,1,(1,1)]],
+#                 [[0,1,(2,2)]] ]
+
+# #L = int(1E+05)
+# #N = L # unit filling
+# #x = random_boson_config(L,N)
+# #data_struct = create_data_struct(x)
+# #print(data_struct)
+
+# beta = 1
+# is_worm_present = [False] # made flag a list so it can be passed "by reference"
+# ira_loc = []    # If there's a worm present, these will store
+# masha_loc = []  # the site_idx and tau_idx "by reference"
+
+# M = int(1E+03)
+# ctr00, ctr01, ctr02, ctr03, ctr04 = 0, 0, 0, 0, 0
+# # Plot original configuration
+# file_name = "worldlines_0%d_00.pdf"%ctr00
+# #view_worldlines(data_struct,beta,file_name)
+# print(" --- Progress --- ")
+# for m in range(M):
+#     # Test insert/delete worm and plot it
+#     worm(data_struct,beta,ira_loc,masha_loc)
+#     file_name = "worldlines_0%d_01.pdf"%ctr01
+#     #view_worldlines(data_struct,beta,file_name)
+#     ctr01 += 1
+
+#     # Test timeshift and plot it
+#     worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+#     file_name = "worldlines_0%d_02.pdf"%ctr02
+#     #view_worldlines(data_struct,beta,file_name)
+#     ctr02 += 1
+
+#     # Test spaceshift_before_insert and plot it
+#     worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+#     file_name = "worldlines_0%d_03.pdf"%ctr03
+#     #view_worldlines(data_struct,beta,file_name)
+#     ctr03 += 1
+
+#     # Test spaceshift_after and plot it
+#     worm_spaceshift_after(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+#     file_name = "worldlines_0%d_04.pdf"%ctr04
+#     #view_worldlines(data_struct,beta,file_name)
+#     ctr04 += 1
+
+#     # Test gsworm_insert
+#     gsworm_insert(data_struct,beta,is_worm_present,ira_loc,masha_loc)
+
+
+#     # Progress
+#     print("%.2f%%"%((m+1)/M*100))
 
 
     ##############################################
