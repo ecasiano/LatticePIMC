@@ -32,8 +32,8 @@ def create_data_struct(alpha):
 
 '----------------------------------------------------------------------------------'
 
-def worm(data_struct, beta, ira_loc, masha_loc):
-    '''Inserts or deletes a worm or antiworm'''
+def worm_insert(data_struct, beta, ira_loc, masha_loc):
+    '''Inserts a worm or antiworm'''
 
     # Can only insert worm if there are no wormends present
     if ira_loc != [] or masha_loc != [] : return None
@@ -54,7 +54,7 @@ def worm(data_struct, beta, ira_loc, masha_loc):
     p_flat = 1/n_flats                                  # prob. of selecting the flat interval
     dtau_flat = tau_max - tau_min                       # length of the flat interval
 
-    # Randomly choose to insert worm or antiworm (if possible)
+    # Randomly choose either to insert worm or, if possible, an antiworm
     n_i = data_struct[i][flat_min_idx][1]  # initial number of particles in the flat interval
     if n_i == 0 : # only worm can be inserted
         insert_worm = True
@@ -64,7 +64,7 @@ def worm(data_struct, beta, ira_loc, masha_loc):
             insert_worm = True
         else:
             insert_worm = False
-        p_wormtype = 0.5 # prob. of the worm being a worm or antiworm
+        p_wormtype = 0.5 # prob. of the worm being either a worm or antiworm
 
     # Randomly choose the length of the worm or antiworm
     dtau_worm  = np.random.random()*(dtau_flat)
@@ -78,7 +78,6 @@ def worm(data_struct, beta, ira_loc, masha_loc):
         tau_1 = tau_min + np.random.random()*(dtau_flat - dtau_worm)
         tau_2 = tau_1 + dtau_worm
     p_tau = 1/(dtau_flat-dtau_worm)     # prob. of inserting the worm end at the chosen time
-
 
     # Reject update if worm end is inserted at the bottom kink of the flat
     # (this will probably never happen in the 2 years I have left to complete my PhD :p )
@@ -96,7 +95,7 @@ def worm(data_struct, beta, ira_loc, masha_loc):
         ira_kink = [tau_1,N_after_ira,(i,i)]
     else: # antiworm
         N_after_ira = data_struct[i][flat_min_idx][1] - 1
-        if N_after_ira == -1 : return None # Reject update if there were no particles for Ira to destroy
+        #if N_after_ira == -1 : return None # Reject update if there were no particles for Ira to destroy
         N_after_masha = N_after_ira + 1
         ira_kink = [tau_1,N_after_ira,(i,i)]
         masha_kink = [tau_2,N_after_masha,(i,i)]
@@ -117,11 +116,11 @@ def worm(data_struct, beta, ira_loc, masha_loc):
     # To Do:  BUILD THE METROPOLIS CONDITION
 
     # Accept
-    insert_weight = 1
+    insert_weight = 1 # Constant just to test if data structure is changing correctly
     if np.random.random() < insert_weight:
-        # Insert antiworm
+        # Insert worm
         if insert_worm:
-            if flat_min_idx == n_flats - 1:
+            if flat_min_idx == n_flats - 1: # if selected flat is the last
                 data_struct[i].append(masha_kink)
                 data_struct[i].append(ira_kink)
             else:
@@ -132,7 +131,7 @@ def worm(data_struct, beta, ira_loc, masha_loc):
             masha_loc.extend([i,flat_min_idx+1])
             ira_loc.extend([i,flat_min_idx+2])
 
-        # Insert worm
+        # Insert antiworm
         else:
             if flat_min_idx == n_flats - 1: # last flat
                 data_struct[i].append(ira_kink)
@@ -178,7 +177,7 @@ def worm_delete(data_struct, beta, ira_loc, masha_loc):
             del data_struct[mx][mk] # Deletes masha
             del data_struct[ix][ik] # Deletes ira
 
-        # Update the worm flag and ira_loc,masha_loc
+        # Update the locations ira and masha
         del ira_loc[:]
         del masha_loc[:]
 
@@ -377,10 +376,10 @@ def gsworm_delete(data_struct, beta, ira_loc, masha_loc):
 
 '----------------------------------------------------------------------------------'
 
-def worm_timeshift(data_struct,beta,is_worm_present,ira_loc,masha_loc):
+def worm_timeshift(data_struct,beta,ira_loc,masha_loc):
 
     # Reject update if there is no worm present
-    if is_worm_present[0] == False : return None
+    if ira_loc == [] and masha_loc == [] : return None
 
     # Retrieve the site and tau indices of where ira and masha are located
     # ira_loc = [site_idx,tau_idx]
