@@ -440,10 +440,10 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc):
 
 '----------------------------------------------------------------------------------'
 
-def worm_spaceshift_before(data_struct,beta,is_worm_present,ira_loc,masha_loc):
+def worm_spaceshift_before(data_struct,beta,ira_loc,masha_loc):
 
-    # Check if there's a worm
-    if is_worm_present[0] == False : return None
+    # Update not possible if there's no worm
+    if ira_loc == [] and masha_loc == [] : return None
 
     # Number of lattice sites
     L = len(data_struct)
