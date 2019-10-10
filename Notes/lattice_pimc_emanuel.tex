@@ -122,7 +122,7 @@ The off-diagonal elements of the Hamiltonian are given by:
 %
 \begin{equation}
 \label{eq:bra_H1_ket}
-\bra{\alpha_p} H_1 \ket{\alpha_q} = - \sum_{i,j} \bra{\alpha_p} t_{i,j} b_i^{\dag} b_j \ket{\alpha_q}
+\bra{\alpha} H_1 \ket{\alpha^\prime} = - \sum_{i,j} \bra{\alpha} t_{i,j} b_i^{\dag} b_j \ket{\alpha^\prime}  \equiv H_1^{\alpha,\alpha^\prime}
 \end{equation}
 %
 Recall the definition of the bosonic creation and annihilation operators:
@@ -135,32 +135,32 @@ b \ket{n} &= \sqrt{n} \ket{n-1}
 The basis states can be expressed as:
 %
 \begin{equation}
-\ket{\alpha_q} = \ket{n_1,n_2 \dots , n_L}
+\ket{\alpha^\prime} = \ket{n_1^{\alpha^\prime},n_2^{\alpha^\prime} \dots , n_L^{\alpha^\prime   }}
 \end{equation}
 %
-where $n_i = b_i^\dag b_i$ is the number of particles on site i, and $L$ is the number of lattice sites. In this representation, acting first with the annihilation operator on site $j$, then acting with the creation operator on site $i$ produces the following result:
+where $n_i^{\alpha^\prime} = b_i^\dag b_i$ is the number of particles on site i of the configuration $\ket{\alpha^\prime}$, and $L$ is the number of lattice sites. In this representation, acting first with the annihilation operator on site $j$, then acting with the creation operator on site $i$ produces the following result:
 %
 \begin{equation}
-b_i^\dag b_j \ket{n_1,n_2,\dots,n_L} = \sqrt{n_j(n_i+1)} \ket{\dots , n_i+1, \dots, n_j-1, \dots} 
+b_i^\dag b_j \ket{n_1^{\alpha^\prime},n_2^{\alpha^\prime} \dots , n_L^{\alpha^\prime   }} = \sqrt{n_j^{\alpha^\prime}(n_i^{\alpha^\prime}+1)} \ket{\dots , n_j^{\alpha^\prime}-1, \dots, n_i^{\alpha^\prime}+1, \dots} 
 \end{equation}
 %
 Only sites $i$ and $j$ are modified. The matrix element in Eq.~\eqref{eq:bra_H1_ket} becomes:
 %
 \begin{equation}
-\bra{\alpha_p} H_1 \ket{\alpha_q} = -\sum_{i,j} t_{i,j} \sqrt{n_j(n_i+1)} \bra{m_1,m_2,\dots,m_L} \ket{\dots , n_i+1, \dots, n_j-1, \dots} 
+H_1^{\alpha,\alpha^\prime} = -\sum_{i,j} t_{i,j} \sqrt{n_j^{\alpha^\prime}(n_i^{\alpha^\prime}+1)} \bra{n^{\alpha}_1,n^{\alpha}_2,\dots,n^{\alpha}_L} \ket{\dots , n_j^{\alpha^\prime}-1, \dots, n_i^{\alpha^\prime}+1, \dots} 
 \end{equation}
 %
 Due to orthonormality of the basis states:
 %
 \begin{equation}
-\bra{m_1,m_2,\dots,m_L} \ket{\dots , n_i+1, \dots, n_j-1, \dots}  = \delta_{m_i, n_i+1} \delta_{m_j,n_j-1} \prod_{k \neq i,j} \delta_{m_k,n_k}
+\bra{n^{\alpha}_1,n^{\alpha}_2,\dots,n^{\alpha}_L} \ket{\dots , n_j^{\alpha^\prime}-1, \dots, n_i^{\alpha^\prime}+1, \dots}  = \delta_{n_i^{\alpha}, n_i^{\alpha^\prime}+1} \delta_{n_j^{\alpha},n_j^{\alpha^\prime}-1} \prod_{k \neq i,j} \delta_{n_k^{\alpha},n_k^{\alpha^\prime}}
 \end{equation}
 %
 where $m_i$ is the number of particles on site $i$ of the state $\ket{\alpha_p}$ (i.e, the "bra" state) and the product is carried over all sites $k$, excluding $i$ and $j$. The elements of the kinetic operator then become:
 %
 \begin{equation}
 \label{eq:off_diagonal_elements}
-\bra{\alpha_p} H_1 \ket{\alpha_q} = -\sum_{i,j} t_{i,j} \sqrt{n_j(n_i+1)} \delta_{m_i, n_i+1} \delta_{m_j,n_j-1} \prod_{k \neq i,j} \delta_{m_k,n_k}
+H_1^{\alpha,\alpha^\prime} = -\sum_{i,j} t_{i,j}  \sqrt{n_j^{\alpha^\prime}(n_i^{\alpha^\prime}+1)} \delta_{n_i^{\alpha}, n_i^{\alpha^\prime}+1} \delta_{n_j^{\alpha},n_j^{\alpha^\prime}-1} \prod_{k \neq i,j} \delta_{n_k^{\alpha},n_k^{\alpha^\prime}}
 \end{equation}
 %
 Eqs.~\eqref{eq:diagonal_elements} and \eqref{eq:off_diagonal_elements} give the diagonal and off-diagonal elements of the Bose-Hubbard Hamiltonian \eqref{eq:bh_hamiltonian}. These elements will be necessary in order to sample the partition function of a Bose-Hubbard configuration via Path Integral Monte Carlo. In the next section, the path integral formulation of the partition will be discussed.
@@ -290,7 +290,7 @@ Thus, the weight $\mathcal{Z}_0$ approximately becomes:
 \begin{aligned}
 \label{eq:Z_0}
 \mathcal{Z}_0 &\approx \sum_{\alpha_0} \vert C_{\alpha_0} \vert^2 e^{-\epsilon_{0} \beta} \\ &+ 
-\sum_{Q=1}^{\infty} (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha_Q} C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
+\sum_{Q=0}^{\infty} (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha_Q} C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
 \bra{\alpha_{q-1}} H_1 \ket{\alpha_q}
 \end{aligned}
 \end{equation}
@@ -303,7 +303,7 @@ NEED TO INCLUDE DERIVATION
 "Worm kinetic energy"
 %
 \begin{equation}
-H_1^{(worm)} = - \eta \sum_i (b_i^\dag + b_i)
+H_{\mathrm{worm}} = - \eta \sum_i (b_i^\dag + b_i)
 \end{equation}
 %
 where $\eta \in \mathbb{R}$
@@ -311,7 +311,7 @@ where $\eta \in \mathbb{R}$
 "Worm kinetic energy" matrix elements
 %
 \begin{equation}
-\bra{\alpha_p} H_1^{(worm)} \ket{\alpha_q} =  -\eta \sum_i  \prod_{k\neq i} \delta_{m_k,n_k} (\sqrt{n_i + 1} \delta_{m_i,n_{i}+1}  + \sqrt{n_i} \delta_{m_i,n_{i}-1})
+\bra{\alpha} H_{\mathrm{worm}} \ket{\alpha^\prime} \equiv H_{\mathrm{worm}}^{\alpha,\alpha^\prime} =  -\eta \sum_i  (\sqrt{n_i^{\alpha^\prime} + 1} \delta_{n_i^{\alpha},n_{i}^{\alpha^\prime}+1}  + \sqrt{n_i^{\alpha^\prime}} \delta_{n_i^{\alpha},n_{i}^{\alpha^\prime}-1}) \prod_{k\neq i} \delta_{n_k^{\alpha},n_k^{\alpha^\prime}} 
 \end{equation}
 %
 % -------------- Metropolis Sampling --------------- %
