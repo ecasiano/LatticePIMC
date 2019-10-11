@@ -3,11 +3,6 @@ import numpy as np
 import bisect
 import matplotlib.pyplot as plt
 
-# Sorry ... but global variables for now :'(
-U = 1       # interaction potential
-mu_i = 1    # chemical potential
-eta = 1     # fugacity
-
 def random_boson_config(L,N):
     '''Generates a random configuration of N bosons in a 1D lattice of size L'''
 
@@ -32,7 +27,7 @@ def create_data_struct(alpha):
 
 '----------------------------------------------------------------------------------'
 
-def worm_insert(data_struct, beta, ira_loc, masha_loc):
+def worm_insert(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
     '''Inserts a worm or antiworm'''
 
     # Can only insert worm if there are no wormends present
@@ -102,9 +97,9 @@ def worm_insert(data_struct, beta, ira_loc, masha_loc):
 
     # Calculate the change in potential energy (will be a factor of the Metropolis condition later on)
     if insert_worm == True:            # case: inserted worm
-        dV = U*n_i + mu_i
+        dV = U*n_i + mu
     else:
-        dV = U*(1-n_i) - mu_i    # case: inserted antiworm
+        dV = U*(1-n_i) - mu    # case: inserted antiworm
 
     # Build the Metropolis ratio (R)
     p_ratio = 1                                     # p_delete / p_insert
@@ -114,6 +109,8 @@ def worm_insert(data_struct, beta, ira_loc, masha_loc):
     # Metropolis Sampling
 
     # To Do:  BUILD THE METROPOLIS CONDITION
+    
+    weight_ratio = 
 
     # Accept
     insert_weight = 1 # Constant just to test if data structure is changing correctly
@@ -150,7 +147,7 @@ def worm_insert(data_struct, beta, ira_loc, masha_loc):
 
 '----------------------------------------------------------------------------------'
 
-def worm_delete(data_struct, beta, ira_loc, masha_loc):
+def worm_delete(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
 
     # Can only propose worm deletion if both worm ends are present
     if ira_loc == [] or masha_loc == [] : return None
@@ -188,7 +185,7 @@ def worm_delete(data_struct, beta, ira_loc, masha_loc):
 
 '----------------------------------------------------------------------------------'
 
-def gsworm_insert(data_struct, beta, is_worm_present, ira_loc, masha_loc):
+def gsworm_insert(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
 
     '''Insert a ground state (T=0) worm or antiworm (looks like inserting only one end)'''
 
@@ -321,7 +318,7 @@ def gsworm_insert(data_struct, beta, is_worm_present, ira_loc, masha_loc):
 
 '----------------------------------------------------------------------------------'
 
-def gsworm_delete(data_struct, beta, ira_loc, masha_loc):
+def gsworm_delete(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
 
     #### THIS IS CURRENTLY THE SAME AS worm_delete() ###
     ### ### ### a;sldjfhas;dufhad ### ### ## ###
@@ -376,7 +373,7 @@ def gsworm_delete(data_struct, beta, ira_loc, masha_loc):
 
 '----------------------------------------------------------------------------------'
 
-def worm_timeshift(data_struct,beta,ira_loc,masha_loc):
+def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
 
     # Reject update if there is no worm present
     if ira_loc == [] and masha_loc == [] : return None
@@ -502,7 +499,7 @@ def worm_spaceshift_before(data_struct,beta,ira_loc,masha_loc):
         pprob *= 1
         
     # Randomly select the neighboring site at which to send the worm end
-    if insert_kink = False: # kink deletion
+    if insert_kink == False: # kink deletion
         j = data_struct[x][k-1][2][0] # end sent to src site of previous kink if deleted
         pprob *= 1
     else:                   # kink insertion
@@ -642,7 +639,7 @@ def worm_spaceshift_before(data_struct,beta,ira_loc,masha_loc):
 
 '----------------------------------------------------------------------------------'
 
-def worm_spaceshift_before_good(data_struct,beta,ira_loc,masha_loc):
+def worm_spaceshift_before_old(data_struct,beta,ira_loc,masha_loc):
 
     # Update not possible if there's no worm
     if ira_loc == [] and masha_loc == [] : return None
