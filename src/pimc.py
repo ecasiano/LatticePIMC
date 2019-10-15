@@ -27,6 +27,7 @@ def create_data_struct(alpha):
 
 '----------------------------------------------------------------------------------'
 
+
 def worm_insert(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
     '''Inserts a worm or antiworm'''
 
@@ -98,23 +99,17 @@ def worm_insert(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
     # Calculate the change in potential energy (will be a factor of the Metropolis condition later on)
     if insert_worm == True:            # case: inserted worm
         dV = U*n_i + mu
+        weight_ratio = (n_i+1)*eta**2 * np.exp(-dtau_worm*dV)   # w_+ / w_- = worm_config / wormless_config
     else:
-        dV = U*(1-n_i) - mu    # case: inserted antiworm
+        dV = U*(1-n_i) - mu            # case: inserted antiworm
+        weight_ratio = (n_i)*eta**2 * np.exp(-dtau_worm*dV)   # w_+ / w_- = worm_config / wormless_config
 
     # Build the Metropolis ratio (R)
-    p_ratio = 1                                     # p_delete / p_insert
-    weight_ratio = eta**2 * np.exp(-dtau_worm*dV)   # w_+ / w_- = worm_config / wormless_config
+    p_ratio = 1                                     # p_delete / p_insert (tunable)
     R = p_ratio * weight_ratio / (p_L * p_flat * p_wormtype * p_wormlen * p_tau)
 
     # Metropolis Sampling
-
-    # To Do:  BUILD THE METROPOLIS CONDITION
-    
-    weight_ratio = 
-
-    # Accept
-    insert_weight = 1 # Constant just to test if data structure is changing correctly
-    if np.random.random() < insert_weight:
+    if np.random.random() < R:
         # Insert worm
         if insert_worm:
             if flat_min_idx == n_flats - 1: # if selected flat is the last
@@ -161,7 +156,41 @@ def worm_delete(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
     ik = ira_loc[1]
     mx = masha_loc[0]
     mk = masha_loc[1]
+    
+    # Identify the type of worm
+    if ik > mk : is_worm = True   # worm
+    else: is_worm = False         # antiworm
+    
+    # Calculate worm length
+    tau_1 = data_struct[ix][ik][0]
+    tau_2 = data_struct[mx][mk][0]
+    dtau = np.abs(tau_1-tau_2)
 
+    # Identify the lower and upper limits of the flat interval where the worm lives
+    if is_worm:
+        tau_min = data_struct[ix][mk-1][0] 
+        tau_max = data_struct[ix][ik+1][0] 
+    else: # antiworm
+        tau_min = data_struct[ix][ik-1][0] 
+        tau_max = data_struct[ix][mk+1][0] 
+        
+    # Worm insert proposal probability
+    p_L = 1/len(data_struct)
+    p_flat = 1/len(data_struct[ix]
+    p_wormlen = 
+    #NOOOOOOOOOOOTE!!!!!!!! Finish the proposal probability!!!!!!!!!!
+    p_L * p_flat * p_wormtype * p_wormlen * p_tau                
+    
+    # Choose the appropriate weigh ratio based on the worm type
+    if is_worm:
+        n_i = data_struct[mx][mk][1]   # particles before delete
+        dV = U*(1-n_i) - mu            # deleted energy minus energy of worm still there
+        weight_ratio = np.exp(dV*dtau)/(n_i*eta**2)   # W_deleted/W_stillthere
+    else: # delete antiworm
+        n_i = data_struct[ix][ik][1]
+        dV =  U*n_i + mu
+        weight_ratio = np.exp(dV*dtau)/(n_i*eta**2)
+                   
     # Metropolis sampling
     # Accept
     delete_weight = 1
