@@ -433,9 +433,11 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
     if shift_ira == True :
         x = ix
         k = ik
+        tau_old = tau_1
     else:
         x = mx
         k = mk
+        tau_old = tau_2
 
     # Determine the lower and upper bounds of the worm end for the timeshift
     tau_max_idx = k + 1
@@ -457,15 +459,24 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
 
     # Get the diaonal energy differences between new and old configurations
     if shift_ira and tau_new > tau_1:               # ira forward
-        n_i = 
+        n_i = data_struct[ix][ik][1]
+        dV = U*n_i + mu
     elif shift_ira and tau_new < tau_1:             # ira backward
+        n_i = data_struct[ix][ik-1][1]
+        dV = U*(1-n_i) - mu
     elif shift_ira==False and tau_new > tau_2:      # masha forward
-    else:                                           # masha backward        
+        n_i = data_struct[mx][mk][1]
+        dV = U*(1-n_i) - mu
+    else:                                           # masha backward      
+        n_i = data_struct[mx][mk-1][1]
+        dV = U*n_i + mu  
+        
+    weight_ratio = np.exp(-dV*(tau_new-tau_old))    # Z(pre_timeshift)/Z_(post_timeshift)
     
     # Metropolis sampling
+    R = weight_ratio
     # Accept
-    weight_timeshift = 1
-    if np.random.random() < weight_timeshift:
+    if np.random.random() < weight_ratio:
         data_struct[x][k][0] = tau_new # Modify Ira time
         return None
 
