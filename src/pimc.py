@@ -219,192 +219,48 @@ def worm_delete(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
 
 '----------------------------------------------------------------------------------'
 
-def gsworm_insert(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
-
-    '''Insert a ground state (T=0) worm or antiworm (looks like inserting only one end)'''
+def insert_gsworm_zero(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
+    
+    '''Insert a ground state (T=0) worm or antiworm near tau=0'''
 
     # Update only possible if there's either zero or one worm ends
-    if ira_loc != [] and masha_loc != []:
-        return None
-
-    # Number of lattice sites
-    L = len(data_struct)
-
-    # Randomly select a lattice site i on which to insert a worm or antiworm
-    i = np.random.randint(L)
-    p_L = 1/L # probability of selecting the L site
-
-    # Randomly choose to insert at the first or last flat interval
-    if len(data_struct[i]) != 1: # Worldline with kinks
-        if np.random.random() < 0.5:
-            is_first_flat = True
-        else:
-            is_first_flat = False
-        p_flat = 0.5
-
-    else: # Case of i_th worldline having no kinks
-        is_first_flat = False # Due to data_struct, convenient to treat worldline as last flat
-        p_flat = 1
-
-    # Determine the lower and upper bounds of the worm insertion
-    if is_first_flat:
-        flat_min_idx = 0
-        tau_min = 0
-        tau_max = data_struct[i][flat_min_idx+1][0]
-    else:
-        flat_min_idx = -1
-        tau_min = data_struct[i][flat_min_idx][0]
-        tau_max = beta
-
-    # Randomly choose the type: ground state i) worm OR ii) antiworm
-    n_i = data_struct[i][flat_min_idx][1] # initial particles on the selected flat
-    if n_i == 0:
-        insert_worm = True
-        p_wormtype = 1
-    else:
-        if np.random.random() < 0.5:
-            insert_worm = True
-        else:
-            insert_worm = False
-        p_wormtype = 0.5
-
-    # Randomly choose the time where the worm will be inserted
-    dtau_flat = tau_max - tau_min                 # length of the flat interval
-    tau = tau_min + np.random.random()*dtau_flat  # insertion time
-    p_tau = 1/dtau_flat
-
-    # Reject update if the insertion time is the same as the kink time
-    if tau == tau_min :
-        return None
-
-    # Build the worm end kink to be inserted on i & the previous one if it were to be modified
-    if insert_worm:
-        if is_first_flat:
-            worm_kink = [tau,n_i,(i,i)]
-            before_worm_kink = [tau_min,n_i+1,(i,i)]
-        else: # last flat
-            worm_kink = [tau,n_i+1,(i,i)]
-            before_worm_kink = [tau_min,n_i,(i,i)]
-    else: # insert antiworm
-        if is_first_flat:
-            worm_kink = [tau,n_i,(i,i)]
-            before_worm_kink = [tau_min,n_i-1,(i,i)]
-        else: # last flat
-            worm_kink = [tau,n_i-1,(i,i)]
-            before_worm_kink = [tau_min,n_i,(i,i)]
-
-    # Calculate the change in potential energy (will be a factor of the Metropolis condition later on)
-    if insert_worm == True:            # case: inserted worm
-        dV = U*n_i + mu_i
-    else:
-        dV = U*(1-n_i) - mu_i    # case: inserted antiworm
-
-    # Build the Metropolis ratio (R)
-    p_ratio = 1                                     # p_delete / p_insert
-    #weight_ratio = eta**2 * np.exp(-dtau_worm*dV)   # w_+ / w_- = worm_config / wormless_config
-    #R = p_ratio * weight_ratio / (p_L * p_flat * p_wormtype * p_wormlen * p_tau)
-
-    # Metropolis Sampling
-
-    # To Do:  BUILD THE METROPOLIS CONDITION
-
-    # Accept
-    worm_weight = 1
-    if np.random.random() < 0.5:
-        if insert_worm:
-            if is_first_flat:
-                data_struct[i][flat_min_idx] = before_worm_kink
-                data_struct[i].insert(flat_min_idx+1,worm_kink)
-
-                # Update worm end location
-                ira_loc.extend([i,flat_min_idx+1])
-
-            else:
-                data_struct[i][flat_min_idx] = before_worm_kink
-                data_struct[i].insert(flat_min_idx+1,worm_kink)
-
-                # Update worm end location
-                masha_loc.extend([i,flat_min_idx+1])
-
-        else: # insert antiworm
-            if is_first_flat:
-                data_struct[i][flat_min_idx] = before_worm_kink
-                data_struct[i].insert(flat_min_idx+1,worm_kink)
-
-                # Update worm end location
-                masha_loc.extend([i,flat_min_idx+1])
-
-            else:
-                data_struct[i][flat_min_idx] = before_worm_kink
-                data_struct[i].insert(flat_min_idx+1,worm_kink)
-
-                # Update worm end location
-                ira_loc.extend([i,flat_min_idx+1])
-
-        # Check if there is now a worm
-        if ira_loc != [] and masha_loc != []: is_worm_present = True
-
-        return None
-
-    # Reject
-    else:
-        return None
+    if ira_loc != [] and masha_loc != []: return None
+    
+    return None
 
 '----------------------------------------------------------------------------------'
 
-def gsworm_delete(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
+def delete_gsworm_zero(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
 
-    #### THIS IS CURRENTLY THE SAME AS worm_delete() ###
-    ### ### ### a;sldjfhas;dufhad ### ### ## ###
-
-    # Can only propose worm deletion if there is one worm end present
-    if ira_loc == [] and masha_loc == [] : return None
-
-    # Retrieve the site and tau indices of where ira and masha are located
-    # ira_loc = [site_idx,tau_idx]
-    ix = ira_loc[0]
-    ik = ira_loc[1]
-    mx = masha_loc[0]
-    mk = masha_loc[1]
-
-    # Count how many worm ends are deletable (i.e, part of either the first or last flat)
-    deletable = 0
-    ira_deletable = False
-    masha_deletable = False
-    if ik == 0 or ik == len(data_struct[ix]) - 1 :
-        ira_deletable = True
-        deletable+=1
-    if mk == 0 or mk == len(data_struct[mx]) - 1 :
-        masha_deletable = True
-        deletable+=1
-
-    # Reject update if neither end lies in the first or last flat region
-    if deletable == 0 : return None
-
-    # Decide which worm end to delete
-
-
-    # Metropolis sampling
-    # Accept
-    delete_weight = 1
-    if np.random.random() < delete_weight:
-        # Delete the worm ends
-        if ik > mk : # worm
-            del data_struct[ix][ik] # Deletes ira
-            del data_struct[mx][mk] # Deletes masha
-        else: # antiworm
-            del data_struct[mx][mk] # Deletes masha
-            del data_struct[ix][ik] # Deletes ira
-
-        # Update the worm flag and ira_loc,masha_loc
-        del ira_loc[:]
-        del masha_loc[:]
-
+    '''Delete a ground state (T=0) worm or antiworm near tau=0'''
+        
+    # Update only possible if there's either zero or one worm ends
+    if ira_loc != [] and masha_loc != []: return None
+        
         return None
+    
+'----------------------------------------------------------------------------------'
 
-    # Reject
-    else : return None
+def insert_gsworm_beta(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
 
+    '''Insert a ground state (T=0) worm or antiworm near tau=beta'''
+    
+    # Update only possible if there's either zero or one worm ends
+    if ira_loc != [] and masha_loc != []: return None
+        
+        return None
+    
+'----------------------------------------------------------------------------------'
+
+def delete_gsworm_beta(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
+
+     '''Delete a ground state (T=0) worm or antiworm near tau=beta'''
+        
+    # Update only possible if there's either zero or one worm ends
+    if ira_loc != [] and masha_loc != []: return None
+        
+        return None
+    
 '----------------------------------------------------------------------------------'
 
 def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
