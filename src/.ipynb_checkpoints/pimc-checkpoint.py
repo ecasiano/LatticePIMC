@@ -455,10 +455,13 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
     # Randomly propose a time for the worm end between tau_min and tau_max
     tau_new = tau_min + np.random.random()*(tau_max - tau_min)
 
-    # Delete the worm if the end is shifted to the location of the other
-    # if tau_new == tau_1 or tau_new == tau_2 and ix == mx:
-    #    worm_delete(data_struct,beta,is_worm_present,ira_loc,masha_loc)
-
+    # Get the diaonal energy differences between new and old configurations
+    if shift_ira and tau_new > tau_1:               # ira forward
+        n_i = 
+    elif shift_ira and tau_new < tau_1:             # ira backward
+    elif shift_ira==False and tau_new > tau_2:      # masha forward
+    else:                                           # masha backward        
+    
     # Metropolis sampling
     # Accept
     weight_timeshift = 1
