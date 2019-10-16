@@ -105,9 +105,8 @@ def worm_insert(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
         weight_ratio = (n_i)*eta**2 * np.exp(-dtau_worm*dV)   # w_+ / w_- = worm_config / wormless_config
 
     # Build the Metropolis ratio (R)
-    p_ratio = 1                                     # p_delete / p_insert (tunable)
-    R = p_ratio * weight_ratio / (p_L * p_flat * p_wormtype * p_wormlen * p_tau)
-
+    p_tunable = 1                                     # p_delete / p_insert (tunable)
+    R = weight_ratio / (p_tunable * p_L * p_flat * p_wormtype * p_wormlen * p_tau)
     # Metropolis Sampling
     if np.random.random() < R:
         # Insert worm
@@ -177,14 +176,14 @@ def worm_delete(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
         n_before_worm = data_struct[ix][ik-1][1]
 
     # Worm insert proposal probability
-    p_L = 1/len(data_struct)
-    p_flat = 1/len(data_struct[ix]
-    if n_before_worm == 0:
-    p_wormlen = 1/(tau_max-tau_min)
-    p_tau = 1/((tau_max-tau_min)-dtau)
-					  
-    #NOOOOOOOOOOOTE!!!!!!!! Finish the proposal probability!!!!!!!!!!
-    p_L * p_flat * p_wormtype * p_wormlen * p_tau                
+    p_L = 1/len(data_struct)           # prob of choosing site
+    p_flat = 1/len(data_struct[ix])    # prob of choosing flat
+    if n_before_worm == 0:             # prob of choosing worm/antiworm
+        p_wormtype = 1 # Only a worm could've been inserted
+    else:
+        p_wormtype = 1/2
+    p_wormlen = 1/(tau_max-tau_min)    # prob of choosing wormlength
+    p_tau = 1/((tau_max-tau_min)-dtau) # prob of choosing the tau of the first wormend
     
     # Choose the appropriate weigh ratio based on the worm type
     if is_worm:
@@ -198,8 +197,9 @@ def worm_delete(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
                    
     # Metropolis sampling
     # Accept
-    delete_weight = 1
-    if np.random.random() < delete_weight:
+    p_tunable = 1 # p_iw/p_dw
+    R = (p_tunable * p_L * p_flat * p_wormtype * p_wormlen * p_tau) * weight_ratio 
+    if np.random.random() < R:
         # Delete the worm ends
         if ik > mk : # worm
             del data_struct[ix][ik] # Deletes ira
@@ -1155,7 +1155,4 @@ def view_worldlines(data_struct,beta,figure_name=None):
     #    tmp = tau_2
     #    tau_2 = tau_1
     #    tau_1 = tmp
-    ##############################################				   
-                   
-if testing:
-                   
+    ##############################################				                      
