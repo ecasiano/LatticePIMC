@@ -168,16 +168,21 @@ def worm_delete(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
 
     # Identify the lower and upper limits of the flat interval where the worm lives
     if is_worm:
-        tau_min = data_struct[ix][mk-1][0] 
-        tau_max = data_struct[ix][ik+1][0] 
+        tau_min = data_struct[mx][mk-1][0] 
+        tau_max = data_struct[ix][ix+1][0]
+        n_before_worm = data_struct[mk][mk-1][1]
     else: # antiworm
-        tau_min = data_struct[ix][ik-1][0] 
-        tau_max = data_struct[ix][mk+1][0] 
-        
+        tau_min = data_struct[ix][ix-1][0] 
+        tau_max = data_struct[mk][mk+1][0] 
+        n_before_worm = data_struct[ix][ik-1][1]
+
     # Worm insert proposal probability
     p_L = 1/len(data_struct)
     p_flat = 1/len(data_struct[ix]
-    p_wormlen = 
+    if n_before_worm == 0:
+    p_wormlen = 1/(tau_max-tau_min)
+    p_tau = 1/((tau_max-tau_min)-dtau)
+					  
     #NOOOOOOOOOOOTE!!!!!!!! Finish the proposal probability!!!!!!!!!!
     p_L * p_flat * p_wormtype * p_wormlen * p_tau                
     
@@ -1150,4 +1155,4 @@ def view_worldlines(data_struct,beta,figure_name=None):
     #    tmp = tau_2
     #    tau_2 = tau_1
     #    tau_1 = tmp
-    ##############################################
+    ##############################################				   
