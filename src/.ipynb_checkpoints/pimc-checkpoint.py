@@ -270,22 +270,18 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
         tau_max = data_struct[x][tau_max_idx][0] #actual times
     # Get tau_min
     tau_min = data_struct[x][tau_min_idx][0]
+        
+    # From the truncated exponential distribution, choose new time of the worm end
+    b = tau_max - tau_min
+    loc = tau_min
     
-    # Randomly choose to move the end forward or backward in time
-    if np.random.random() < 0.5:
+    tau_new = truncexpon.rvs(b=b,loc=loc,scale=1,size=int(1))[0]
+    
+    # Determine if the worm end moved forward or backwards in imaginary time
+    if tau_new >= tau_old: 
         shift_forward = True
     else:
         shift_forward = False
-        
-    # From the truncated exponential distribution, choose new time of the worm end
-    if shift_forward:
-        b = tau_max - tau_old    # spread
-        loc = tau_old            # shift
-    else:
-        b = tau_old - tau_min    # spread
-        loc = tau_min            # shift
-    
-    tau_new = truncexpon.rvs(b=b,loc=loc,scale=1,size=int(1))[0]
  
     length_old = abs(tau_1-tau_2) # just to check if sign of contraction is good
     # Get the diagonal energy differences between new and old configurations
@@ -293,26 +289,25 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
         n_i = data_struct[ix][ik][1]
         dV = U*n_i + mu
         length_new = abs(tau_2-tau_new)
-        print("Length ratio: ", length_new/length_old)
+        #print("Length ratio: ", length_new/length_old)
     elif shift_ira and not(shift_forward):      # ira backward
         n_i = data_struct[ix][ik-1][1]
         dV = U*(1-n_i) - mu
         length_new = abs(tau_2-tau_new)
-        print("Length ratio: ", length_new/length_old)
+        #print("Length ratio: ", length_new/length_old)
     elif not(shift_ira) and shift_forward:      # masha forward
         n_i = data_struct[mx][mk][1]
         dV = U*(1-n_i) - mu
         length_new = abs(tau_1-tau_new)
-        print("Length ratio: ", length_new/length_old)
+        #print("Length ratio: ", length_new/length_old)
     else:                                       # masha backward      
         n_i = data_struct[mx][mk-1][1]
         dV = U*n_i + mu  
         length_new = abs(tau_1-tau_new)
-        print("Length ratio: ", length_new/length_old)
+        #print("Length ratio: ", length_new/length_old)
 
     weight_ratio = np.exp(-dV*(tau_new-tau_old))    # Z(pre)/Z(post)
-    
-    
+       
     # Metropolis sampling
     R = weight_ratio
     # Accept
