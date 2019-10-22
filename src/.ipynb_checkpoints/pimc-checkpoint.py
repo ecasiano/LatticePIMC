@@ -201,7 +201,7 @@ def worm_delete(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
     else: # delete antiworm
         n_i = data_struct[ix][ik][1]
         dV =  U*n_i + mu
-        weight_ratio = np.exp(dV*dtau)/((n_i-1)*eta**2) # CHECK THIS on pen and paper
+        weight_ratio = np.exp(dV*dtau)/((n_i+1)*eta**2)
                    
     # Metropolis sampling
     # Accept
