@@ -209,7 +209,7 @@ def worm_delete(data_struct, beta, ira_loc, masha_loc, U, mu, eta):
     R = (p_tunable * p_L * p_flat * p_wormtype * p_wormlen * p_tau) * weight_ratio 
     if np.random.random() < R:
         # Delete the worm ends
-        if ik > mk : # worm
+        if is_worm: # worm
             del data_struct[ix][ik] # Deletes ira
             del data_struct[mx][mk] # Deletes masha
         else: # antiworm
@@ -242,7 +242,7 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
     # Retrieve the actual times of Ira and Masha
     tau_1 = data_struct[ix][ik][0]
     tau_2 = data_struct[mx][mk][0]
-
+        
     # Randomly choose to shift Ira or Masha
     if np.random.random() < 0.5:
         shift_ira = True
@@ -259,7 +259,7 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
         k = mk
         tau_old = tau_2
     
-    # Determine the lower and upper bounds of the worm end for the timeshift
+    # Determine the lower and upper bounds of the worm end to be timeshifted
     tau_max_idx = k + 1
     tau_min_idx = k - 1
 
@@ -269,10 +269,7 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
     else:
         tau_max = data_struct[x][tau_max_idx][0] #actual times
     # Get tau_min
-    if tau_min_idx == 0:
-        tau_min = 0
-    else:
-        tau_min = data_struct[x][tau_min_idx][0]
+    tau_min = data_struct[x][tau_min_idx][0]
     
     # Randomly choose to move the end forward or backward in time
     if np.random.random() < 0.5:
@@ -282,29 +279,39 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
         
     # From the truncated exponential distribution, choose new time of the worm end
     if shift_forward:
-        b = tau_max    # spread
-        loc = tau_old  # shift
+        b = tau_max - tau_old    # spread
+        loc = tau_old            # shift
     else:
-        b = tau_old
-        loc = tau_min
+        b = tau_old - tau_min    # spread
+        loc = tau_min            # shift
     
     tau_new = truncexpon.rvs(b=b,loc=loc,scale=1,size=int(1))[0]
  
+    length_old = abs(tau_1-tau_2) # just to check if sign of contraction is good
     # Get the diagonal energy differences between new and old configurations
-    if shift_ira and tau_new > tau_1:               # ira forward
+    if shift_ira and shift_forward:             # ira forward
         n_i = data_struct[ix][ik][1]
         dV = U*n_i + mu
-    elif shift_ira and tau_new < tau_1:             # ira backward
+        length_new = abs(tau_2-tau_new)
+        print("Length ratio: ", length_new/length_old)
+    elif shift_ira and not(shift_forward):      # ira backward
         n_i = data_struct[ix][ik-1][1]
         dV = U*(1-n_i) - mu
-    elif shift_ira==False and tau_new > tau_2:      # masha forward
+        length_new = abs(tau_2-tau_new)
+        print("Length ratio: ", length_new/length_old)
+    elif not(shift_ira) and shift_forward:      # masha forward
         n_i = data_struct[mx][mk][1]
         dV = U*(1-n_i) - mu
-    else:                                           # masha backward      
+        length_new = abs(tau_1-tau_new)
+        print("Length ratio: ", length_new/length_old)
+    else:                                       # masha backward      
         n_i = data_struct[mx][mk-1][1]
         dV = U*n_i + mu  
-        
-    weight_ratio = np.exp(-dV*(tau_new-tau_old))    # Z(pre_timeshift)/Z_(post_timeshift)
+        length_new = abs(tau_1-tau_new)
+        print("Length ratio: ", length_new/length_old)
+
+    weight_ratio = np.exp(-dV*(tau_new-tau_old))    # Z(pre)/Z(post)
+    
     
     # Metropolis sampling
     R = weight_ratio
