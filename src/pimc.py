@@ -309,9 +309,10 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
     weight_ratio = np.exp(-dV*(tau_new-tau_old))    # Z(pre)/Z(post)
        
     # Metropolis sampling
-    R = weight_ratio
+    prob = 0.5 # probability of choosing either ira or masha
+    R = prob*weight_ratio
     # Accept
-    if np.random.random() < weight_ratio:
+    if np.random.random() < R:
         data_struct[x][k][0] = tau_new # Modify Ira time
         return None
 
