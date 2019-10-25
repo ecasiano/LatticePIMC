@@ -242,7 +242,7 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
     # Retrieve the actual times of Ira and Masha
     tau_1 = data_struct[ix][ik][0]
     tau_2 = data_struct[mx][mk][0]
-        
+    
     # Randomly choose to shift Ira or Masha
     if np.random.random() < 0.5:
         shift_ira = True
@@ -254,11 +254,13 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
         x = ix
         k = ik
         tau_old = tau_1
+        #print("Move Ira")
     else:
         x = mx
         k = mk
         tau_old = tau_2
-    
+        #print("Move Masha")
+   
     # Determine the lower and upper bounds of the worm end to be timeshifted
     tau_max_idx = k + 1
     tau_min_idx = k - 1
@@ -269,54 +271,32 @@ def worm_timeshift(data_struct,beta,ira_loc,masha_loc, U, mu):
         tau_max = data_struct[x][tau_max_idx][0] #actual times
     # Get tau_min
     tau_min = data_struct[x][tau_min_idx][0]
-    
-    # Determine if the worm end moved forward or backwards in imaginary time
-    if tau_new >= tau_old: 
-        shift_forward = True
-    else:
-        shift_forward = False
+
+    # Number of particles before and after the moving worm end
+    m_i = data_struct[x][k-1][1]     # before
+    n_i = data_struct[x][k][1]       # after
 
     # Get the diagonal energy differences between new and old configurations
-    if shift_ira and shift_forward:             # ira forward
-        n_i = data_struct[ix][ik][1]
-        dV = U*n_i + mu
-    elif shift_ira and not(shift_forward):      # ira backward
-        n_i = data_struct[ix][ik-1][1]
-        dV = U*(1-n_i) - mu
-    elif not(shift_ira) and shift_forward:      # masha forward
-        n_i = data_struct[mx][mk][1]
-        dV = U*(1-n_i) - mu
-    else:                                       # masha backward      
-        n_i = data_struct[mx][mk-1][1]
-        dV = U*n_i + mu  
-               
+    dV = (U/2)*(m_i*(m_i-1)-n_i*(n_i-1)) - mu*(m_i-n_i)
+    #print("m_i=",m_i)
+    #print("n_i=",n_i)
+    #print("dV=",dV)
+    
     # From the truncated exponential distribution, choose new time of the worm end
-    #loc = tau_min          # shift
-    loc = 0
-    b = tau_max - tau_min  # spread
+    b = tau_max - tau_min
     scale = 1/abs(dV)
-
-    delta_tau = truncexpon.rvs(b=b,loc=loc,scale=scale,size=int(1))[0]
-  
-    # Do we add delta_tau to tau_min or subtract it from tau_max?
-    
-
-    # THERE"S IS NO METROPOLIS!!!!!!!!!!!!!
-    # Rejection free
-    weight_ratio = np.exp(-dV*(abs(tau_new-tau_old)))    # Z(C+)/Z(C)
-       
-    # Metropolis sampling
-    #p_att_ratio = 2/truncexpon.pdf(tau_new,b=b,loc=loc,scale=scale) # p_att_-/p_att_+
-    p_att_ratio = 2
-    
-    R = p_att_ratio*weight_ratio
+    if dV > 0:
+        loc = tau_min
+        tau_new = truncexpon.rvs(b=b,loc=loc,scale=scale,size=int(1))[0]
+    else:
+        loc = tau_max
+        tau_rvs = truncexpon.rvs(b=b,loc=loc,scale=scale,size=int(1))[0]   
+        tau_new = tau_max-(tau_rvs-tau_max)
+         
     # Accept
-    if np.random.random() < R:
-        data_struct[x][k][0] = tau_new # Modify the time of the moved worm end
-        return None
-
-    # Reject
-    else : return None
+    data_struct[x][k][0] = tau_new # Modify the time of the moved worm end
+        
+    return None
 
 '----------------------------------------------------------------------------------'
 
