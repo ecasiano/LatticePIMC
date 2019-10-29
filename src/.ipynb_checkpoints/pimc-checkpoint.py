@@ -291,7 +291,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     loc = 0
     scale = 1/abs(dV)    
     r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
-    if dV > 0:
+    if dV < 0:
         if shift_head:
             tau_new = tau_t + r
         else:
