@@ -286,6 +286,8 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
         b = tau_next - tau_t
     else:
         b = tau_h - tau_prev
+        
+    #NOTE: Might need to include new conditional to determine b in the presence of antiworm
    
     # From the truncated exponential distribution, choose new time of the worm end
     loc = 0
@@ -296,7 +298,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
             tau_new = tau_t + r
         else:
             tau_new = tau_h - r
-    else: # dV < 0
+    else: # dV > 0
         if shift_head:
             tau_new = tau_next - r        
         else:
