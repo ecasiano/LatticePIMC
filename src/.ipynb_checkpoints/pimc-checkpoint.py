@@ -39,7 +39,7 @@ def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
     i = np.random.randint(L)
-    p_L = 1/L # probability of selecting the L site
+    p_L = 1/L # probability of selecting site i
 
     # Randomly select a flat tau interval at which to possibly insert worm
     n_flats = len(data_struct[i])
@@ -68,8 +68,6 @@ def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     p_wormlen = 1/(dtau_flat) # prob. of the worm being of the chosen length
 
     # Randomly choose the time where the first worm end will be inserted
-    insert_worm = True # For debugging
-    #insert_worm = False
     if insert_worm: # worm
         tau_t = tau_prev + np.random.random()*(dtau_flat - dtau_worm) # worm tail (creates a particle)
         tau_h = tau_t + dtau_worm                                    # worm head (destroys a particle)
@@ -138,6 +136,8 @@ def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta):
             # Save ira and masha locations (site_idx, tau_idx)
             head_loc.extend([i,flat_min_idx+1])
             tail_loc.extend([i,flat_min_idx+2])
+            
+            return None
 
     # Reject
     else:
@@ -170,7 +170,6 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     dtau = np.abs(tau_h-tau_t)
 
     # Identify the lower and upper limits of the flat interval where the worm lives
-    print((hx,hk),(tx,tk))
     if is_worm:
         tau_prev = data_struct[tx][tk-1][0]
         if hk+1 == len(data_struct[hx]): 
@@ -266,8 +265,8 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     m_i = data_struct[x][k][1]       # after
     n_i = data_struct[x][k-1][1]     # before
 
-    # Calculate the diagonal energy differences between new and old configurations
-    dV = (U/2)*(m_i*(m_i-1)-n_i*(n_i-1)) - mu*(m_i-n_i)
+    # Calculate the diagonal energy differences between old and new   configurations
+    dV = (U/2)*(n_i*(n_i-1)-m_i*(m_i-1)) - mu*(n_i-m_i)
     #print("dV=",dV)
     #print("m_i=",m_i)
     #print("n_i=",n_i)
@@ -282,10 +281,23 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     tau_prev = data_struct[x][k-1][0]
     
     # Determine the "spread" of the truncated exponential distribution
-    if shift_head:
-        b = tau_next - tau_t
-    else:
-        b = tau_h - tau_prev
+    if tau_h > tau_t: # worm
+        if shift_head:
+            b = tau_next - tau_t
+        else:
+            b = tau_h - tau_prev
+    else: # antiworm
+        if shift_head:
+            b = tau_t - tau_prev
+            #print("\nShift head, b=%.4f"%b)
+        else:
+            b = tau_next - tau_h
+            #print("\nShift tail")
+            
+    #print("tau_head: %.4f"%tau_h)
+    #print("tau_tail: %.4f"%tau_t)
+    #print("head_loc: ", head_loc)
+    #print("tail_loc: ", tail_loc)
         
     #NOTE: Might need to include new conditional to determine b in the presence of antiworm
    
@@ -293,16 +305,28 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     loc = 0
     scale = 1/abs(dV)    
     r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
-    if dV < 0:
-        if shift_head:
-            tau_new = tau_t + r
-        else:
-            tau_new = tau_h - r
-    else: # dV > 0
-        if shift_head:
-            tau_new = tau_next - r        
-        else:
-            tau_new = tau_prev + r
+    if tau_t < tau_h: # worm
+        if dV > 0:
+            if shift_head:
+                tau_new = tau_t + r
+            else:
+                tau_new = tau_h - r
+        else: # dV > 0
+            if shift_head:
+                tau_new = tau_next - r        
+            else:
+                tau_new = tau_prev + r
+    else: # antiworm
+        if dV > 0:
+            if shift_head:
+                tau_new = tau_t - r
+            else:
+                tau_new = tau_h + r
+        else: # dV > 0
+            if shift_head:
+                tau_new = tau_prev + r        
+            else:
+                tau_new = tau_next - r
 
     # Accept
     data_struct[x][k][0] = tau_new
@@ -313,9 +337,78 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
 
 def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     
+    # Cannot insert if there's two worm end presents
     if head_loc != [] and tail_loc != []: return None
     
-    return None
+    # Randomly choose a lattice site
+    L = len(data_struct)
+
+    # Randomly select a lattice site i on which to insert a worm or antiworm
+    i = np.random.randint(L)
+    p_L = 1/L # probability of selecting site i
+    
+    # Determine the upper and lower bound of the first flat interval of the site
+    if len(data_struct[i]) == 1: # Worldline is flat throughout
+        tau_next = beta
+    else:
+        tau_next = data_struct[i][1][0]
+    tau_prev = 0
+
+    # Randomly choose time at which to insert worm end
+    tau_new = np.random.random()*tau_next
+    
+    # Decide between worm/antiworm based on the worm ends present
+    if head_loc == [] and tail_loc != []: # can only insert worm head (worm)
+        insert_head = True
+        p_type = 1 # can only insert worm tail (antiworm)
+    elif head_loc != [] and tail_loc == []: # insert tail (antiworm from zero)
+        insert_head = False
+        p_type = 1
+    else: # choose to insert either worm end with equal probability
+        if np.random.random() < 0.5:
+            insert_head = True
+        else:
+            insert_head = False
+        p_type = 0.5
+        
+    # Build the structure representing the worm end to be inserted and the first flat
+    m_i = data_struct[i][0][1] # particles after worm end (original number of particles)
+    if insert_head:
+        n_i = m_i + 1              # particles before worm head
+    else:
+        n_i = m_i - 1              # particles before antiworm tail
+        
+    worm_end_kink = [tau_new,m_i,(i,i)]
+    first_flat = [0,n_i,(i,i)]
+    
+    # Build the Metropolis Ratio   
+    R = 1
+    if np.random.random() < 1: # Accept
+        if len(data_struct[i]) == 1: # Worldline is flat throughout
+            data_struct[i].append(worm_end_kink)
+        else:
+            data_struct[i].insert(1,worm_end_kink)
+        
+        data_struct[i][0] = first_flat # Modify the first flat
+                
+        # Save head and tail locations (site index, kink index)  
+        if insert_head: # insert worm head (worm)
+            head_loc.extend([i,1])
+            # Reindex the other worm end if it was also on site i
+            if tail_loc != []:
+                if tail_loc[0] == i:
+                    tail_loc[1] += 1
+        else: # insert worm tail (antiworm)
+            tail_loc.extend([i,1])
+            # Reindex other worm end if necessary
+            if head_loc != []:
+                if head_loc[0] == i:
+                    head_loc[1] += 1 
+
+        return None
+        
+    else: # Reject
+        return None
 
 '----------------------------------------------------------------------------------'
 
@@ -329,10 +422,63 @@ def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 '----------------------------------------------------------------------------------'
 
 def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
-       
+    
+    # Cannot insert if there's two worm end presents
     if head_loc != [] and tail_loc != []: return None
+    
+    # Randomly choose a lattice site
+    L = len(data_struct)
 
-    return None
+    # Randomly select a lattice site i on which to insert a worm or antiworm
+    i = np.random.randint(L)
+    p_L = 1/L # probability of selecting site i
+    
+    # Determine the upper and lower bound of the first flat interval of the site
+    tau_next = beta
+    tau_prev = data_struct[i][-1][0]
+
+    # Randomly choose time at which to insert worm end
+    tau_new = tau_prev + np.random.random()*(beta-tau_prev)
+    
+    # Decide between worm/antiworm insertion based on the worm ends present
+    if head_loc == [] and tail_loc != []: # can only insert worm head (antiworm)
+        insert_head = True
+        p_type = 1 # can only insert worm tail (antiworm)
+    elif head_loc != [] and tail_loc == []: # insert tail (worm from beta)
+        insert_head = False
+        p_type = 1
+    else: # choose to insert either worm end with equal probability
+        if np.random.random() < 0.5:
+            insert_head = True
+        else:
+            insert_head = False
+        p_type = 0.5
+        
+    # Build the structure representing the worm end to be inserted and the last flat
+    n_i = data_struct[i][-1][1] # particles before worm end (original number of particles)
+    if insert_head:
+        m_i = n_i - 1              # particles after worm head
+    else:
+        m_i = n_i + 1              # particles after antiworm tail
+        
+    worm_end_kink = [tau_new,m_i,(i,i)]
+    
+    # Build the Metropolis Ratio   
+    R = 1
+    if np.random.random() < 1: # Accept
+        
+        data_struct[i].append(worm_end_kink)
+                        
+        # Save head and tail locations (site index, kink index)  
+        if insert_head: # insert worm head (worm)
+            head_loc.extend([i,1])
+        else: # insert worm tail (antiworm)
+            tail_loc.extend([i,1])
+
+        return None
+        
+    else: # Reject
+        return None
     
 '----------------------------------------------------------------------------------'
 
