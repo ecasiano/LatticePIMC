@@ -326,26 +326,45 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     p_L = 1/L # probability of selecting site i
     
     # Determine the upper and lower bound of the first flat interval of the site
-    tau_next = data_struct[i][1][0]
+    if len(data_struct[i]) == 1: # Worldline is flat throughout
+        tau_next = beta
+    else:
+        tau_next = data_struct[i][1][0]
     tau_prev = 0
     
+    print("tau_next: %.4f"%tau_next)
+    print("tau_prev: %.4f"%tau_prev)
+
     # Randomly choose time at which to insert worm end
     tau_new = np.random.random()*tau_next
     
     # Decide between worm/antiworm based on the worm ends present
-    if head_loc == [] and tail_loc != []: # insert head (worm from tau=zero)
+    if head_loc == [] and tail_loc != []: # can only insert worm head (worm)
         insert_head = True
-        p_type = 1 # probability of inserting head or tail
+        p_type = 1 # can only insert worm tail (antiworm)
+        print("Hey")
     elif head_loc != [] and tail_loc == []: # insert tail (antiworm from zero)
         insert_head = False
         p_type = 1
+        print("Yo!")
     else: # choose to insert either worm end with equal probability
         if np.random.random() < 0.5:
             insert_head = True
+            print("Insert head")
         else:
             insert_head = False
+            print("Insert tail")
         p_type = 0.5
-                       
+        
+    # Build the structure representing the worm end to be inserted and the first flat
+    m_i = data_struct[i][0][1] # particles after worm end (original number of particles)
+    if insert_head:
+        n_i = m_i + 1              # particles before worm head
+    else:
+        n_i = m_i - 1              # particles before antiworm tail
+        
+    worm_end_kink = [tau_new,m_i,(i,i)]
+    first_flat = [0,n_i,(i,i)]
     
     # Build the Metropolis Ratio   
     R = 1
@@ -354,18 +373,22 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
             data_struct[i].append(worm_end_kink)
         else:
             data_struct[i].insert(1,worm_end_kink)
+        
+        data_struct[i][0] = first_flat # Modify the first flat
                 
         # Save head and tail locations (site index, kink index)  
-        if insert_head:
+        if insert_head: # insert worm head (worm)
             head_loc.extend([i,1])
             # Reindex the other worm end if it was also on site i
-            if tail_loc[0] == i:
-                tail_loc[1] += 1
-        else:
+            if tail_loc != []:
+                if tail_loc[0] == i:
+                    tail_loc[1] += 1
+        else: # insert worm tail (antiworm)
             tail_loc.extend([i,1])
             # Reindex other worm end if necessary
-            if head_loc[0] == i:
-                head_loc[1] += 1 
+            if head_loc != []:
+                if head_loc[0] == i:
+                    head_loc[1] += 1 
                 
         return None
         
