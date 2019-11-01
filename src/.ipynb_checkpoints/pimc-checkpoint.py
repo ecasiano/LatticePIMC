@@ -433,9 +433,12 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     i = np.random.randint(L)
     p_L = 1/L # probability of selecting site i
     
+    # Count the number of kinks on site i to get the index of the last kink
+    k_last = len(data_struct[i]) - 1
+    
     # Determine the upper and lower bound of the first flat interval of the site
     tau_next = beta
-    tau_prev = data_struct[i][-1][0]
+    tau_prev = data_struct[i][k_last][0]
 
     # Randomly choose time at which to insert worm end
     tau_new = tau_prev + np.random.random()*(beta-tau_prev)
@@ -455,7 +458,7 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
         p_type = 0.5
         
     # Build the structure representing the worm end to be inserted and the last flat
-    n_i = data_struct[i][-1][1] # particles before worm end (original number of particles)
+    n_i = data_struct[i][k_last][1] # particles before worm end (original number of particles)
     if insert_head:
         m_i = n_i - 1              # particles after worm head
     else:
@@ -471,9 +474,9 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
                         
         # Save head and tail locations (site index, kink index)  
         if insert_head: # insert worm head (worm)
-            head_loc.extend([i,1])
+            head_loc.extend([i,k_last+1])
         else: # insert worm tail (antiworm)
-            tail_loc.extend([i,1])
+            tail_loc.extend([i,k_last+1])
 
         return None
         
