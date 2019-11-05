@@ -580,7 +580,6 @@ def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
         else: # delete tail
             del data_struct[tx][tk]
             tk_len -= 1
-            print("Length after delete tail: ", tk_len)
             #data_struct[tx][tk_len-1][1] -= 1
             del tail_loc[:]
 
