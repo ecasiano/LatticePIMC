@@ -360,9 +360,12 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     # Decide between worm/antiworm based on the worm ends present
     if head_loc == [] and tail_loc != []: # can only insert worm head (worm)
         insert_head = True
-        p_type = 1 # can only insert worm tail (antiworm)
+        p_type = 1 # can only insert worm tail (antiworm)s
     elif head_loc != [] and tail_loc == []: # insert tail (antiworm from zero)
         insert_head = False
+        p_type = 1
+    elif data_struct[i][0][1] == 0 and head_loc == []: # can't insert tail if no particles
+        insert_head = True
         p_type = 1
     else: # choose to insert either worm end with equal probability
         if np.random.random() < 0.5:
@@ -414,10 +417,55 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 
 def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 
-    if head_loc != [] and tail_loc != []: return None
-
+    # Cannot delete if there are no worm ends present
+    if head_loc == [] and tail_loc == []: return None
+    
+    # Retrieve the site and kink indices of the worm ends
+    hx = head_loc[0] 
+    hk = head_loc[1]
+    tx = tail_loc[0]
+    tk = tail_loc[1]
+    
+    # Only delete worms that originate at tau = 0
+    if hk != 1 and tk != 1 : return None
+    
+    # Select worm end to delete
+    if hk == 1 and tk != 1:     # Only the head is near tau=0
+        delete_head = True
+        prob = 1
+    elif hk != 1 and tk == 1:   # Only the tail is near tau=0
+        delete_head = False
+        prob = 1
+    else:                       # Both are near zero (but different sites)
+        if np.random.random() < 0.5:
+            delete_head = True
+        else:
+            delete_head = False
+        prob = 0.5
         
-    return None
+    # Metropolis Sampling
+    R = 1
+    if np.random.random() < R: # Accept
+        if delete_head:
+            del data_struct[hx][hk]
+            del head_loc[:]
+            data_struct[hx][0][1] -= 1
+            # Reindex if there was another end on the same worldline
+            if hx == tx and tk > hk:
+                tail_loc[1] -= 1
+        
+        else: # delete tail
+            del data_struct[tx][tk]
+            del tail_loc[:]
+            data_struct[tx][0][1] += 1
+            # Reindex if there was another end on the same worldline
+            if hx == tx and hk > tk:
+                head_loc[1] -= 1
+                
+        return None
+    
+    else: # Reject 
+        return None
     
 '----------------------------------------------------------------------------------'
 
@@ -448,6 +496,9 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
         insert_head = True
         p_type = 1 # can only insert worm tail (antiworm)
     elif head_loc != [] and tail_loc == []: # insert tail (worm from beta)
+        insert_head = False
+        p_type = 1
+    elif data_struct[i][k_last][1] == 0 and tail_loc == []: # can't insert head if no particles
         insert_head = False
         p_type = 1
     else: # choose to insert either worm end with equal probability
@@ -486,11 +537,58 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 '----------------------------------------------------------------------------------'
 
 def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
-        
-    if head_loc != [] and tail_loc != []: return None
 
-    return None
-	
+    # Cannot delete if there are no worm ends present
+    if head_loc == [] and tail_loc == []: return None
+    
+    # Retrieve the site and kink indices of the worm ends
+    hx = head_loc[0] 
+    hk = head_loc[1]
+    tx = tail_loc[0]
+    tk = tail_loc[1]
+    
+    # Length of the 
+    
+    # Only delete worms that originate at tau = beta
+    hk_len = len(data_struct[hx]) # Kinks of site where the head is
+    tk_len = len(data_struct[tx]) # Kinks of site where the tail is
+    if hk != hk_len-1 and tk != tk_len-1: return None
+    
+    # Select worm end to delete
+    if hk == hk_len-1 and tk != tk_len-1:     # Only the head is near tau=beta
+        delete_head = True
+        prob = 1
+    elif hk != hk_len-1 and tk == tk_len-1:   # Only the tail is near tau=beta
+        delete_head = False
+        prob = 1
+    else:                       # Both are near beta (but different sites)
+        if np.random.random() < 0.5:
+            delete_head = True
+        else:
+            delete_head = False
+        prob = 0.5
+        
+    # Metropolis Sampling
+    R = 1
+    if np.random.random() < R: # Accept
+        if delete_head:
+            del data_struct[hx][hk]
+            hk_len -= 1
+            #data_struct[hx][hk_len-1][1] += 1
+            del head_loc[:]
+
+        else: # delete tail
+            del data_struct[tx][tk]
+            tk_len -= 1
+            print("Length after delete tail: ", tk_len)
+            #data_struct[tx][tk_len-1][1] -= 1
+            del tail_loc[:]
+
+                
+        return None
+    
+    else: # Reject 
+        return None
 '----------------------------------------------------------------------------------'
 
 # Visualize worldline configurations for Lattice Path Integral Monte Carlo (PIMC)
