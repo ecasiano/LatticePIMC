@@ -244,7 +244,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     # Retrieve the actual times of head and tail
     tau_h = data_struct[hx][hk][0]
     tau_t = data_struct[tx][tk][0]
-    
+
     # Randomly choose to shift HEAD or TAIL
     if np.random.random() < 0.5:
         shift_head = True
@@ -252,6 +252,11 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     else:
         shift_head = False
         #print("Moved Tail")
+        
+    #print(shift_head)
+    # For debugging!!!!
+    #shift_head = True
+    shift_head = False
 
     # Save the site and kink indices of the end that will be moved
     if shift_head == True :
@@ -260,17 +265,19 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     else:
         x = tx
         k = tk
-
+    
     # Number of particles before and after the worm end to be shifted
-    m_i = data_struct[x][k][1]       # after
-    n_i = data_struct[x][k-1][1]     # before
+    n_f = data_struct[x][k][1]       # after
+    n_o = data_struct[x][k-1][1]     # before
 
-    # Calculate the diagonal energy differences between old and new   configurations
-    dV = (U/2)*(n_i*(n_i-1)-m_i*(m_i-1)) - mu*(n_i-m_i)
-    #print("dV=",dV)
-    #print("m_i=",m_i)
-    #print("n_i=",n_i)
-
+    # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
+    # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
+    # the energy of the segment of path adjacent the moving worm end with more particles.  
+    if shift_head:                              
+        dV = (U/2)*(n_o*(n_o-1)-n_f*(n_f-1)) - mu*(n_o-n_f)
+    else:
+        dV = (U/2)*(n_f*(n_f-1)-n_o*(n_o-1)) - mu*(n_f-n_o)
+        
     # Determine the lower and upper bounds of the worm end to be timeshifted
     # Get tau_next
     if k+1 == len(data_struct[x]):
@@ -280,53 +287,23 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     # Get tau_prev
     tau_prev = data_struct[x][k-1][0]
     
-    # Determine the "spread" of the truncated exponential distribution
-    if tau_h > tau_t: # worm
-        if shift_head:
-            b = tau_next - tau_t
-        else:
-            b = tau_h - tau_prev
-    else: # antiworm
-        if shift_head:
-            b = tau_t - tau_prev
-            #print("\nShift head, b=%.4f"%b)
-        else:
-            b = tau_next - tau_h
-            #print("\nShift tail")
-            
-    #print("tau_head: %.4f"%tau_h)
-    #print("tau_tail: %.4f"%tau_t)
-    #print("head_loc: ", head_loc)
-    #print("tail_loc: ", tail_loc)
-        
     #NOTE: Might need to include new conditional to determine b in the presence of antiworm
-   
     # From the truncated exponential distribution, choose new time of the worm end
     loc = 0
     scale = 1/abs(dV)    
+    b = tau_next - tau_prev
     r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
-    if tau_t < tau_h: # worm
-        if dV > 0:
-            if shift_head:
-                tau_new = tau_t + r
-            else:
-                tau_new = tau_h - r
-        else: # dV > 0
-            if shift_head:
-                tau_new = tau_next - r        
-            else:
-                tau_new = tau_prev + r
-    else: # antiworm
-        if dV > 0:
-            if shift_head:
-                tau_new = tau_t - r
-            else:
-                tau_new = tau_h + r
-        else: # dV > 0
-            if shift_head:
-                tau_new = tau_prev + r        
-            else:
-                tau_new = tau_next - r
+    #print(beta+(tau_h-tau_t))
+    if dV > 0:
+        if shift_head:
+            tau_new = tau_prev + r
+        else:
+            tau_new = tau_next - r
+    else: # dV < 0
+        if shift_head:
+            tau_new = tau_next - r        
+        else:
+            tau_new = tau_prev + r
 
     # Accept
     data_struct[x][k][0] = tau_new
