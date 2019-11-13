@@ -256,7 +256,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     #print(shift_head)
     # For debugging!!!!
     #shift_head = True
-    shift_head = False
+    #shift_head = False
 
     # Save the site and kink indices of the end that will be moved
     if shift_head == True :
@@ -277,7 +277,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
         dV = (U/2)*(n_o*(n_o-1)-n_f*(n_f-1)) - mu*(n_o-n_f)
     else:
         dV = (U/2)*(n_f*(n_f-1)-n_o*(n_o-1)) - mu*(n_f-n_o)
-        
+                    
     # Determine the lower and upper bounds of the worm end to be timeshifted
     # Get tau_next
     if k+1 == len(data_struct[x]):
@@ -287,13 +287,22 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     # Get tau_prev
     tau_prev = data_struct[x][k-1][0]
     
+    #print("tau next: ", tau_next)
+    #print("tau prev: ", tau_prev)
+    
     #NOTE: Might need to include new conditional to determine b in the presence of antiworm
     # From the truncated exponential distribution, choose new time of the worm end
     loc = 0
     scale = 1/abs(dV)    
     b = tau_next - tau_prev
+    #r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] * (1-np.exp(-b/scale)) * scale
+    #r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] * (1-np.exp(-b/scale))
     r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
-    #print(beta+(tau_h-tau_t))
+    #print(b)
+    #print(scale)
+    #print(loc)
+    #print(dV)
+
     if dV > 0:
         if shift_head:
             tau_new = tau_prev + r
@@ -301,13 +310,15 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
             tau_new = tau_next - r
     else: # dV < 0
         if shift_head:
-            tau_new = tau_next - r        
+            tau_new = tau_next - r
         else:
-            tau_new = tau_prev + r
-
+            tau_new = tau_prev + r       
+        
     # Accept
     data_struct[x][k][0] = tau_new
         
+    return r
+
     return None
 
 '----------------------------------------------------------------------------------'
