@@ -231,27 +231,34 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 
 def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
 
-    # Reject update if there is no worm present
+    # Reject update if there are is no worm end present
     if head_loc == [] and tail_loc == [] : return None
 
-    # Retrieve the site and tau indices of where ira and masha are located
-    # head_loc = [site_idx,tau_idx]
-    hx = head_loc[0]                # site index 
-    hk = head_loc[1]                # kink index
-    tx = tail_loc[0]
-    tk = tail_loc[1]
-
-    # Retrieve the actual times of head and tail
-    tau_h = data_struct[hx][hk][0]
-    tau_t = data_struct[tx][tk][0]
-
-    # Randomly choose to shift HEAD or TAIL
-    if np.random.random() < 0.5:
+    # Choose which worm end to move
+    
+    if head_loc != [] and tail_loc == [] : # only head present
+        hx = head_loc[0]                # site index 
+        hk = head_loc[1]                # kink index
+        tau_h = data_struct[hx][hk][0]
         shift_head = True
-        #print("Moved Head")
-    else:
+    elif head_loc == [] and tail_loc != [] : # only tail present
+        tx = tail_loc[0]                # site index 
+        tk = tail_loc[1]                # kink index
+        tau_t = data_struct[tx][tk][0]
         shift_head = False
-        #print("Moved Tail")
+    else: # both worm ends present
+        hx = head_loc[0]                # site index 
+        hk = head_loc[1]                # kink index
+        tx = tail_loc[0]
+        tk = tail_loc[1]
+        # Retrieve the actual times of head and tail
+        tau_h = data_struct[hx][hk][0]
+        tau_t = data_struct[tx][tk][0]
+        # Randomly choose to shift HEAD or TAIL
+        if np.random.random() < 0.5:
+            shift_head = True
+        else:
+            shift_head = False
         
     #print(shift_head)
     # For debugging!!!!
@@ -295,13 +302,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     loc = 0
     scale = 1/abs(dV)    
     b = tau_next - tau_prev
-    #r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] * (1-np.exp(-b/scale)) * scale
-    #r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] * (1-np.exp(-b/scale))
     r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
-    #print(b)
-    #print(scale)
-    #print(loc)
-    #print(dV)
 
     if dV > 0:
         if shift_head:
@@ -309,6 +310,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
         else:
             tau_new = tau_next - r
     else: # dV < 0
+        #print("dV ", dV)
         if shift_head:
             tau_new = tau_next - r
         else:
@@ -317,8 +319,6 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
     # Accept
     data_struct[x][k][0] = tau_new
         
-    return r
-
     return None
 
 '----------------------------------------------------------------------------------'
