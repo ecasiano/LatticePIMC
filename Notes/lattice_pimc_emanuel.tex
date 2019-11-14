@@ -256,10 +256,10 @@ First-order term:
 Second-order term:
 \begin{equation}
 \begin{aligned}
-\mathcal{Z}_T^{(2)} &=  \sum_{\alpha_0, \alpha_2} C_{\alpha_0} C_{\alpha_2}^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{0} \beta} \bra{\alpha_0}  H_1(\tau_1) H_1(\tau_2) ) \ket{\alpha_2} \\
-&= \sum_{\alpha_0, \alpha_1, \alpha_2} C_{\alpha_0} C_{\alpha_2}^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{0} \beta} \bra{\alpha_0}  H_1(\tau_1) \ket{\alpha_1} \bra{\alpha_1}   H_1(\tau_2) )  \ket{\alpha_2} \\
+\mathcal{Z}_T^{(2)} &=  \sum_{\alpha_0, \alpha_2} C_{\alpha_0} C_{\alpha_2}^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{\alpha_0} \beta} \bra{\alpha_0}  H_1(\tau_1) H_1(\tau_2) ) \ket{\alpha_2} \\
+&= \sum_{\alpha_0, \alpha_1, \alpha_2} C_{\alpha_0} C_{\alpha_2}^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{\alpha_0} \beta} \bra{\alpha_0}  H_1(\tau_1) \ket{\alpha_1} \bra{\alpha_1}   H_1(\tau_2) )  \ket{\alpha_2} \\
 \\
-&= \sum_{\alpha_0, \alpha_1, \alpha_2} C_{\alpha_0} C_{\alpha_2}^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{0} \beta} \bra{\alpha_0}  e^{\tau_1 H_0}H_1e^{-\tau_1 H_0}  \ket{\alpha_1} \bra{\alpha_1} e^{\tau_2 H_0}H_1e^{-\tau_2 H_0}  \ket{\alpha_2} \\
+&= \sum_{\alpha_0, \alpha_1, \alpha_2} C_{\alpha_0} C_{\alpha_2}^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{\alpha_0} \beta} \bra{\alpha_0}  e^{\tau_1 H_0}H_1e^{-\tau_1 H_0}  \ket{\alpha_1} \bra{\alpha_1} e^{\tau_2 H_0}H_1e^{-\tau_2 H_0}  \ket{\alpha_2} \\
 \mathcal{Z}_T^{(2)} &= \sum_{\alpha_0, \alpha_1, \alpha_2} C_{\alpha_0} C_{\alpha_2}^{*} \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 e^{-\epsilon_{\alpha_0}(\beta-\tau_1)} e^{-\epsilon_{\alpha_1}(\tau_1-\tau_2)} e^{-\epsilon_{\alpha_2} \tau_2} \bra{\alpha_0} H_1 \ket{\alpha_1} \bra{\alpha_1} H_1 \ket{\alpha_2}
 \end{aligned}
 \end{equation}
@@ -289,7 +289,7 @@ Thus, the weight $\mathcal{Z}_0$ approximately becomes:
 \begin{equation}
 \begin{aligned}
 \label{eq:Z_0}
-\mathcal{Z}_0 &\approx \sum_{\alpha_0} \vert C_{\alpha_0} \vert^2 e^{-\epsilon_{0} \beta} \\ &+ 
+\mathcal{Z}_0 &\approx \sum_{\alpha_0} \vert C_{\alpha_0} \vert^2 e^{-\epsilon_{\alpha_0} \beta} \\ &+ 
 \sum_{Q=0}^{\infty} (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha_Q} C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
 \bra{\alpha_{q-1}} H_1 \ket{\alpha_q}
 \end{aligned}
