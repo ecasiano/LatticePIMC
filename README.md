@@ -1,11 +1,8 @@
 # LatticePIMC
 [Emanuel Casiano-Diaz, Chris Herdman & Adrian Del Maestro]
 
-### Abstract
-For indistinguishable itinerant particles subject to a superselection rule fixing their total number, a portion of the entanglement entropy under a spatial bipartition of the ground state is due to particle fluctuations between subsystems and thus is inaccessible as a resource for quantum information processing. We quantify the remaining operationally accessible entanglement in a model of interacting spinless fermions on a one dimensional lattice via exact diagonalization and the density matrix renormalization group. We find that the accessible entanglement exactly vanishes at the first order phase transition between a Tomonaga-Luttinger liquid and phase separated solid for attractive interactions and is maximal at the transition to the charge density wave for repulsive interactions. Throughout the phase diagram, we discuss the connection between the accessible entanglement entropy and the variance of the probability distribution describing intra-subregion particle number fluctuations. 
-
 ### Description
-This repository includes links, code, scripts and data to generate the figures in [arXiv:1905.03312](https://arxiv.org/abs/1905.03312).
+Lattice Path Integral Monte Carlo (PIMC) code based on Prokof'ev et al. [Exact, Complete, and Universal Continuous-Time Worldline ... ](https://arxiv.org/pdf/cond-mat/9703200.pdf)
 
 ### Requirements
 The data in this project was generated via exact diagonalization and the density matrix renormalization group.  Everything included in the [Data](https://github.com/DelMaestroGroup/AccessibleEntanglementFermions/tree/master/Data) directory was generated via:
