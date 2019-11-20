@@ -109,20 +109,31 @@ In the Fock configuration basis, the interaction potential and the chemical pote
 H = H_1 + H_0
 \end{equation}
 %
-where $H_1 = - \sum_{i,j} t_{i,j} b_i^{\dag} b_j$ is the off-diagonal term, while $H_0 = \frac{U}{2} \sum_i n_i (n_i-1) - \sum_i \mu_i n_i$ is the diagonal term. Due to $H_0$ being a diagonal operator and the basis states being orthonormal, the diagonal matrix elements are rather simply obtained:
+where $H_1 = - \sum_{i,j} t_{i,j} b_i^{\dag} b_j$ is the off-diagonal term, while $H_0 = \frac{U}{2} \sum_i n_i (n_i-1) - \sum_i \mu_i n_i$ is the diagonal term.
+
+The matrix elements of the diagonal and the off-diagonal parts of the Hamiltonian can be explicitly determined by sandwiching the operators between basis states. Matrix elements of each of these operators will show up as factors of the partition function. In the next section, explicit expressions for these elements will be derived.
+
+\subsection{Matrix elements}
+
+In this section, the matrix elements of the diagonal and off-diagonal parts of the Bose-Hubbard Hamiltonian will be derived. Additionally, we will introduce a so-called "worm operator". This off-diagonal operator is not traditionally part of the Bose-Hubbard model. Nevertheless, for convenience when implementing the Worm Algorithm, the Hamiltonian will include this term. Thus, matrix elements of the worm operator will also show up as factors of the partition function and will be derived in this section.
+
+\subsubsection{Potential energy and chemical potential}
+Due to $H_0$ being a diagonal operator and the basis states being orthonormal, the diagonal matrix elements are rather simply obtained:
 %
 \begin{equation}
 \label{eq:diagonal_elements}
-\bra{\alpha_p} H_0 \ket{\alpha_q} =  \bra{\alpha_p}  \epsilon_{\alpha_q} \ket{\alpha_q}  = \epsilon_{\alpha_q} \bra{\alpha_p} \ket{\alpha_q} = \epsilon_{\alpha_q} \delta_{p,q}
+\bra{\alpha^\prime} H_0 \ket{\alpha} =  \bra{\alpha^\prime}  \epsilon_{\alpha} \ket{\alpha}  = \epsilon_{\alpha} \bra{\alpha^\prime} \ket{\alpha} = \epsilon_{\alpha} \delta_{\alpha^\prime,\alpha}
 \end{equation}
 %
-where $\epsilon_{\alpha_q}$ is the off-diagonal energy of Fock configuration $\alpha_q$, and $\delta_{p,q}$ is the Kronecker-Delta function. In other words, the matrix elements vanish when the configurations $\alpha_p$ and $\alpha_q$ are different, and become $\epsilon_{\alpha_q}$ otherwise.
+where $\epsilon_{\alpha}$ is the off-diagonal energy of Fock configuration $\alpha$, and $\delta_{\alpha^\prime,\alpha}$ is a Kronecker-Delta function. In other words, the matrix elements vanish when the configurations $\alpha^\prime$ and $\alpha$ are different, and become $\epsilon_{\alpha}$ otherwise.
+
+\subsubsection{Kinetic energy}
 
 The off-diagonal elements of the Hamiltonian are given by:
 %
 \begin{equation}
 \label{eq:bra_H1_ket}
-\bra{\alpha} H_1 \ket{\alpha^\prime} = - \sum_{i,j} \bra{\alpha} t_{i,j} b_i^{\dag} b_j \ket{\alpha^\prime}  \equiv H_1^{\alpha,\alpha^\prime}
+\bra{\alpha^\prime} H_1 \ket{\alpha} = - \sum_{i,j} \bra{\alpha^\prime} t_{i,j} b_i^{\dag} b_j \ket{\alpha}  \equiv H_1^{\alpha^\prime,\alpha}
 \end{equation}
 %
 Recall the definition of the bosonic creation and annihilation operators:
@@ -135,35 +146,59 @@ b \ket{n} &= \sqrt{n} \ket{n-1}
 The basis states can be expressed as:
 %
 \begin{equation}
-\ket{\alpha^\prime} = \ket{n_1^{\alpha^\prime},n_2^{\alpha^\prime} \dots , n_L^{\alpha^\prime   }}
+\ket{\alpha} = \ket{n_1^{\alpha},n_2^{\alpha} \dots , n_L^{\alpha}}
 \end{equation}
 %
-where $n_i^{\alpha^\prime} = b_i^\dag b_i$ is the number of particles on site i of the configuration $\ket{\alpha^\prime}$, and $L$ is the number of lattice sites. In this representation, acting first with the annihilation operator on site $j$, then acting with the creation operator on site $i$ produces the following result:
+where $n_i^{\alpha} = b_i^\dag b_i$ is the number of particles on site i of the configuration $\ket{\alpha}$, and $L$ is the number of lattice sites. In this representation, acting first with the annihilation operator on site $j$, then acting with the creation operator on site $i$ produces the following result:
 %
 \begin{equation}
-b_i^\dag b_j \ket{n_1^{\alpha^\prime},n_2^{\alpha^\prime} \dots , n_L^{\alpha^\prime   }} = \sqrt{n_j^{\alpha^\prime}(n_i^{\alpha^\prime}+1)} \ket{\dots , n_j^{\alpha^\prime}-1, \dots, n_i^{\alpha^\prime}+1, \dots} 
+b_i^\dag b_j \ket{n_1^{\alpha},n_2^{\alpha} \dots , n_L^{\alpha   }} = \sqrt{n_j^{\alpha}(n_i^{\alpha}+1)} \ket{\dots , n_j^{\alpha}-1, \dots, n_i^{\alpha}+1, \dots} 
 \end{equation}
 %
 Only sites $i$ and $j$ are modified. The matrix element in Eq.~\eqref{eq:bra_H1_ket} becomes:
 %
 \begin{equation}
-H_1^{\alpha,\alpha^\prime} = -\sum_{i,j} t_{i,j} \sqrt{n_j^{\alpha^\prime}(n_i^{\alpha^\prime}+1)} \bra{n^{\alpha}_1,n^{\alpha}_2,\dots,n^{\alpha}_L} \ket{\dots , n_j^{\alpha^\prime}-1, \dots, n_i^{\alpha^\prime}+1, \dots} 
+H_1^{\alpha,\alpha} = -\sum_{i,j} t_{i,j} \sqrt{n_j^{\alpha}(n_i^{\alpha}+1)} \bra{n^{\alpha^\prime}_1,n^{\alpha^\prime}_2,\dots,n^{\alpha^\prime}_L} \ket{\dots , n_j^{\alpha}-1, \dots, n_i^{\alpha}+1, \dots} 
 \end{equation}
 %
 Due to orthonormality of the basis states:
 %
 \begin{equation}
-\bra{n^{\alpha}_1,n^{\alpha}_2,\dots,n^{\alpha}_L} \ket{\dots , n_j^{\alpha^\prime}-1, \dots, n_i^{\alpha^\prime}+1, \dots}  = \delta_{n_i^{\alpha}, n_i^{\alpha^\prime}+1} \delta_{n_j^{\alpha},n_j^{\alpha^\prime}-1} \prod_{k \neq i,j} \delta_{n_k^{\alpha},n_k^{\alpha^\prime}}
+\bra{n^{\alpha^\prime}_1,n^{\alpha^\prime}_2,\dots,n^{\alpha^\prime}_L} \ket{\dots , n_j^{\alpha}-1, \dots, n_i^{\alpha}+1, \dots}  = \delta_{n_i^{\alpha^\prime}, n_i^{\alpha}+1} \delta_{n_j^{\alpha^\prime},n_j^{\alpha}-1} \prod_{k \neq i,j} \delta_{n_k^{\alpha^\prime},n_k^{\alpha}}
 \end{equation}
 %
-where $m_i$ is the number of particles on site $i$ of the state $\ket{\alpha_p}$ (i.e, the "bra" state) and the product is carried over all sites $k$, excluding $i$ and $j$. The elements of the kinetic operator then become:
+where $n^{\alpha}_i$ is the number of particles on site $i$ of the state $\ket{\alpha}$ and the product is carried over all sites $k$, excluding $i$ and $j$. The elements of the kinetic operator then become:
 %
 \begin{equation}
 \label{eq:off_diagonal_elements}
-H_1^{\alpha,\alpha^\prime} = -\sum_{i,j} t_{i,j}  \sqrt{n_j^{\alpha^\prime}(n_i^{\alpha^\prime}+1)} \delta_{n_i^{\alpha}, n_i^{\alpha^\prime}+1} \delta_{n_j^{\alpha},n_j^{\alpha^\prime}-1} \prod_{k \neq i,j} \delta_{n_k^{\alpha},n_k^{\alpha^\prime}}
+H_1^{\alpha^\prime,\alpha} = -\sum_{i,j} t_{i,j}  \sqrt{n_j^{\alpha}(n_i^{\alpha}+1)} \delta_{n_i^{\alpha^\prime}, n_i^{\alpha}+1} \delta_{n_j^{\alpha^\prime},n_j^{\alpha}-1} \prod_{k \neq i,j} \delta_{n_k^{\alpha^\prime},n_k^{\alpha}}
 \end{equation}
 %
-Eqs.~\eqref{eq:diagonal_elements} and \eqref{eq:off_diagonal_elements} give the diagonal and off-diagonal elements of the Bose-Hubbard Hamiltonian \eqref{eq:bh_hamiltonian}. These elements will be necessary in order to sample the partition function of a Bose-Hubbard configuration via Path Integral Monte Carlo. In the next section, the path integral formulation of the partition will be discussed.
+
+\subsubsection{Worm operator}
+
+In the next section, it will be discussed in more detail how the partition function can be written as path integrals along the imaginary time direction. These paths, which will be known as worldlines, may have discontinuities along them. Worldline discontinuities will arise due to the insertion of bosonic creation or annihilation operators, which will be known as worm tails and heads, respectively. Here, we will define a "worm operator", related to the insertion or deletion of worm ends. The worm operator is defined as:
+%
+\begin{equation}
+\label{eq:worm_operator}
+H_\mathrm{worm} = -\eta \sum_i (b_i^\dag + b_i)
+\end{equation}
+%
+where $\eta$ is a tunable parameter known as the worm fugacity and the sum will be carried over all lattice sites. Sandwiching between Fock states, the matrix elements of the worm operator are obtained:
+%
+\begin{equation}
+\bra{\alpha^\prime} H_\mathrm{worm} \ket{\alpha} \equiv H_\mathrm{worm}^{\alpha^\prime,\alpha} 
+\end{equation}
+%
+In the derivation of the kinetic energy matrix elements $H_1^{\alpha^\prime,\alpha}$ , the Fock states were rewritten explicitly in terms of site occupation numbers as $\ket{\alpha} = \ket{n_1^{\alpha},n_2^{\alpha},\dots,n_L^{\alpha}}$. Rewriting basis states in this way, the matrix elements of the worm operator become:
+%
+\begin{equation}
+\label{eq:worm_elements}
+H_\mathrm{worm}^{\alpha^\prime,\alpha} =  -\eta \sum_i  (\sqrt{n_i^{\alpha} + 1} \delta_{n_i^{\alpha^\prime},n_{i}^{\alpha}+1}  + \sqrt{n_i^{\alpha}} \delta_{n_i^{\alpha^\prime},n_{i}^{\alpha}-1}) \prod_{k\neq i} \delta_{n_k^{\alpha^\prime},n_k^{\alpha}} 
+\end{equation}
+%
+
+Eqs. \eqref{eq:diagonal_elements}, \eqref{eq:off_diagonal_elements}, and \eqref{eq:worm_elements} give the diagonal, off-diagonal, and worm matrix elements of the Bose-Hubbard Hamiltonian \eqref{eq:bh_hamiltonian}. These elements will be necessary in order to sample the partition function of a Bose-Hubbard configuration via Path Integral Monte Carlo. In the next section, the path integral formulation of the partition will be discussed.
  
 %-----------------------------   Partition Function (Weights) ----------------------------------------------%
 \section{Partition function (weights)}
@@ -267,8 +302,8 @@ Second-order term:
 Proceeding in similar fashion, the $Q$-th term of $\mathcal{Z}_T$ can be generated:
 \begin{equation}
 \label{eq:Z^q}
-\mathcal{Z}_T^{(Q)} = (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha_Q} C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
-\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}
+\mathcal{Z}_T^{(Q)} = (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha} C_{\alpha_0} C_{\alpha}^* e^{-\epsilon_{\alpha} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
+\bra{\alpha_{q-1}} H_1 \ket{\alpha}
 \end{equation}
 where $Q \geq 1$ and $\tau_0 = \beta$. Summing $Z_T^{(Q)}$ over all $Q$ from $0$ to $\infty$, the full expression for $\mathcal{Z}_T$ is obtained:
 %
@@ -290,12 +325,12 @@ Thus, the weight $\mathcal{Z}_0$ approximately becomes:
 \begin{aligned}
 \label{eq:Z_0}
 \mathcal{Z}_0 &\approx \sum_{\alpha_0} \vert C_{\alpha_0} \vert^2 e^{-\epsilon_{\alpha_0} \beta} \\ &+ 
-\sum_{Q=0}^{\infty} (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha_Q} C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
-\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}
+\sum_{Q=0}^{\infty} (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha} C_{\alpha_0} C_{\alpha}^* e^{-\epsilon_{\alpha} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
+\bra{\alpha_{q-1}} H_1 \ket{\alpha}
 \end{aligned}
 \end{equation}
 %%%%%%%%%%%%%%%%
-where the off-diagonal elements $\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}$ are given by Eq.~\eqref{eq:off_diagonal_elements} and the diagonal elements $\epsilon_{\alpha}$ are given by Eq.~\eqref{eq:diagonal_elements} and the approximation becomes exact in the limit $\beta\to\infty$.
+where the off-diagonal elements $\bra{\alpha_{q-1}} H_1 \ket{\alpha}$ are given by Eq.~\eqref{eq:off_diagonal_elements} and the diagonal elements $\epsilon_{\alpha}$ are given by Eq.~\eqref{eq:diagonal_elements} and the approximation becomes exact in the limit $\beta\to\infty$.
 
 NEED TO INCLUDE DERIVATION 
 
