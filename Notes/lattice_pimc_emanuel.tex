@@ -201,30 +201,38 @@ H_\mathrm{worm}^{\alpha^\prime,\alpha} =  -\eta \sum_i  (\sqrt{n_i^{\alpha} + 1}
 Eqs. \eqref{eq:diagonal_elements}, \eqref{eq:off_diagonal_elements}, and \eqref{eq:worm_elements} give the diagonal, off-diagonal, and worm matrix elements of the Bose-Hubbard Hamiltonian \eqref{eq:bh_hamiltonian}. These elements will be necessary in order to sample the partition function of a Bose-Hubbard configuration via Path Integral Monte Carlo. In the next section, the path integral formulation of the partition will be discussed.
  
 %-----------------------------   Partition Function (Weights) ----------------------------------------------%
-\section{Partition function (weights)}
+\section{Partition function}
 
-The ground state can be exactly obtained by:
+The partition function is defined as:
+%
+\begin{equation}
+\mathcal{Z}  = \Tr \rho \nonumber = \Tr e^{-\beta H} 
+\end{equation}
+%
+where $e^{-\beta H} = \rho$ is the density matrix of the system and $\ket{\psi_T}$ is the trial state. The ground state can be exactly obtained by:
 %
 \begin{equation}
 \ket{\psi_0} = \lim_{\beta\to\infty} e^{-\frac{\beta}{2} H}\ket{\psi_T} 
 \end{equation}
 %
-where $\beta = \frac{1}{k_B  T}$, $H$ is the ground state Hamiltonian, and $\ket{\psi_T}$ is a trial wavefunction. Under this definition, the ground state weight $Z_0$ can then be approximated as the expectation value of the density operator $e^{\beta H}$
+where $\beta = \frac{1}{k_B  T}$, $H$ is the ground state Hamiltonian, and $\ket{\psi_T}$ is a trial wavefunction. Under this definition, the ground state weight $Z_0$ can then be approximated as the expectation value of the density operator $e^{\beta H}$:
 %
 \begin{equation}
 \label{eq:z_0_01}
 \mathcal{Z}_0 = \bra{\psi_0} \hat{I} \ket{\psi_0} = \lim_{\beta\to\infty} \bra{\psi_T} e^{-\beta H} \ket{\psi_T}
 \end{equation}
 %
-To save some typing effort in what follows, define a "trial weight" $\mathcal{Z}_T$, such that:
+To save some typing effort in what follows, define the argument of the limit above as:
 %
 \begin{equation}
 \mathcal{Z}_T \equiv  \bra{\psi_T} e^{-\beta H} \ket{\psi_T}
 \end{equation}
 %
-The trial weight, and hence the ground state weight can be sampled via Path Integral Monte Carlo (PIMC). To do this, $\mathcal{Z}_T$ has to be rewritten in the path integral formulation.
+This "trial weight" $\mathcal{Z}_T$ and hence the ground state weight $\mathcal{Z_0}$ can be sampled via Path Integral Monte Carlo (PIMC). To do this, $\mathcal{Z}_T$ has to be rewritten in the path integral formulation.
 
-Due to completeness of the wavefunction, $\ket{\psi_T}$ can be expanded as:
+\subsubsection{Path integral representation of the partition function}
+
+Due to completeness of the wavefunction, the trial state $\ket{\psi_T}$ can be expanded as:
 %
 \begin{equation}
 \ket{\psi_T} = \sum_{\alpha} C_{\alpha} \ket{\alpha}
@@ -236,26 +244,33 @@ where the $C_\alpha$'s are complex expansion coefficients, and the sum is carrie
 \mathcal{Z_T} = \sum_{\alpha_0, \alpha_1} C_{\alpha_0} C_{\alpha_1}^{*} \bra{\alpha_0} e^{-\beta H} \ket{\alpha_1}
 \end{equation}
 %
-where each of the sums is carried over all Fock states. The state labels could be chosen arbitrarily, but with the power of hindsight, numerical subscripts have been used to distinguish the bra-ket pair, as it will ease the notation in the following steps. Nevertheless, keep in mind that both $\alpha_0$ and $\alpha_1$ will span the space of all Fock configurations.
+where each of the sums is carried over all Fock states. The state labels could be chosen arbitrarily, but with the power of hindsight, numerical subscripts have been used to distinguish the bra-ket pair, as it will ease the notation in the following steps. Nevertheless, keep in mind that both $\alpha_0$ and $\alpha_1$ will span the space of all Fock configurations, and are not just two basis states of the Hamiltonian.
 
 In the interaction picture of quantum mechanics, the density operator can be expressed as:
 %
 \begin{equation}
 \label{eq:density_op_01}
-e^{-\beta H} = e^{-\beta H_0} T_{\tau} e^{- \int_0^{\beta} d\tau_1 H_1(\tau_1)}
+e^{-\beta H} = e^{-\beta H_0} T_{\tau} e^{- \int_0^{\beta} d\tau_1 [ H_1(\tau_1) + H_\mathrm{worm}(\tau_1) ] }
 \end{equation}
-where $T_{\tau}$ is the imaginary time-ordering operator and $\tau = it/\hbar$. The integrand is the interaction picture representation of the off-diagonal part of the Hamiltonian (kinetic energy operator):
+where $T_{\tau}$ is the imaginary time-ordering operator and $\tau = it/\hbar$ is the imaginary time. The integrand in the exponent is the interaction picture representation of the off-diagonal part of the Hamiltonian (kinetic and worm operators):
 %
 \begin{equation}
 H_1(\tau_1) = e^{\tau_1 H_0} H_1 e^{-\tau_1 H_0}
 \end{equation}
 %
-where $H_1$ is the off-diagonal part and $H_0$, the diagonal. The time-ordered exponential can be Taylor expanded as:
+%
+\begin{equation}
+H_\mathrm{worm}(\tau_1) = e^{\tau_1 H_0} H_\mathrm{worm} e^{-\tau_1 H_0}
+\end{equation}
+%
+where the kinetic and worm operators $H_1$ and $H_\mathrm{worm}$, respectively are the off-diagonal parts of the Hamiltonian, and $H_0$ is the diagonal (interaction and chemical potential). The time-ordered exponential can be Taylor expanded as:
 \begin{equation}
 e^{- \int_0^{\beta} d\tau_1 H_1(\tau_1)} = \mathds{1} - \int_{0}^{\beta} H_1(\tau_1) d\tau_1 + \int_0^{\beta} d\tau_1 \int_{0}^{\tau_1} d\tau_2 H_1(\tau_1) H_1(\tau_2) - \dots 
 \end{equation}
 %
-With this Taylor expansion, the trial weight $\mathcal{Z}_T$ becomes:
+Notice that the $H_\mathrm{worm}$ term has been dropped to save some space. It will be inserted at the end of the derivation.
+
+Substituting the Taylor expansion into the trial weight $\mathcal{Z}_T$, it is seen that:
 %
 \begin{equation}
 \begin{aligned}
@@ -264,7 +279,8 @@ With this Taylor expansion, the trial weight $\mathcal{Z}_T$ becomes:
 \end{aligned}
 \end{equation}
 %
-By evaluating the first few terms of the expansion, a generating formula for the weight $\mathcal{Z}_T$ can be obtained. 
+where $\epsilon_{\alpha_0}$ is the an eigenvalue of $H_0$, such that $H_0 \ket{\alpha_0} = \epsilon_{\alpha_0} \ket{\alpha_0}$.
+By evaluating the first few terms of the Taylor expansion, a generating formula for the trial weight $\mathcal{Z}_T$ can be obtained. 
 
 The zeroth-order term is:
 \begin{equation}
@@ -299,17 +315,17 @@ Second-order term:
 \end{aligned}
 \end{equation}
 
-Proceeding in similar fashion, the $Q$-th term of $\mathcal{Z}_T$ can be generated:
+Proceeding in similar fashion, the $Q$-th term of $\mathcal{Z}_T$ becomes:
 \begin{equation}
 \label{eq:Z^q}
-\mathcal{Z}_T^{(Q)} = (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha} C_{\alpha_0} C_{\alpha}^* e^{-\epsilon_{\alpha} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
-\bra{\alpha_{q-1}} H_1 \ket{\alpha}
+\mathcal{Z}_T^{(Q)} = (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha_Q} C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha} \tau_Q} \prod_{q=0}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
+\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}
 \end{equation}
-where $Q \geq 1$ and $\tau_0 = \beta$. Summing $Z_T^{(Q)}$ over all $Q$ from $0$ to $\infty$, the full expression for $\mathcal{Z}_T$ is obtained:
+where $\tau_0 = \beta > \tau_1 > \tau_2 > \dots > \tau_Q = 0$. Summing $Z_T^{(Q)}$ over all $Q$ from $0$ to $\infty$, the full expression for $\mathcal{Z}_T$ is obtained:
 %
 \begin{equation}
 \begin{aligned}
-\mathcal{Z}_T = \mathcal{Z}_T^{(0)} + \sum_{Q=1}^{\infty} \mathcal{Z}_T^{(Q)}
+\mathcal{Z}_T = \sum_{Q=0}^{\infty} \mathcal{Z}_T^{(Q)}
 \end{aligned}
 \end{equation}
 %
@@ -319,36 +335,17 @@ Recall from Eq.~\eqref{eq:z_0_01} that:
 \mathcal{Z}_0 = \bra{\psi_0} \hat{I} \ket{\psi_0} = \lim_{\beta\to\infty} \bra{\psi_T} e^{-\beta H} \ket{\psi_T} = \lim_{\beta\to\infty} \mathcal{Z}_T
 \end{equation}
 %
-Thus, the weight $\mathcal{Z}_0$ approximately becomes:
+Finally, insert back the $H_\mathrm{worm}$ terms and the weight $\mathcal{Z}_0$ approximately becomes:
 %%%%%%%%%%%%%%%%
 \begin{equation}
-\begin{aligned}
 \label{eq:Z_0}
-\mathcal{Z}_0 &\approx \sum_{\alpha_0} \vert C_{\alpha_0} \vert^2 e^{-\epsilon_{\alpha_0} \beta} \\ &+ 
-\sum_{Q=0}^{\infty} (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha} C_{\alpha_0} C_{\alpha}^* e^{-\epsilon_{\alpha} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
-\bra{\alpha_{q-1}} H_1 \ket{\alpha}
-\end{aligned}
+\mathcal{Z}_0 \approx 
+\sum_{Q=0}^{\infty} (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha_Q} C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
+(H_1^{\alpha_{q-1},\alpha_q} + H_\mathrm{worm}^{\alpha_{q-1},\alpha_q})
 \end{equation}
 %%%%%%%%%%%%%%%%
-where the off-diagonal elements $\bra{\alpha_{q-1}} H_1 \ket{\alpha}$ are given by Eq.~\eqref{eq:off_diagonal_elements} and the diagonal elements $\epsilon_{\alpha}$ are given by Eq.~\eqref{eq:diagonal_elements} and the approximation becomes exact in the limit $\beta\to\infty$.
+where the off-diagonal elements $\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}$ and $\bra{\alpha_{q-1}} H_\mathrm{worm} \ket{\alpha_q}$ are given by Eq.~\eqref{eq:off_diagonal_elements} and Eq.~\eqref{eq:worm_elements}, the diagonal elements $\epsilon_{\alpha}$ are given by Eq.~\eqref{eq:diagonal_elements} and the approximation becomes exact in the limit $\beta\to\infty$.
 
-NEED TO INCLUDE DERIVATION 
-
-
-"Worm kinetic energy"
-%
-\begin{equation}
-H_{\mathrm{worm}} = - \eta \sum_i (b_i^\dag + b_i)
-\end{equation}
-%
-where $\eta \in \mathbb{R}$
-
-"Worm kinetic energy" matrix elements
-%
-\begin{equation}
-\bra{\alpha} H_{\mathrm{worm}} \ket{\alpha^\prime} \equiv H_{\mathrm{worm}}^{\alpha,\alpha^\prime} =  -\eta \sum_i  (\sqrt{n_i^{\alpha^\prime} + 1} \delta_{n_i^{\alpha},n_{i}^{\alpha^\prime}+1}  + \sqrt{n_i^{\alpha^\prime}} \delta_{n_i^{\alpha},n_{i}^{\alpha^\prime}-1}) \prod_{k\neq i} \delta_{n_k^{\alpha},n_k^{\alpha^\prime}} 
-\end{equation}
-%
 % -------------- Metropolis Sampling --------------- %
 \section{Metropolis sampling}
 
