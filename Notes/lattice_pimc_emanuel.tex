@@ -318,7 +318,7 @@ Second-order term:
 Proceeding in similar fashion, the $Q$-th term of $\mathcal{Z}_T$ becomes:
 \begin{equation}
 \label{eq:Z^q}
-\mathcal{Z}_T^{(Q)} = (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha_Q} C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha} \tau_Q} \prod_{q=0}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
+\mathcal{Z}_T^{(Q)} = (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha_Q} C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q} \prod_{q=0}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
 \bra{\alpha_{q-1}} H_1 \ket{\alpha_q}
 \end{equation}
 where $\tau_0 = \beta > \tau_1 > \tau_2 > \dots > \tau_Q = 0$. Summing $Z_T^{(Q)}$ over all $Q$ from $0$ to $\infty$, the full expression for $\mathcal{Z}_T$ is obtained:
@@ -340,7 +340,7 @@ Finally, insert back the $H_\mathrm{worm}$ terms and the weight $\mathcal{Z}_0$ 
 \begin{equation}
 \label{eq:Z_0}
 \mathcal{Z}_0 \approx 
-\sum_{Q=0}^{\infty} (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha_Q} C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
+\sum_{Q=0}^{\infty} (-1)^{Q}  \sum_{\alpha_0,\alpha_1,\dots,\alpha_Q} C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q} \prod_{q=1}^Q \int_0^{\tau_{q-1}} d\tau_q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
 (H_1^{\alpha_{q-1},\alpha_q} + H_\mathrm{worm}^{\alpha_{q-1},\alpha_q})
 \end{equation}
 %%%%%%%%%%%%%%%%
@@ -412,11 +412,6 @@ As part of Metropolis sampling, proposed configurations will be accepted with th
 
 \subsection{The Metropolis-Hastings algorithm}
 
-\begin{equation}
-\label{eq:sexytime}
-\pi \approx 3.14\dots
-\end{equation}
-
 Essentialy, Eq.~\eqref{eq:sexytime} is an approximation. In the incredible paper by Prokokkokokok \cite{Prokof_ev_1998}, the authors play some Pokemon. In the Metropolis paper \cite{doi:10.1063/1.1699114}. On the Brian Keng's website \cite{bkeng.metropolis}
 
 \section{Lattice Worm Algorithm (WA) Updates}
@@ -429,7 +424,7 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
 %
     \begin{enumerate}
         \setcounter{enumi}{-1}
-    \item Do with probability $p_{iw}$ {\color{red} What is this actually? There's already an attempt and acceptance prob.}
+    \item Do with probability $p_{iw}$
         \item Randomly choose an integer $i \in [0,L-1]$, where $L$ is the number of sites on the lattice. The $i^{th}$ site will be chosen wih probability $p_i = 1/L$.
         \item Randomly choose an integer $f \in [0,F - 1]$, where $F$ is the number of flat regions on site $i$. The $f^{th}$ flat region will be chosen with probability $p_{f} = 1/F$
         \item Count the number of particles $n_{flat}$ on the flat region and check if inserting an antiworm is possible:
@@ -448,16 +443,6 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
             %
             where $W_+$ and $W_-$ are the weights of the configuration with a worm and no worm, respectively, $\eta$ is the worm fugacity and $\Delta V$ is the change in potential energy pre and post worm insertion. 
     \end{enumerate}
-    %
-    {\color{red}-Derive $\Delta V$ here for insert worm and antiworm} \\ 
-    {\color{red}-Give a similar walkthrough of the delete worm update} \\
-    {\color{red}-Derive the Metropolis condition from Detailed Balance} \\
-%
-    %
-    \begin{equation}
-    \pi \approx 3.14159...
-    \label{eq:detailed_balance}
-    \end{equation}
     %
 
     \subsection{Insert/Delete ground state (gs) worm}
@@ -528,57 +513,7 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
     %
 
 	\subsection{Timeshift}
-    \subsubsection{Forward}
-    The timeshift update consists of moving either a worm head or tail either forward or backwards in imaginary time. The update proceeds as follow:
-    % Timeshift forward
-    \begin{enumerate}
-        \setcounter{enumi}{-1}
-        \item Do with probability $p_{fw}$ :
-        \item Choose which worm end will move, head or tail, with probability $p = 1/2$
-        \item Randomly choose a real number $\tau_{new} = \tau + rand()*(\tau_{max}-\tau)$, where $\tau_{max}$ is the upper bound of the flat region delimited by the moving end and the next kink or worm end and $\tau$ is the original time of the moving worm end. The probability that the worm end will move to this time is $p = 1/(\tau_{max}-\tau)$
-        \item Calculate the ratio of weights of configurations pre and post timeshifting forward:
-            %
-            \begin{equation}
-            \frac{W_+}{W_-} = e^{-\Delta\tau_{worm} \Delta V} = 1
-            \label{eq:forward_ratios}
-            \end{equation}
-            %
-            where $W_+$ and $W_-$ are the weights of the configuration post and pre moving forward, respectively, and $\Delta V$ is the change in potential energy. Since the number of particles on each site remains constant before and after the update, the change in potential energy is $dV = 0$ and thus the exponential becomes unity.
 
-    \end{enumerate}
-    %
-    \subsubsection{Backward}
-    % Timeshift backward
-    \begin{enumerate}
-        \setcounter{enumi}{-1}
-        \item Do with probability $p_{bw}$ :
-        \item Choose which worm end will move, head or tail, with probability $p = 1/2$
-        \item Randomly choose a real number $\tau_{new} = \tau_{min} + rand()*(\tau-\tau_{min})$, where $\tau_{min}$ is the lower bound of the flat region delimited by the moving end and the preceding kink or worm end and $\tau$ is the original time of the moving worm end. The probability that the worm end will move to this time is $p = 1/(\tau-\tau_{min})$
-        \item Calculate the ratio of weights of configurations pre and post timeshifting backward:
-            %
-            \begin{equation}
-            \frac{W_-}{W_+} = e^{\Delta\tau_{worm} \Delta V} = 1
-            \label{eq:tsbw_ratios}
-            \end{equation}
-            %
-    \end{enumerate}
-
-    % Detailed balance of timeshift
-    \subsubsection{Detailed balance}
-    %
-    \begin{equation}
-    p_{fw}^{att} p_{fw}^{acc} W_- = p_{fw}^{att} p_{fw}^{acc} W_+
-    \end{equation}
-    %
-    The attempt probabilities for the forward and backward timeshift can be read off from the description of the update. Substituting them in and solving for $p_{fw}^{acc}/p_{bw}^{acc}$:
-    %
-    \begin{equation}
-    \frac{p_{fw}^{acc}}{p_{bw}^{acc}} = \frac{\tau_{max}-\tau}{\tau-\tau_{min}} = R
-    \end{equation}
-    %
-
-	\subsection{Spaceshift before}
-	\subsection{Spaceshift after}
 	
 % References
 \phantomsection 
