@@ -532,7 +532,7 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
     \item Insert from $\tau=\beta$
     	\begin{enumerate}
 	\item{Worm: $\frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-(\epsilon_w-\epsilon)(\beta-\tau_t)}$}
-	\item{Antiworm: $\frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-(\epsilon_w-\epsilon)(\tau_h - \beta)}$}
+	\item{Antiworm: $\frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}e^{-(\epsilon_w-\epsilon)(\tau_h - \beta)}$}
 	\end{enumerate}
     \item Delete from $\tau=0$
     	\begin{enumerate}
@@ -541,8 +541,8 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
 	\end{enumerate}
     \item Delete from $\tau=\beta$
     	\begin{enumerate}
-	\item{Worm: $1/(\frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-(\epsilon_w-\epsilon)(\beta-\tau_t)})$}
-	\item{Antiworm: $1/(\frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-(\epsilon_w-\epsilon)(\tau_t - \beta)})$}
+	\item{Worm: $\frac{W^\prime}{W}= 1/( \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-(\epsilon_w-\epsilon)(\beta-\tau_t)})$}
+	\item{Antiworm: $\frac{W^\prime}{W}= 1/(\eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}e^{-(\epsilon_w-\epsilon)(\tau_t - \beta)})$}
 	\end{enumerate}
     \end{enumerate}
 
@@ -551,7 +551,11 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
 	\setcounter{enumi}{0}
 		\item Insert: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot e^{(\epsilon_w-\epsilon)(\tau_h-\tau_t)}$
 		\item Delete: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1/(\frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot e^{(\epsilon_w-\epsilon)(\tau_h-\tau_t)})$
-		\item Timeshift: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1$
+		\item Timeshift
+		\begin{enumerate}
+		\item{Shift head: $R =  e^{(\epsilon_w-\epsilon)(\tau_h^\prime-\tau_h)}$}
+		\item{Shift tail: $R = e^{(\epsilon_w-\epsilon)(\tau_t-\tau_t^\prime)}$}
+		\end{enumerate}
 		\item Insert from $\tau=0$
 		\begin{enumerate}
 		\item{worm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)\tau_h}$ }
@@ -581,8 +585,8 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
 		\item Delete: $R = 1/(\frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot \eta^2 n_i^{\alpha_w} )$
 		\item Timeshift: 		
 		\begin{enumerate}
-		\item{Shift head: $R =  e^{-(\epsilon_w-\epsilon)(\tau_h^\prime-\tau_h)}$}
-		\item{Shift tail: $R = e^{-(\epsilon_w-\epsilon)(\tau_t-\tau_t^\prime)}$}
+		\item{Shift head: $R =  1$}
+		\item{Shift tail: $R = 1$}
 		\end{enumerate}
 		\item Insert from $\tau=0$
 		\begin{enumerate}
