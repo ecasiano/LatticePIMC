@@ -37,7 +37,7 @@ def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     # Number of lattice sites
     L = len(data_struct)
 
-    # Randomly select a lattice site i on which to insert a worm or antiworm
+    # Randomly select a lattice site i on which to insert a worm or antiworm 
     i = np.random.randint(L)
 
     # Randomly select a flat tau interval at which to possibly insert worm
@@ -59,6 +59,7 @@ def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta):
         else:
             insert_worm = False
         p_type = 0.5 # prob. of the worm being either a worm or antiworm
+    insert_worm = False
 
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
@@ -108,8 +109,8 @@ def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities                                   
     R = (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail 
     # Metropolis Sampling
-    #R = 1 # For debugging
-    print("R = ", R)
+    R = 1 # For debugging
+    #print("R = ", R)
     if np.random.random() < R:
         # Insert worm
         if insert_worm:
