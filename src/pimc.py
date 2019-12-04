@@ -158,55 +158,52 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     tx = tail_loc[0]
     tk = tail_loc[1]
     
+    # Number of lattice sites and Number of flat regions on the worm site
+    L = len(data_struct)
+    N_flats = len(data_struct[hx])
+    
     # Identify the type of worm
     if hk > tk : is_worm = True   # worm
     else: is_worm = False         # antiworm
     
-    # Calculate worm length
+    # Retrieve the times of the worm head and tail 
     tau_h = data_struct[hx][hk][0]
     tau_t = data_struct[tx][tk][0]
-    dtau = np.abs(tau_h-tau_t)
 
     # Identify the lower and upper limits of the flat interval where the worm lives
     if is_worm:
         tau_prev = data_struct[tx][tk-1][0]
-        if hk+1 == len(data_struct[hx]): 
+        if hk == len(data_struct[hx])-1: 
             tau_next = beta
         else: 
             tau_next = data_struct[hx][hk+1][0]
-        n_before_worm = data_struct[tk][tk-1][1]
+        n_i = data_struct[tk][tk-1][1]  # number of particles outside of worm/antiworm
+        N_after_tail = n_i+1
     else: # antiworm
         tau_prev = data_struct[hx][hk-1][0] 
-        if tk+1 == len(data_struct[tx]):
+        if tk == len(data_struct[tx])-1:
             tau_next = beta
         else:
              tau_next = data_struct[tx][tk+1][0]
-        n_before_worm = data_struct[hx][hk-1][1]
+        n_i = data_struct[hx][hk-1][1]
+        N_after_tail = n_i
 
-    # Worm insert proposal probability
-    p_L = 1/len(data_struct)           # prob of choosing site
-    p_flat = 1/len(data_struct[hx])    # prob of choosing flat
-    if n_before_worm == 0:             # prob of choosing worm/antiworm
-        p_wormtype = 1 # Only a worm could've been inserted
-    else:
-        p_wormtype = 1/2
-    p_wormlen = 1/(tau_next-tau_prev)    # prob of choosing wormlength
-    p_tau = 1/((tau_next-tau_prev)-dtau) # prob of choosing the tau of the first wormend
+    # Calculate the length of the flat interval and the length of the worm/antiworm
+    tau_flat = tau_next - tau_prev
+    tau_worm = np.abs(tau_h-tau_t)
     
-    # Choose the appropriate weigh ratio based on the worm type
-    if is_worm:
-        n_i = data_struct[tx][tk][1]   # particles in flat before delete
-        dV = U*(1-n_i) - mu            # deleted energy minus energy of worm still there
-        weight_ratio = np.exp(dV*dtau)/(n_i*eta**2)   # W_deleted/W_stillthere
-    else: # delete antiworm
-        n_i = data_struct[hx][hk][1]
-        dV =  U*n_i + mu
-        weight_ratio = np.exp(dV*dtau)/((n_i+1)*eta**2)
+    # Worm insert probability of choosing between worm or antiworm
+    if n_i == 0:
+        p_type = 1 # Only a worm could've been inserted
+    else:
+        p_type = 1/2
                    
     # Metropolis sampling
     # Accept
-    p_tunable = 1 # p_iw/p_dw
-    R = (p_tunable * p_L * p_flat * p_wormtype * p_wormlen * p_tau) * weight_ratio 
+    p_dw, p_iw = 0.5,0.5 # p_iw/p_dw
+    R = 1/ ( (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail )
+    print("R=",R)
+    #R = 1 # for debugging
     if np.random.random() < R:
         # Delete the worm ends
         if is_worm: # worm
