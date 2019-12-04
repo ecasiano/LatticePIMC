@@ -177,7 +177,7 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta):
             tau_next = beta
         else: 
             tau_next = data_struct[hx][hk+1][0]
-        n_i = data_struct[tk][tk-1][1]  # number of particles outside of worm/antiworm
+        n_i = data_struct[tx][tk-1][1]  # number of particles outside of worm/antiworm
         N_after_tail = n_i+1
     else: # antiworm
         tau_prev = data_struct[hx][hk-1][0] 
@@ -431,21 +431,21 @@ def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     if hk == 1 and tk != 1:     # Only the head is near tau=0
         delete_head = True
         p_wormend = 1
-        n_i = data_struct[hk][hk][1]  # number of particles outside of worm/antiworm
+        n_i = data_struct[hx][hk][1]  # number of particles outside of worm/antiworm
         N_after_tail = n_i + 1
     elif hk != 1 and tk == 1:   # Only the tail is near tau=0
         delete_head = False
         p_wormend = 1
-        n_i = data_struct[tk][tk][1]  # number of particles outside of worm/antiworm
+        n_i = data_struct[tx][tk][1]  # number of particles outside of worm/antiworm
         N_after_tail = n_i
     else:                       # Both are near zero (but different sites)
         if np.random.random() < 0.5:
             delete_head = True
-            n_i = data_struct[hk][hk][1]  # number of particles outside of worm/antiworm
+            n_i = data_struct[hx][hk][1]  # number of particles outside of worm/antiworm
             N_after_tail = n_i + 1
         else:
             delete_head = False
-            n_i = data_struct[tk][tk][1]  # number of particles outside of worm/antiworm
+            n_i = data_struct[tx][tk][1]  # number of particles outside of worm/antiworm
             N_after_tail = n_i
         p_wormend = 0.5
 
@@ -459,7 +459,6 @@ def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     p_gsdw,p_gsiw = 0.5,0.5
     C_post,C_pre = 0.5,0.5
     R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
-    print("R=",R)
     if np.random.random() < R: # Accept
         if delete_head:
             del data_struct[hx][hk]
@@ -582,43 +581,56 @@ def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     hk = head_loc[1]
     tx = tail_loc[0]
     tk = tail_loc[1]
-    
-    # Length of the 
-    
+        
     # Only delete worms that originate at tau = beta
     hk_len = len(data_struct[hx]) # Kinks of site where the head is
     tk_len = len(data_struct[tx]) # Kinks of site where the tail is
     if hk != hk_len-1 and tk != tk_len-1: return None
     
-    # Select worm end to delete
+    # Number of lattice sites
+    L = len(data_struct)
+    
+    # Select which worm end to delete and determine the prob. of choosing that wormend
     if hk == hk_len-1 and tk != tk_len-1:     # Only the head is near tau=beta
         delete_head = True
-        prob = 1
+        p_wormend = 1
+        n_i = data_struct[hx][hk-1][1]  # number of particles outside of worm/antiworm
+        N_after_tail = n_i
     elif hk != hk_len-1 and tk == tk_len-1:   # Only the tail is near tau=beta
         delete_head = False
-        prob = 1
+        p_wormend = 1
+        n_i = data_struct[tx][tk-1][1]  # number of particles outside of worm/antiworm
+        N_after_tail = n_i+1
     else:                       # Both are near beta (but different sites)
         if np.random.random() < 0.5:
             delete_head = True
+            n_i = data_struct[hx][hk-1][1]  # number of particles outside of worm/antiworm
+            N_after_tail = n_i
         else:
             delete_head = False
-        prob = 0.5
+            n_i = data_struct[tx][tk-1][1]  # number of particles outside of worm/antiworm
+            N_after_tail = n_i+1
+        p_wormend = 0.5
+       
+    # Worm insert probability of choosing between worm or antiworm
+    if n_i == 0:
+        p_type = 1 # Only a worm could've been inserted
+    else:
+        p_type = 1/2
         
     # Metropolis Sampling
-    R = 1
+    C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
+    p_gsdw, p_gsiw = 0.5, 0.5
+    R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
+    print("R=",R)
     if np.random.random() < R: # Accept
         if delete_head:
             del data_struct[hx][hk]
-            hk_len -= 1
-            #data_struct[hx][hk_len-1][1] += 1
             del head_loc[:]
 
         else: # delete tail
             del data_struct[tx][tk]
-            tk_len -= 1
-            #data_struct[tx][tk_len-1][1] -= 1
             del tail_loc[:]
-
                 
         return None
     
@@ -627,7 +639,6 @@ def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 '----------------------------------------------------------------------------------'
 
 # Visualize worldline configurations for Lattice Path Integral Monte Carlo (PIMC)
-
 def view_worldlines(data_struct,beta,figure_name=None):
     import matplotlib.pyplot as plt
 
