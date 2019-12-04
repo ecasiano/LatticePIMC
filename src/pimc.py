@@ -202,8 +202,6 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     # Accept
     p_dw, p_iw = 0.5,0.5 # p_iw/p_dw
     R = 1/ ( (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail )
-    print("R=",R)
-    #R = 1 # for debugging
     if np.random.random() < R:
         # Delete the worm ends
         if is_worm: # worm
@@ -425,23 +423,43 @@ def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     
     # Only delete worms that originate at tau = 0
     if hk != 1 and tk != 1 : return None
+       
+    # Number of lattice sites
+    L = len(data_struct)
     
-    # Select worm end to delete
+    # Select which worm end to delete and determine the prob. of choosing that wormend
     if hk == 1 and tk != 1:     # Only the head is near tau=0
         delete_head = True
-        prob = 1
+        p_wormend = 1
+        n_i = data_struct[hk][hk][1]  # number of particles outside of worm/antiworm
+        N_after_tail = n_i + 1
     elif hk != 1 and tk == 1:   # Only the tail is near tau=0
         delete_head = False
-        prob = 1
+        p_wormend = 1
+        n_i = data_struct[tk][tk][1]  # number of particles outside of worm/antiworm
+        N_after_tail = n_i
     else:                       # Both are near zero (but different sites)
         if np.random.random() < 0.5:
             delete_head = True
+            n_i = data_struct[hk][hk][1]  # number of particles outside of worm/antiworm
+            N_after_tail = n_i + 1
         else:
             delete_head = False
-        prob = 0.5
+            n_i = data_struct[tk][tk][1]  # number of particles outside of worm/antiworm
+            N_after_tail = n_i
+        p_wormend = 0.5
+
+    # Worm insert probability of choosing between worm or antiworm
+    if n_i == 0:
+        p_type = 1 # Only a worm could've been inserted
+    else:
+        p_type = 1/2
         
     # Metropolis Sampling
-    R = 1
+    p_gsdw,p_gsiw = 0.5,0.5
+    C_post,C_pre = 0.5,0.5
+    R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
+    print("R=",R)
     if np.random.random() < R: # Accept
         if delete_head:
             del data_struct[hx][hk]
