@@ -416,10 +416,12 @@ def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     if head_loc == [] and tail_loc == []: return None
     
     # Retrieve the site and kink indices of the worm ends
-    hx = head_loc[0] 
-    hk = head_loc[1]
-    tx = tail_loc[0]
-    tk = tail_loc[1]
+    if head_loc != []:
+        hx = head_loc[0] 
+        hk = head_loc[1]
+    if tail_loc != []:
+        tx = tail_loc[0]
+        tk = tail_loc[1]
     
     # Only delete worms that originate at tau = 0
     if hk != 1 and tk != 1 : return None
@@ -577,14 +579,19 @@ def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     if head_loc == [] and tail_loc == []: return None
     
     # Retrieve the site and kink indices of the worm ends
-    hx = head_loc[0] 
-    hk = head_loc[1]
-    tx = tail_loc[0]
-    tk = tail_loc[1]
-        
+    if head_loc != []:
+        hx = head_loc[0] 
+        hk = head_loc[1]
+        hk_len = len(data_struct[hx]) # Kinks of site where the head is
+    if tail_loc != []:
+        tx = tail_loc[0]
+        tk = tail_loc[1]
+        tk_len = len(data_struct[tx]) # Kinks of site where the tail is
+
     # Only delete worms that originate at tau = beta
     hk_len = len(data_struct[hx]) # Kinks of site where the head is
     tk_len = len(data_struct[tx]) # Kinks of site where the tail is
+    
     if hk != hk_len-1 and tk != tk_len-1: return None
     
     # Number of lattice sites
@@ -622,7 +629,6 @@ def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
     p_gsdw, p_gsiw = 0.5, 0.5
     R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
-    print("R=",R)
     if np.random.random() < R: # Accept
         if delete_head:
             del data_struct[hx][hk]
