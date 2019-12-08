@@ -199,10 +199,11 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta):
         p_type = 1/2
                    
     # Metropolis sampling
-    # Accept
     p_dw, p_iw = 0.5,0.5 # p_iw/p_dw
     R = 1/ ( (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail )
+    # Accept
     if np.random.random() < R:
+        #print("We made it fam.")
         # Delete the worm ends
         if is_worm: # worm
             del data_struct[hx][hk] # Deletes ira
@@ -413,44 +414,55 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 
     # Cannot delete if there are no worm ends present
-    if head_loc == [] and tail_loc == []: return None
+    if head_loc == [] and tail_loc == []: 
+        return None
     
-    # Retrieve the site and kink indices of the worm ends
-    if head_loc != []:
-        hx = head_loc[0] 
-        hk = head_loc[1]
-    if tail_loc != []:
-        tx = tail_loc[0]
-        tk = tail_loc[1]
-    
-    # Only delete worms that originate at tau = 0
-    if hk != 1 and tk != 1 : return None
-       
-    # Number of lattice sites
+     # Number of lattice sites
     L = len(data_struct)
     
-    # Select which worm end to delete and determine the prob. of choosing that wormend
-    if hk == 1 and tk != 1:     # Only the head is near tau=0
+    # Save the indices of worm end to be deleted
+    if head_loc != [] and tail_loc == []: # only head present
+        x = head_loc[0]                  # site index 
+        k = head_loc[1]                  # kink index
         delete_head = True
         p_wormend = 1
-        n_i = data_struct[hx][hk][1]  # number of particles outside of worm/antiworm
-        N_after_tail = n_i + 1
-    elif hk != 1 and tk == 1:   # Only the tail is near tau=0
+        if k != 1:  # head not on first flat
+            return None
+    elif head_loc == [] and tail_loc != [] : # only tail present
+        x = tail_loc[0]                     # site index 
+        k = tail_loc[1]                     # kink index
         delete_head = False
+        p_wormend = 1                       # probability of choosing this wormend
+        if k != 1:      # tail not on first flat
+            return None
+    else: # both worm ends present
+        x = head_loc[0]                # site index 
+        k = head_loc[1]                # kink index
+        delete_head = True
         p_wormend = 1
-        n_i = data_struct[tx][tk][1]  # number of particles outside of worm/antiworm
-        N_after_tail = n_i
-    else:                       # Both are near zero (but different sites)
-        if np.random.random() < 0.5:
-            delete_head = True
-            n_i = data_struct[hx][hk][1]  # number of particles outside of worm/antiworm
-            N_after_tail = n_i + 1
-        else:
+        if k != 1: # head not on first flat, try tail
+            x = tail_loc[0]
+            k = tail_loc[1]
             delete_head = False
-            n_i = data_struct[tx][tk][1]  # number of particles outside of worm/antiworm
-            N_after_tail = n_i
-        p_wormend = 0.5
+            if k != 1: # tail no on last first either, stop.
+                return None
+        else:  # head on first flat, check tail too.
+            tx = tail_loc[0]
+            tk = tail_loc[1]
+            if tk == 1: # if both ends on first flast, choose randomly
+                if np.random.random() < 0.5:
+                    x = tx
+                    k = tk
+                    delete_head = False
+                    p_wormend = 0.5
 
+    # Number of particles in flat after the near zero worm end
+    n_i = data_struct[x][k][1]
+    if delete_head:
+        N_after_tail = n_i+1
+    else:
+        N_after_tail = n_i
+        
     # Worm insert probability of choosing between worm or antiworm
     if n_i == 0:
         p_type = 1 # Only a worm could've been inserted
@@ -462,22 +474,26 @@ def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     C_post,C_pre = 0.5,0.5
     R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
     if np.random.random() < R: # Accept
+        
+        del data_struct[x][k]
+        
         if delete_head:
-            del data_struct[hx][hk]
-            del head_loc[:]
-            data_struct[hx][0][1] -= 1
+            data_struct[x][0][1] -= 1  # Modify the number of particles after deletion
             # Reindex if there was another end on the same worldline
-            if hx == tx and tk > hk:
-                tail_loc[1] -= 1
+            if head_loc != [] and tail_loc != []:
+                if head_loc[0] == tail_loc[0] and tail_loc[1] > head_loc[1]:
+                    tail_loc[1] -= 1
+            del head_loc[:]
+
         
         else: # delete tail
-            del data_struct[tx][tk]
-            del tail_loc[:]
-            data_struct[tx][0][1] += 1
+            data_struct[x][0][1] += 1
             # Reindex if there was another end on the same worldline
-            if hx == tx and hk > tk:
-                head_loc[1] -= 1
-                
+            if head_loc != [] and tail_loc != []:
+                if head_loc[0] == tail_loc[0] and tail_loc[1] < head_loc[1]:
+                    head_loc[1] -= 1                
+            del tail_loc[:]
+            
         return None
     
     else: # Reject 
@@ -577,49 +593,54 @@ def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 
     # Cannot delete if there are no worm ends present
     if head_loc == [] and tail_loc == []: return None
-    
-    # Retrieve the site and kink indices of the worm ends
-    if head_loc != []:
-        hx = head_loc[0] 
-        hk = head_loc[1]
-        hk_len = len(data_struct[hx]) # Kinks of site where the head is
-    if tail_loc != []:
-        tx = tail_loc[0]
-        tk = tail_loc[1]
-        tk_len = len(data_struct[tx]) # Kinks of site where the tail is
-
-    # Only delete worms that originate at tau = beta
-    hk_len = len(data_struct[hx]) # Kinks of site where the head is
-    tk_len = len(data_struct[tx]) # Kinks of site where the tail is
-    
-    if hk != hk_len-1 and tk != tk_len-1: return None
-    
+     
     # Number of lattice sites
     L = len(data_struct)
     
-    # Select which worm end to delete and determine the prob. of choosing that wormend
-    if hk == hk_len-1 and tk != tk_len-1:     # Only the head is near tau=beta
+    # Save the indices of worm end to be deleted
+    if head_loc != [] and tail_loc == []: # only head present
+        x = head_loc[0]                  # site index 
+        k = head_loc[1]                  # kink index
         delete_head = True
         p_wormend = 1
-        n_i = data_struct[hx][hk-1][1]  # number of particles outside of worm/antiworm
-        N_after_tail = n_i
-    elif hk != hk_len-1 and tk == tk_len-1:   # Only the tail is near tau=beta
+        if k != len(data_struct[x])-1:  # head not on last flat
+            return None
+    elif head_loc == [] and tail_loc != [] : # only tail present
+        x = tail_loc[0]                     # site index 
+        k = tail_loc[1]                     # kink index
         delete_head = False
+        p_wormend = 1                       # probability of choosing this wormend
+        if k != len(data_struct[x])-1:      # tail not on last flat
+            return None
+    else: # both worm ends present
+        x = head_loc[0]                # site index 
+        k = head_loc[1]                # kink index
+        delete_head = True
         p_wormend = 1
-        n_i = data_struct[tx][tk-1][1]  # number of particles outside of worm/antiworm
-        N_after_tail = n_i+1
-    else:                       # Both are near beta (but different sites)
-        if np.random.random() < 0.5:
-            delete_head = True
-            n_i = data_struct[hx][hk-1][1]  # number of particles outside of worm/antiworm
-            N_after_tail = n_i
-        else:
+        if k != len(data_struct[x])-1: # head not on last flat, try tail
+            x = tail_loc[0]
+            k = tail_loc[1]
             delete_head = False
-            n_i = data_struct[tx][tk-1][1]  # number of particles outside of worm/antiworm
-            N_after_tail = n_i+1
-        p_wormend = 0.5
+            if k != len(data_struct[x])-1: # tail no on last flat either, stop.
+                return None
+        else:  # head on last flat, check tail too.
+            tx = tail_loc[0]
+            tk = tail_loc[1]
+            if tk == len(data_struct[x])-1: # if both ends on last flast, choose randomly
+                if np.random.random() < 0.5:
+                    x = tx
+                    k = tk
+                    delete_head = False
+                    p_wormend = 0.5
+
+    # Number of particles in flat before the edge worm flat
+    n_i = data_struct[x][k-1][1]
+    if delete_head:
+        N_after_tail = n_i
+    else:
+        N_after_tail = n_i+1
        
-    # Worm insert probability of choosing between worm or antiworm
+    # Worm insert (the reverse update) probability of choosing between worm or antiworm
     if n_i == 0:
         p_type = 1 # Only a worm could've been inserted
     else:
@@ -630,12 +651,13 @@ def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     p_gsdw, p_gsiw = 0.5, 0.5
     R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
     if np.random.random() < R: # Accept
+        
+        del data_struct[x][k]
+        
         if delete_head:
-            del data_struct[hx][hk]
             del head_loc[:]
 
         else: # delete tail
-            del data_struct[tx][tk]
             del tail_loc[:]
                 
         return None
@@ -695,9 +717,8 @@ def view_worldlines(data_struct,beta,figure_name=None):
 
             n = N_list[i][j] # Occupation of the i_th site at the j_th "kink"
             if n == 0: ls,lw = ':',1
-            elif n == 1: ls,lw = '-',1
-            elif n == 2: ls,lw = '-',3
-            elif n == 3: ls,lw = '-',5.5
+            else: ls,lw = '-',n
+
             src_site = dirs_list[i][j][0]    # Index of source site
             dest_site = dirs_list[i][j][1]  # Index of destination site
 
