@@ -2,6 +2,7 @@
 import numpy as np
 import bisect
 import matplotlib.pyplot as plt
+from copy import deepcopy
 from scipy.stats import truncexpon
 
 def random_boson_config(L,N):
@@ -25,6 +26,67 @@ def create_data_struct(alpha):
         data_struct.append([[0,alpha[i],(i,i)]])
 
     return data_struct
+
+'----------------------------------------------------------------------------------'
+
+def N_tracker(data_struct,beta):
+    '''Count total particles in the worldline configuration'''
+    
+    # Number of lattice sites
+    L = len(data_struct)
+    
+    # Add paths
+    l = 0
+    for i in range(L):
+        F = len(data_struct[i]) # Number of flat intervals on the site
+        for k in range(F):
+            if k < F-1:
+                dtau = data_struct[i][k+1][0]-data_struct[i][k][0]
+            else:
+                dtau = beta-data_struct[i][k][0]
+            
+            n = data_struct[i][k][1] # particles in flat interval
+            l += n*dtau
+                
+    # Track the total number of particles (must be between N-1 and N+1)
+    N = l/beta
+    
+    return N
+'----------------------------------------------------------------------------------'
+
+def egs_pimc(data_struct,beta,head_loc,tail_loc,U,mu):
+    '''Calculates pimc ground state energy at time slice tau=beta/2'''
+    
+    # Can only count observables when no worm end is present
+    if head_loc != [] or tail_loc != [] : return None
+
+    # Number of lattice sites
+    L = len(data_struct)
+    
+    # BoseHubbard Energy (for no hopping)
+    egs = 0
+    for i in range(L):
+        N_flats = len(data_struct[i]) # Number of flats on site i
+        for k in range(N_flats):
+            if data_struct[i][k][0] <= beta/2:
+                n_i = data_struct[i][k][1] # particles on i at beta/2
+            else: break
+        # Add on-site contribution to energy if no worms crossing beta/2
+        # if data_struct[i][k][2][0] != data_struct[i][k][2][1]:
+        egs += (U/2)*n_i*(n_i-1)-mu*n_i
+                    
+    return egs
+
+'----------------------------------------------------------------------------------'
+
+def egs_theory(L,U,mu):
+    '''Calculates BH model theoretical ground state energy with no hopping'''
+    
+    # NOTE: This works for unit filling (not sure if otherwise works)
+    n_min = 0.5 + mu/U
+    egs = L*U/2 * n_min * (n_min-1) - L*mu*n_min
+    
+    return egs
 
 '----------------------------------------------------------------------------------'
 
@@ -147,7 +209,7 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 
     # Can only propose worm deletion if both worm ends are present
     if head_loc == [] or tail_loc == [] : return None
-
+    
     # Only delete if worm ends are on the same site and on the same flat interval
     if head_loc[0] != tail_loc[0] or abs(head_loc[1]-tail_loc[1]) != 1: return None
 
@@ -215,7 +277,7 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta):
         # Update the locations ira and masha
         del head_loc[:]
         del tail_loc[:]
-
+        
         return None
 
     # Reject
@@ -307,7 +369,8 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
 
 '----------------------------------------------------------------------------------'
 
-def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
+def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta,
+                      canonical,N):
     
     # Cannot insert if there's two worm ends present
     if head_loc != [] and tail_loc != []: return None
@@ -411,11 +474,15 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 
 '----------------------------------------------------------------------------------'
 
-def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
+def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 
     # Cannot delete if there are no worm ends present
     if head_loc == [] and tail_loc == []: 
         return None
+    
+     # Can only propose if the worm ends don't form a worm
+    if head_loc != [] and tail_loc != []:
+        if head_loc[0] == tail_loc[0] and np.abs(head_loc[1]-tail_loc[1])==1: return None
     
      # Number of lattice sites
     L = len(data_struct)
@@ -455,7 +522,7 @@ def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
                     k = tk
                     delete_head = False
                     p_wormend = 0.5
-
+       
     # Number of particles in flat after the near zero worm end
     n_i = data_struct[x][k][1]
     if delete_head:
@@ -469,12 +536,24 @@ def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     else:
         p_type = 1/2
         
+    # Check if the update would violate conservation of total particle number
+    if canonical: # do the check for Canonical simulation
+        data_struct_tmp = deepcopy(data_struct)
+        del data_struct_tmp[x][k]
+        if delete_head:
+            data_struct_tmp[x][0][1] -= 1
+        else: # delete tail
+            data_struct_tmp[x][0][1] += 1
+    
+        N_check = N_tracker(data_struct_tmp,beta)
+        if N_check < N-1 or N_check > N+1: return None 
+
+        
     # Metropolis Sampling
     p_gsdw,p_gsiw = 0.5,0.5
     C_post,C_pre = 0.5,0.5
     R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
     if np.random.random() < R: # Accept
-        
         del data_struct[x][k]
         
         if delete_head:
@@ -501,7 +580,8 @@ def delete_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     
 '----------------------------------------------------------------------------------'
 
-def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
+def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta,
+                      canonical,N):
     
     # Cannot insert if there's two worm end presents
     if head_loc != [] and tail_loc != []: return None
@@ -589,11 +669,15 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     
 '----------------------------------------------------------------------------------'
 
-def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
+def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 
     # Cannot delete if there are no worm ends present
     if head_loc == [] and tail_loc == []: return None
      
+     # Can only propose if the worm ends don't form a worm
+    if head_loc != [] and tail_loc != []:
+        if head_loc[0] == tail_loc[0] and np.abs(head_loc[1]-tail_loc[1])==1: return None
+    
     # Number of lattice sites
     L = len(data_struct)
     
@@ -631,8 +715,8 @@ def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
                     x = tx
                     k = tk
                     delete_head = False
-                    p_wormend = 0.5
-
+                    p_wormend = 0.5   
+    
     # Number of particles in flat before the edge worm flat
     n_i = data_struct[x][k-1][1]
     if delete_head:
@@ -645,7 +729,15 @@ def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
         p_type = 1 # Only a worm could've been inserted
     else:
         p_type = 1/2
-        
+    
+    # Check if the update would violate conservation of total particle number
+    if canonical: # do the check for Canonical simulation
+        data_struct_tmp = deepcopy(data_struct)
+        del data_struct_tmp[x][k]
+    
+        N_check = N_tracker(data_struct_tmp,beta)
+        if N_check < N-1 or N_check > N+1: return None 
+    
     # Metropolis Sampling
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
     p_gsdw, p_gsiw = 0.5, 0.5
@@ -659,7 +751,7 @@ def delete_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 
         else: # delete tail
             del tail_loc[:]
-                
+              
         return None
     
     else: # Reject 
