@@ -38,9 +38,9 @@ def N_tracker(data_struct,beta):
     # Add paths
     l = 0
     for i in range(L):
-        F = len(data_struct[i]) # Number of flat intervals on the site
-        for k in range(F):
-            if k < F-1:
+        N_flats = len(data_struct[i]) # Number of flat intervals on the site
+        for k in range(N_flats):
+            if k < N_flats-1:
                 dtau = data_struct[i][k+1][0]-data_struct[i][k][0]
             else:
                 dtau = beta-data_struct[i][k][0]
@@ -55,12 +55,9 @@ def N_tracker(data_struct,beta):
 
 '----------------------------------------------------------------------------------'
 
-def egs_pimc(data_struct,beta,head_loc,tail_loc,U,mu):
+def egs_pimc(data_struct,beta,U,mu):
     '''Calculates pimc ground state energy at time slice tau=beta/2'''
     
-    # Can only count observables when no worm end is present
-    if head_loc != [] or tail_loc != [] : return None
-
     # Number of lattice sites
     L = len(data_struct)
     
@@ -74,7 +71,7 @@ def egs_pimc(data_struct,beta,head_loc,tail_loc,U,mu):
             else: break
         # Add on-site contribution to energy if no worms crossing beta/2
         # if data_struct[i][k][2][0] != data_struct[i][k][2][1]:
-        egs += (U/2)*n_i*(n_i-1)-mu*n_i
+        egs += ( (U/2)*n_i*(n_i-1)-mu*n_i )
                     
     return egs
 
@@ -91,7 +88,8 @@ def egs_theory(L,U,mu):
 
 '----------------------------------------------------------------------------------'
 
-def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta):
+def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta,
+               canonical, N):
     '''Inserts a worm or antiworm'''
 
     # Can only insert worm if there are no wormends present
@@ -167,6 +165,30 @@ def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta):
         head_kink = [tau_h,N_after_head,(i,i)]
         tail_kink = [tau_t,N_after_tail,(i,i)]
     
+    # Check if the update would violate conservation of total particle number
+    if canonical: # do the check for Canonical simulation
+        data_struct_tmp = deepcopy(data_struct)
+    
+        # Insert worm
+        if insert_worm:
+            if flat_min_idx == N_flats - 1: # if selected flat is the last
+                data_struct_tmp[i].append(tail_kink)
+                data_struct_tmp[i].append(head_kink)
+            else:
+                data_struct_tmp[i].insert(flat_min_idx+1,tail_kink)
+                data_struct_tmp[i].insert(flat_min_idx+2,head_kink)
+        # Insert antiworm
+        else:
+            if flat_min_idx == N_flats - 1: # last flat
+                data_struct_tmp[i].append(head_kink)
+                data_struct_tmp[i].append(tail_kink)
+            else:
+                data_struct_tmp[i].insert(flat_min_idx+1,head_kink)
+                data_struct_tmp[i].insert(flat_min_idx+2,tail_kink)
+        
+        N_check = N_tracker(data_struct_tmp,beta)
+        if N_check <= N-1 or N_check >= N+1: return None 
+        
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities       
     R = (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail 
@@ -206,7 +228,8 @@ def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta):
 
 '----------------------------------------------------------------------------------'
 
-def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta):
+def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta,
+               canonical, N):
 
     # Can only propose worm deletion if both worm ends are present
     if head_loc == [] or tail_loc == [] : return None
@@ -260,13 +283,28 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta):
         p_type = 1 # Only a worm could've been inserted
     else:
         p_type = 1/2
+        
+    # Check if N is conserved on canonical simulations
+    if canonical:
+        data_struct_tmp = deepcopy(data_struct)
+    
+        # Delete the worm ends
+        if is_worm: # worm
+            del data_struct_tmp[hx][hk] # Deletes ira
+            del data_struct_tmp[tx][tk] # Deletes masha
+        else: # antiworm
+            del data_struct_tmp[tx][tk] # Deletes masha
+            del data_struct_tmp[hx][hk] # Deletes ira
+        
+        N_check = N_tracker(data_struct_tmp,beta)
+        if N_check <= N-1 or N_check >= N+1: return None 
                    
     # Metropolis sampling
     p_dw, p_iw = 0.5,0.5 # p_iw/p_dw
     R = 1/ ( (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail )
     # Accept
     if np.random.random() < R:
-        #print("We made it fam.")
+        
         # Delete the worm ends
         if is_worm: # worm
             del data_struct[hx][hk] # Deletes ira
@@ -286,7 +324,7 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta):
     
 '----------------------------------------------------------------------------------'
 
-def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
+def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu, canonical, N):
 
     # Reject update if there are is no worm end present
     if head_loc == [] and tail_loc == [] : return None
@@ -362,9 +400,14 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu):
             tau_new = tau_next - r
         else:
             tau_new = tau_prev + r       
-        
+    
     # Accept
+    tau_old = data_struct[x][k][0] # original time of the worm end
     data_struct[x][k][0] = tau_new
+    if canonical:
+        N_check = N_tracker(data_struct,beta)
+        if N_check <= N-1 or N_check >= N+1:
+            data_struct[x][k][0] = tau_old # reject update if N not conserved
         
     return None
 
@@ -453,7 +496,7 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta,
         data_struct_tmp[i][0] = first_flat # Modify the first flat
         
         N_check = N_tracker(data_struct_tmp,beta)
-        if N_check < N-1 or N_check > N+1: return None 
+        if N_check <= N-1 or N_check >= N+1: return None 
         
     # Build the Metropolis Ratio   
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
@@ -560,7 +603,7 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
             data_struct_tmp[x][0][1] += 1
     
         N_check = N_tracker(data_struct_tmp,beta)
-        if N_check < N-1 or N_check > N+1: return None 
+        if N_check <= N-1 or N_check >= N+1: return None 
 
         
     # Metropolis Sampling
@@ -668,7 +711,7 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta,
         data_struct_tmp[i].append(worm_end_kink)
         
         N_check = N_tracker(data_struct_tmp,beta)
-        if N_check < N-1 or N_check > N+1: return None 
+        if N_check <= N-1 or N_check >= N+1: return None 
         
     # Build the Metropolis Ratio   
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
@@ -757,7 +800,7 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         del data_struct_tmp[x][k]
     
         N_check = N_tracker(data_struct_tmp,beta)
-        if N_check < N-1 or N_check > N+1: return None 
+        if N_check <= N-1 or N_check >= N+1: return None 
     
     # Metropolis Sampling
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
