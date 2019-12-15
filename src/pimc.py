@@ -52,6 +52,7 @@ def N_tracker(data_struct,beta):
     N = l/beta
     
     return N
+
 '----------------------------------------------------------------------------------'
 
 def egs_pimc(data_struct,beta,head_loc,tail_loc,U,mu):
@@ -417,8 +418,7 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta,
         N_after_tail = n_i
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
     
-    # From the truncated exponential distribution, choose the length of the worm    
-    #tau_worm  = np.random.random()*(tau_flat)
+    # From the truncated exponential distribution, choose the length of the worm
     loc = 0
     scale = 1/abs(dV)    
     b = tau_next
@@ -440,6 +440,20 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta,
     else:
         worm_end_kink = [tau_worm,N_after_tail,(i,i)]
         first_flat = [0,N_after_head,(i,i)]
+        
+    # Check if the update would violate conservation of total particle number
+    if canonical: # do the check for Canonical simulation
+        data_struct_tmp = deepcopy(data_struct)
+    
+        if len(data_struct_tmp[i]) == 1: # Worldline is flat throughout
+            data_struct_tmp[i].append(worm_end_kink)
+        else:
+            data_struct_tmp[i].insert(1,worm_end_kink)
+        
+        data_struct_tmp[i][0] = first_flat # Modify the first flat
+        
+        N_check = N_tracker(data_struct_tmp,beta)
+        if N_check < N-1 or N_check > N+1: return None 
         
     # Build the Metropolis Ratio   
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
@@ -627,8 +641,7 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta,
         N_after_tail = n_i
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
     
-    # From the truncated exponential distribution, choose the length of the worm    
-    #tau_worm  = np.random.random()*(tau_flat)
+    # From the truncated exponential distribution, choose the length of the worm 
     loc = 0
     scale = 1/abs(dV)    
     b = beta - tau_prev
@@ -648,7 +661,15 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta,
     else:
         worm_end_kink = [beta-tau_worm,N_after_head,(i,i)]
         
-    # Build the Metropolis Ratio   
+    # Check if the update would violate conservation of total particle number
+    if canonical: # do the check for Canonical simulation
+        data_struct_tmp = deepcopy(data_struct)
+        
+        data_struct_tmp[i].append(worm_end_kink)
+        
+        N_check = N_tracker(data_struct_tmp,beta)
+        if N_check < N-1 or N_check > N+1: return None 
+        
     # Build the Metropolis Ratio   
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
     p_gsdw, p_gsiw = 0.5, 0.5
