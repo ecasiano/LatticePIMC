@@ -69,6 +69,7 @@ def egs_pimc(data_struct,beta,U,mu):
             if data_struct[i][k][0] <= beta/2:
                 n_i = data_struct[i][k][1] # particles on i at beta/2
             else: break
+        
         # Add on-site contribution to energy if no worms crossing beta/2
         # if data_struct[i][k][2][0] != data_struct[i][k][2][1]:
         egs += ( (U/2)*n_i*(n_i-1)-mu*n_i )
@@ -81,8 +82,12 @@ def egs_theory(L,U,mu):
     '''Calculates BH model theoretical ground state energy with no hopping'''
     
     # NOTE: This works for unit filling (not sure if otherwise works)
-    n_min = 0.5 + mu/U
-    egs = L*U/2 * n_min * (n_min-1) - L*mu*n_min
+    n_min = 1/2 + mu/U
+    if n_min == 0.5 : 
+       n_min = 1   # python's round method goes down for 0.5
+    else: 
+       n_min = round(n_min) # round to nearest integer
+    egs = L * (U/2*n_min*(n_min-1) - mu*n_min )
     
     return egs
 
