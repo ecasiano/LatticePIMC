@@ -42,7 +42,7 @@ def N_tracker(data_struct,beta):
         for k in range(N_flats):
             if k < N_flats-1:
                 dtau = data_struct[i][k+1][0]-data_struct[i][k][0]
-            else:
+            else: # time difference between beta and last kink on the site
                 dtau = beta-data_struct[i][k][0]
             
             n = data_struct[i][k][1] # particles in flat interval
@@ -60,7 +60,6 @@ def egs_pimc(data_struct,beta,U,mu):
     
     # Number of lattice sites
     L = len(data_struct)
-    
     # BoseHubbard Energy (for no hopping)
     egs = 0
     for i in range(L):
@@ -69,9 +68,6 @@ def egs_pimc(data_struct,beta,U,mu):
             if data_struct[i][k][0] <= beta/2:
                 n_i = data_struct[i][k][1] # particles on i at beta/2
             else: break
-        
-        # Add on-site contribution to energy if no worms crossing beta/2
-        # if data_struct[i][k][2][0] != data_struct[i][k][2][1]:
         egs += ( (U/2)*n_i*(n_i-1)-mu*n_i )
                     
     return egs
@@ -93,8 +89,8 @@ def egs_theory(L,U,mu):
 
 '----------------------------------------------------------------------------------'
 
-def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta,
-               canonical, N):
+def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical, N):
+    
     '''Inserts a worm or antiworm'''
 
     # Can only insert worm if there are no wormends present
@@ -125,6 +121,9 @@ def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta,
         else:
             insert_worm = False
         p_type = 0.5 # prob. of the worm being either a worm or antiworm
+    
+    # For debugging
+    # insert_worm = False
 
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
@@ -140,6 +139,8 @@ def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta,
     # From the truncated exponential distribution, choose the length of the worm    
     #tau_worm  = np.random.random()*(tau_flat)
     loc = 0
+    if dV == 0:
+        dV = np.finfo(float).eps # machine epsilon
     scale = 1/abs(dV)    
     b = tau_next - tau_prev
     tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
@@ -233,8 +234,7 @@ def worm_insert(data_struct, beta, head_loc, tail_loc, U, mu, eta,
 
 '----------------------------------------------------------------------------------'
 
-def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta,
-               canonical, N):
+def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 
     # Can only propose worm deletion if both worm ends are present
     if head_loc == [] or tail_loc == [] : return None
@@ -300,7 +300,7 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta,
         else: # antiworm
             del data_struct_tmp[tx][tk] # Deletes masha
             del data_struct_tmp[hx][hk] # Deletes ira
-        
+
         N_check = N_tracker(data_struct_tmp,beta)
         if N_check <= N-1 or N_check >= N+1: return None 
                    
@@ -329,22 +329,25 @@ def worm_delete(data_struct, beta, head_loc, tail_loc, U, mu, eta,
     
 '----------------------------------------------------------------------------------'
 
-def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu, canonical, N):
+def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
 
     # Reject update if there are is no worm end present
     if head_loc == [] and tail_loc == [] : return None
 
-    # Choose which worm end to move    
+    # Choose which worm end to move   
+    worm = True # flag that keeps track if we have worm or antiworm
     if head_loc != [] and tail_loc == [] : # only head present
         hx = head_loc[0]                # site index 
         hk = head_loc[1]                # kink index
         tau_h = data_struct[hx][hk][0]
         shift_head = True
+        
     elif head_loc == [] and tail_loc != [] : # only tail present
         tx = tail_loc[0]                # site index 
         tk = tail_loc[1]                # kink index
         tau_t = data_struct[tx][tk][0]
         shift_head = False
+        
     else: # both worm ends present
         hx = head_loc[0]                # site index 
         hk = head_loc[1]                # kink index
@@ -359,6 +362,9 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu, canonical, N):
         else:
             shift_head = False
 
+    # For debugging
+    # shift_head = True
+
     # Save the site and kink indices of the end that will be moved
     if shift_head == True :
         x = hx
@@ -366,7 +372,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu, canonical, N):
     else:
         x = tx
         k = tk
-    
+        
     # Number of particles before and after the worm end to be shifted
     n_f = data_struct[x][k][1]       # after
     n_o = data_struct[x][k-1][1]     # before
@@ -381,7 +387,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu, canonical, N):
                     
     # Determine the lower and upper bounds of the worm end to be timeshifted
     # Get tau_next
-    if k+1 == len(data_struct[x]):
+    if k == len(data_struct[x])-1:
         tau_next = beta  # This covers the case when there's no kinks after the worm end
     else:
         tau_next = data_struct[x][k+1][0] #actual times
@@ -390,6 +396,8 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu, canonical, N):
     
     # From the truncated exponential distribution, choose new time of the worm end
     loc = 0
+    if dV == 0:
+        dV = np.finfo(float).eps # machine epsilon
     scale = 1/abs(dV)    
     b = tau_next - tau_prev
     r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
@@ -400,26 +408,24 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc, U, mu, canonical, N):
         else:
             tau_new = tau_next - r
     else: # dV < 0
-        #print("dV ", dV)
         if shift_head:
             tau_new = tau_next - r
         else:
-            tau_new = tau_prev + r       
+            tau_new = tau_prev + r 
     
     # Accept
     tau_old = data_struct[x][k][0] # original time of the worm end
     data_struct[x][k][0] = tau_new
-    if canonical:
-        N_check = N_tracker(data_struct,beta)
-        if N_check <= N-1 or N_check >= N+1:
-            data_struct[x][k][0] = tau_old # reject update if N not conserved
+    #if canonical:
+    #    N_check = N_tracker(data_struct,beta)
+    #    if N_check <= N-1 or N_check >= N+1:
+    #        data_struct[x][k][0] = tau_old # reject update if N not conserved
         
     return None
 
 '----------------------------------------------------------------------------------'
 
-def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta,
-                      canonical,N):
+def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
     # Cannot insert if there's two worm ends present
     if head_loc != [] and tail_loc != []: return None
@@ -453,6 +459,9 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta,
         else:
             insert_worm = False
         p_type = 0.5 
+    
+    # For debugging
+    # insert_worm = False
         
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
@@ -468,6 +477,8 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta,
     
     # From the truncated exponential distribution, choose the length of the worm
     loc = 0
+    if dV == 0:
+        dV = np.finfo(float).eps # machine epsilon
     scale = 1/abs(dV)    
     b = tau_next
     tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
@@ -501,7 +512,7 @@ def insert_gsworm_zero(data_struct, beta, head_loc, tail_loc, U, mu, eta,
         data_struct_tmp[i][0] = first_flat # Modify the first flat
         
         N_check = N_tracker(data_struct_tmp,beta)
-        if N_check <= N-1 or N_check >= N+1: return None 
+        if N_check <= N-1 or N_check >= N+1: return None
         
     # Build the Metropolis Ratio   
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
@@ -542,20 +553,16 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     if head_loc == [] and tail_loc == []: 
         return None
     
-     # Can only propose if the worm ends don't form a worm
-    if head_loc != [] and tail_loc != []:
-        if head_loc[0] == tail_loc[0] and np.abs(head_loc[1]-tail_loc[1])==1: return None
-    
-     # Number of lattice sites
+    # Number of lattice sites
     L = len(data_struct)
     
-    # Save the indices of worm end to be deleted
+    # Save the indices of the worm end to be deleted
     if head_loc != [] and tail_loc == []: # only head present
         x = head_loc[0]                  # site index 
         k = head_loc[1]                  # kink index
         delete_head = True
         p_wormend = 1
-        if k != 1:  # head not on first flat
+        if k != 1:  # head needs to be on first flat
             return None
     elif head_loc == [] and tail_loc != [] : # only tail present
         x = tail_loc[0]                     # site index 
@@ -573,7 +580,7 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
             x = tail_loc[0]
             k = tail_loc[1]
             delete_head = False
-            if k != 1: # tail no on last first either, stop.
+            if k != 1: # tail not on last first either, stop.
                 return None
         else:  # head on first flat, check tail too.
             tx = tail_loc[0]
@@ -609,13 +616,13 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
         N_check = N_tracker(data_struct_tmp,beta)
         if N_check <= N-1 or N_check >= N+1: return None 
-
         
     # Metropolis Sampling
     p_gsdw,p_gsiw = 0.5,0.5
     C_post,C_pre = 0.5,0.5
     R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
     if np.random.random() < R: # Accept
+        
         del data_struct[x][k]
         
         if delete_head:
@@ -642,8 +649,7 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
 '----------------------------------------------------------------------------------'
 
-def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta,
-                      canonical,N):
+def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
     # Cannot insert if there's two worm end presents
     if head_loc != [] and tail_loc != []: return None
@@ -676,6 +682,9 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta,
         else:
             insert_worm = False
         p_type = 0.5  
+     
+    # For debubbing
+    # insert_worm = False
 
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
@@ -691,6 +700,8 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta,
     
     # From the truncated exponential distribution, choose the length of the worm 
     loc = 0
+    if dV == 0:
+        dV = np.finfo(float).eps # machine epsilon
     scale = 1/abs(dV)    
     b = beta - tau_prev
     tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
@@ -716,7 +727,8 @@ def insert_gsworm_beta(data_struct, beta, head_loc, tail_loc, U, mu, eta,
         data_struct_tmp[i].append(worm_end_kink)
         
         N_check = N_tracker(data_struct_tmp,beta)
-        if N_check <= N-1 or N_check >= N+1: return None 
+        if N_check <= N-1 or N_check >= N+1: 
+            return None 
         
     # Build the Metropolis Ratio   
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
@@ -742,10 +754,6 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 
     # Cannot delete if there are no worm ends present
     if head_loc == [] and tail_loc == []: return None
-     
-     # Can only propose if the worm ends don't form a worm
-    if head_loc != [] and tail_loc != []:
-        if head_loc[0] == tail_loc[0] and np.abs(head_loc[1]-tail_loc[1])==1: return None
     
     # Number of lattice sites
     L = len(data_struct)
@@ -756,7 +764,7 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         k = head_loc[1]                  # kink index
         delete_head = True
         p_wormend = 1
-        if k != len(data_struct[x])-1:  # head not on last flat
+        if k != len(data_struct[x])-1:  # head needs to be on last flat
             return None
     elif head_loc == [] and tail_loc != [] : # only tail present
         x = tail_loc[0]                     # site index 
@@ -779,18 +787,18 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         else:  # head on last flat, check tail too.
             tx = tail_loc[0]
             tk = tail_loc[1]
-            if tk == len(data_struct[x])-1: # if both ends on last flast, choose randomly
+            if tk == len(data_struct[tx])-1: # both ends on last flast, choose randomly
                 if np.random.random() < 0.5:
                     x = tx
                     k = tk
                     delete_head = False
                     p_wormend = 0.5   
     
-    # Number of particles in flat before the edge worm flat
+    # Number of particles in flat outside the edge worm
     n_i = data_struct[x][k-1][1]
-    if delete_head:
+    if delete_head: # delete antiworm near beta
         N_after_tail = n_i
-    else:
+    else: # delete worm near beta
         N_after_tail = n_i+1
        
     # Worm insert (the reverse update) probability of choosing between worm or antiworm
@@ -811,6 +819,7 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
     p_gsdw, p_gsiw = 0.5, 0.5
     R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
+    #print(R)
     if np.random.random() < R: # Accept
         
         del data_struct[x][k]
