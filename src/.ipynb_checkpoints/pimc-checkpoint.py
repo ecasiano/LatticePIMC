@@ -79,11 +79,16 @@ def egs_theory(L,U,mu):
     
     # NOTE: This works for unit filling (not sure if otherwise works)
     n_min = 1/2 + mu/U
-    if n_min == 0.5 : 
-       n_min = 1   # python's round method goes down for 0.5
-    else: 
-       n_min = round(n_min) # round to nearest integer
+    #n_min = 1 + mu/U
+
+    #if n_min == 0.5 : 
+    #   n_min = 1   # python's round method goes down for 0.5
+    #else: 
+    #   n_min = round(n_min) # round to nearest integer
     egs = L * (U/2*n_min*(n_min-1) - mu*n_min )
+    #egs = L * (U*n_min*(n_min-1) - mu*n_min )
+
+ 
     
     return egs
 
