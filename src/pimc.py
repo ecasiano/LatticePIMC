@@ -74,11 +74,50 @@ def egs_pimc(data_struct,beta,U,mu):
 
 '----------------------------------------------------------------------------------'
 
+def n_pimc(data_struct,beta):
+    '''Calculates total particle number at time slice tau=beta/2'''
+    
+    # Number of lattice sites
+    L = len(data_struct)
+    # Average particle number at slice beta/2 (for no hopping)
+    n = 0
+    for i in range(L):
+        N_flats = len(data_struct[i]) # Number of flats on site i
+        for k in range(N_flats):
+            if data_struct[i][k][0] <= beta/2:
+                n_i = data_struct[i][k][1] # particles on i at beta/2
+            else: break
+        n += n_i
+               
+    return n
+
+'----------------------------------------------------------------------------------'
+
+def n_i_pimc(data_struct,beta):
+    '''Determine site occupation at time slice beta/2'''
+    
+    # Number of lattice sites
+    L = len(data_struct)
+    # Average particle number at slice beta/2 (for no hopping)
+    n = [] # stores average particle number per site
+    for i in range(L):
+        N_flats = len(data_struct[i]) # Number of flats on site i
+        for k in range(N_flats):
+            if data_struct[i][k][0] <= beta/2:
+                n_i = data_struct[i][k][1] # particles on i at beta/2
+            else: break
+        n.append(n_i)
+               
+    return n
+
+'----------------------------------------------------------------------------------'
+
 def egs_theory(L,U,mu):
     '''Calculates BH model theoretical ground state energy with no hopping'''
     
     # NOTE: This works for unit filling (not sure if otherwise works)
-    n_min = 1/2 + mu/U
+    n_min = 1
+    #n_min = 1/2 + mu/U
     #n_min = 1 + mu/U
 
     #if n_min == 0.5 : 
@@ -88,8 +127,6 @@ def egs_theory(L,U,mu):
     egs = L * (U/2*n_min*(n_min-1) - mu*n_min )
     #egs = L * (U*n_min*(n_min-1) - mu*n_min )
 
- 
-    
     return egs
 
 '----------------------------------------------------------------------------------'
