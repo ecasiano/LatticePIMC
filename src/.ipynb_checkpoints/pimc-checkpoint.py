@@ -181,11 +181,12 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical, N):
     # From the truncated exponential distribution, choose the length of the worm    
     #tau_worm  = np.random.random()*(tau_flat)
     loc = 0
-    if dV == 0:
-        dV = np.finfo(float).eps # machine epsilon
-    scale = 1/abs(dV)    
     b = tau_next - tau_prev
-    tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
+    if dV == 0: # uniform distribution
+        tau_worm = b*np.random.random()
+    else: # truncated exponential distribution
+        scale = 1/abs(dV)    
+        tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
     if not(insert_worm):     # Flip the distribution for antiworm insertion
         tau_worm = -tau_worm + b   # Antiworm length
         
@@ -405,7 +406,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
             shift_head = False
 
     # For debugging
-    # shift_head = True
+    #shift_head = True
 
     # Save the site and kink indices of the end that will be moved
     if shift_head == True :
@@ -438,11 +439,12 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
     
     # From the truncated exponential distribution, choose new time of the worm end
     loc = 0
-    if dV == 0:
-        dV = np.finfo(float).eps # machine epsilon
-    scale = 1/abs(dV)    
     b = tau_next - tau_prev
-    r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+    if dV == 0: # uniform distribution
+        r = b*np.random.random()
+    else: # truncated exponential distribution
+        scale = 1/abs(dV)    
+        r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
 
     if dV > 0:
         if shift_head:
@@ -458,10 +460,10 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
     # Accept
     tau_old = data_struct[x][k][0] # original time of the worm end
     data_struct[x][k][0] = tau_new
-    #if canonical:
-    #    N_check = N_tracker(data_struct,beta)
-    #    if N_check <= N-1 or N_check >= N+1:
-    #        data_struct[x][k][0] = tau_old # reject update if N not conserved
+    if canonical:
+        N_check = N_tracker(data_struct,beta)
+        if N_check <= N-1 or N_check >= N+1:
+            data_struct[x][k][0] = tau_old # reject update if N not conserved
         
     return None
 
@@ -519,11 +521,12 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
     # From the truncated exponential distribution, choose the length of the worm
     loc = 0
-    if dV == 0:
-        dV = np.finfo(float).eps # machine epsilon
-    scale = 1/abs(dV)    
     b = tau_next
-    tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
+    if dV == 0: # uniform distribution
+        tau_worm = b*np.random.random()
+    else: # truncated exponential distribution
+        scale = 1/abs(dV)    
+        tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
     if not(insert_worm):     # Flip the distribution for antiworm insertion
         tau_worm = -tau_worm + b   # Antiworm length
     
@@ -742,11 +745,12 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
     # From the truncated exponential distribution, choose the length of the worm 
     loc = 0
-    if dV == 0:
-        dV = np.finfo(float).eps # machine epsilon
-    scale = 1/abs(dV)    
     b = beta - tau_prev
-    tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
+    if dV == 0:
+        tau_worm = b*np.random.random()
+    else:
+        scale = 1/abs(dV)   
+        tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
     if not(insert_worm):     # Flip the distribution for antiworm insertion
         tau_worm = -tau_worm + b   # Antiworm length
     
