@@ -165,7 +165,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical, N):
         p_type = 0.5 # prob. of the worm being either a worm or antiworm
     
     # For debugging
-    # insert_worm = False
+    # insert_worm = True
 
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
@@ -242,6 +242,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical, N):
     p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities       
     R = (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail 
     # Metropolis Sampling
+    #R = 1 # debugging
     if np.random.random() < R:
         # Insert worm
         if insert_worm:
@@ -406,7 +407,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
             shift_head = False
 
     # For debugging
-    #shift_head = True
+    # shift_head = False
 
     # Save the site and kink indices of the end that will be moved
     if shift_head == True :
@@ -444,8 +445,8 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
         r = b*np.random.random()
     else: # truncated exponential distribution
         scale = 1/abs(dV)    
-        r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
-
+        r = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # time diff.
+        
     if dV > 0:
         if shift_head:
             tau_new = tau_prev + r
@@ -456,6 +457,11 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
             tau_new = tau_next - r
         else:
             tau_new = tau_prev + r 
+            
+#     if shift_head:
+#         tau_new = tau_prev + r
+#     else:
+#         tau_new = tau_next - r
     
     # Accept
     tau_old = data_struct[x][k][0] # original time of the worm end
@@ -505,7 +511,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         p_type = 0.5 
     
     # For debugging
-    # insert_worm = False
+    #insert_worm = False
         
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
@@ -729,7 +735,7 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         p_type = 0.5  
      
     # For debubbing
-    # insert_worm = False
+    insert_worm = True
 
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
