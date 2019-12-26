@@ -165,7 +165,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical, N):
         p_type = 0.5 # prob. of the worm being either a worm or antiworm
     
     # For debugging
-    # insert_worm = True
+    insert_worm = True
 
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
@@ -184,11 +184,22 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical, N):
     b = tau_next - tau_prev
     if dV == 0: # uniform distribution
         tau_worm = b*np.random.random()
-    else: # truncated exponential distribution
-        scale = 1/abs(dV)    
-        tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
-    if not(insert_worm):     # Flip the distribution for antiworm insertion
-        tau_worm = -tau_worm + b   # Antiworm length
+    elif insert_worm:
+        if dV > 0: # Decreasing truncated exponential distribution
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
+        else: # dV < 0, Increasing truncexpon
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+            tau_worm = -tau_worm + b
+    else: # insert antiworm
+        if dV > 0: # Increasing truncated exponential distribution
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+            tau_worm = -tau_worm + b
+        else: # dV < 0 , decreasing truncated exponential distribution
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]  
         
     # Randomly choose the time where the first worm end will be inserted
     if insert_worm: # worm
@@ -511,7 +522,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         p_type = 0.5 
     
     # For debugging
-    #insert_worm = False
+    # insert_worm = True
         
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
@@ -530,12 +541,23 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     b = tau_next
     if dV == 0: # uniform distribution
         tau_worm = b*np.random.random()
-    else: # truncated exponential distribution
-        scale = 1/abs(dV)    
-        tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
-    if not(insert_worm):     # Flip the distribution for antiworm insertion
-        tau_worm = -tau_worm + b   # Antiworm length
-    
+    elif insert_worm:
+        if dV > 0: # Decreasing truncated exponential distribution
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
+        else: # dV < 0, Increasing truncexpon
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+            tau_worm = -tau_worm + b
+    else: # insert antiworm
+        if dV > 0: # Increasing truncated exponential distribution
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+            tau_worm = -tau_worm + b
+        else: # dV < 0 , decreasing truncated exponential distribution
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+
     # If there are two wormends present, the delete move has to randomly choose which to remove
     # This is important for detailed balance.
     if head_loc == [] and tail_loc == []:
@@ -735,7 +757,7 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         p_type = 0.5  
      
     # For debubbing
-    insert_worm = False
+    # insert_worm = False
 
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
@@ -754,11 +776,22 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     b = beta - tau_prev
     if dV == 0:
         tau_worm = b*np.random.random()
-    else:
-        scale = 1/abs(dV)   
-        tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
-    if not(insert_worm):     # Flip the distribution for antiworm insertion
-        tau_worm = -tau_worm + b   # Antiworm length
+    elif insert_worm:
+        if dV > 0: # Decreasing truncated exponential distribution
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
+        else: # dV < 0, Increasing truncexpon
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+            tau_worm = -tau_worm + b
+    else: # insert antiworm
+        if dV > 0: # Increasing truncated exponential distribution
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+            tau_worm = -tau_worm + b
+        else: # dV < 0 , decreasing truncated exponential distribution
+            scale = 1/abs(dV)    
+            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
     
     # If there are two wormends present, the delete move has to randomly choose which to remove
     if head_loc == [] and tail_loc == []:
