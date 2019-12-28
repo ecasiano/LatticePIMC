@@ -677,6 +677,12 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
                     k = tk
                     delete_head = False
                     p_wormend = 0.5
+                    
+    # Get tau_next
+    if k == len(data_struct[x]) - 1:
+        tau_next = beta
+    else:
+        tau_next = data_struct[x][k+1][0]
        
     # Number of particles in flat after the near zero worm end
     n_i = data_struct[x][k][1]
@@ -684,6 +690,7 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         N_after_tail = n_i+1
     else:
         N_after_tail = n_i
+    N_after_head = N_after_tail-1
         
     # Worm insert probability of choosing between worm or antiworm
     if n_i == 0:
@@ -703,10 +710,19 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         N_check = N_tracker(data_struct_tmp,beta)
         if N_check <= N-1 or N_check >= N+1: return False 
         
+    # Calculate diagonal energy difference
+    dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
+    if dV != 0:
+        scale = 1/np.abs(dV)
+        b = tau_next
+        
     # Metropolis Sampling
     p_gsdw,p_gsiw = 0.5,0.5
     C_post,C_pre = 0.5,0.5
-    R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
+    if dV != 0:
+        R = 1 / ( scale * (1-np.exp(-b/scale)) * (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
+    else: # dV==0
+        R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend * tau_next / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
     if np.random.random() < R: # Accept
         
         del data_struct[x][k]
@@ -895,12 +911,16 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
                     delete_head = False
                     p_wormend = 0.5   
     
+    # Get tau_prev
+    tau_prev = data_struct[x][k-1][0]
+        
     # Number of particles in flat outside the edge worm
     n_i = data_struct[x][k-1][1]
     if delete_head: # delete antiworm near beta
         N_after_tail = n_i
     else: # delete worm near beta
         N_after_tail = n_i+1
+    N_after_head = N_after_tail-1
        
     # Worm insert (the reverse update) probability of choosing between worm or antiworm
     if n_i == 0:
@@ -915,6 +935,12 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
         N_check = N_tracker(data_struct_tmp,beta)
         if N_check <= N-1 or N_check >= N+1: return False 
+        
+    # Calculate diagonal energy difference
+    dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
+    if dV != 0:
+        scale = 1/np.abs(dV)
+        b = beta-tau_prev
     
     # Metropolis Sampling
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
