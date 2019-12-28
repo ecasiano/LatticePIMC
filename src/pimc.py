@@ -136,7 +136,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     '''Inserts a worm or antiworm'''
 
     # Can only insert worm if there are no wormends present
-    if head_loc != [] or tail_loc != [] : return False
+    if head_loc != [] or tail_loc != [] : return None
 
     # Number of lattice sites
     L = len(data_struct)
@@ -294,10 +294,10 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 
     # Can only propose worm deletion if both worm ends are present
-    if head_loc == [] or tail_loc == [] : return False
+    if head_loc == [] or tail_loc == [] : return None
     
     # Only delete if worm ends are on the same site and on the same flat interval
-    if head_loc[0] != tail_loc[0] or abs(head_loc[1]-tail_loc[1]) != 1: return False
+    if head_loc[0] != tail_loc[0] or abs(head_loc[1]-tail_loc[1]) != 1: return None
 
     # Retrieve the site and tau indices of where ira and masha are located
     # head_loc = [site_idx,tau_idx]
@@ -403,7 +403,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
 
     # Reject update if there are is no worm end present
-    if head_loc == [] and tail_loc == [] : return False
+    if head_loc == [] and tail_loc == [] : return None
 
     # Choose which worm end to move   
     worm = True # flag that keeps track if we have worm or antiworm
@@ -500,7 +500,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
 def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
     # Cannot insert if there's two worm ends present
-    if head_loc != [] and tail_loc != []: return False
+    if head_loc != [] and tail_loc != []: return None
     
     # Randomly choose a lattice site
     L = len(data_struct)
@@ -637,7 +637,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 
     # Cannot delete if there are no worm ends present
-    if head_loc == [] and tail_loc == []: return False
+    if head_loc == [] and tail_loc == []: return None
     
     # Number of lattice sites
     L = len(data_struct)
@@ -649,14 +649,14 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         delete_head = True
         p_wormend = 1
         if k != 1:  # head needs to be on first flat
-            return False
+            return None
     elif head_loc == [] and tail_loc != [] : # only tail present
         x = tail_loc[0]                     # site index 
         k = tail_loc[1]                     # kink index
         delete_head = False
         p_wormend = 1                       # probability of choosing this wormend
         if k != 1:      # tail not on first flat
-            return False
+            return None
     else: # both worm ends present
         x = head_loc[0]                # site index 
         k = head_loc[1]                # kink index
@@ -667,7 +667,7 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
             k = tail_loc[1]
             delete_head = False
             if k != 1: # tail not on last first either, stop.
-                return False
+                return None
         else:  # head on first flat, check tail too.
             tx = tail_loc[0]
             tk = tail_loc[1]
@@ -738,7 +738,7 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
     # Cannot insert if there's two worm end already present
-    if head_loc != [] and tail_loc != []: return False
+    if head_loc != [] and tail_loc != []: return None
     
     # Randomly choose a lattice site
     L = len(data_struct)
@@ -854,7 +854,7 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 
     # Cannot delete if there are no worm ends present
-    if head_loc == [] and tail_loc == []: return False
+    if head_loc == [] and tail_loc == []: return None
     
     # Number of lattice sites
     L = len(data_struct)
@@ -866,14 +866,14 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         delete_head = True
         p_wormend = 1
         if k != len(data_struct[x])-1:  # head needs to be on last flat
-            return False
+            return None
     elif head_loc == [] and tail_loc != [] : # only tail present
         x = tail_loc[0]                     # site index 
         k = tail_loc[1]                     # kink index
         delete_head = False
         p_wormend = 1                       # probability of choosing this wormend
         if k != len(data_struct[x])-1:      # tail not on last flat
-            return False
+            return None
     else: # both worm ends present
         x = head_loc[0]                # site index 
         k = head_loc[1]                # kink index
@@ -884,7 +884,7 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
             k = tail_loc[1]
             delete_head = False
             if k != len(data_struct[x])-1: # tail no on last flat either, stop.
-                return False
+                return None
         else:  # head on last flat, check tail too.
             tx = tail_loc[0]
             tk = tail_loc[1]
