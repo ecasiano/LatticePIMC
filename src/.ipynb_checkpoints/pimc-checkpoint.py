@@ -601,7 +601,10 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     # Build the Metropolis Ratio   
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
     p_gsdw, p_gsiw = 0.5, 0.5
-    R = (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
+    if dV != 0:
+        R = scale * (1-np.exp(-b/scale)) * (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
+    else: # dV == 0
+        R = (p_gsdw/p_gsiw) * L * p_wormend * tau_next / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
     if np.random.random() < R: # Accept
         if len(data_struct[i]) == 1: # Worldline is flat throughout
             data_struct[i].append(worm_end_kink)
@@ -828,7 +831,10 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     # Build the Metropolis Ratio   
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
     p_gsdw, p_gsiw = 0.5, 0.5
-    R = (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
+    if dV != 0:
+        R = scale * (1-np.exp(-b/scale)) * (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
+    else: # dV == 0
+        R = (p_gsdw/p_gsiw) * L * p_wormend * (beta-tau_prev) / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
     if np.random.random() < R: # Accept    
         data_struct[i].append(worm_end_kink)
                         
@@ -1018,7 +1024,7 @@ def view_worldlines(data_struct,beta,figure_name=None):
     plt.show()
     #plt.close()
 
-    return False
+    return None
 
 '----------------------------------------------------------------------------------'
 
