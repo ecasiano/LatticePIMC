@@ -249,8 +249,11 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         if N_check <= N-1 or N_check >= N+1: return False
         
     # Build the Metropolis ratio (R)
-    p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities       
-    R = (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail 
+    p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities   
+    if dV != 0:
+        R = scale * (1-np.exp(-b/scale)) * (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
+    if dV == 0:
+        R = (p_dw/p_iw) * L * N_flats * tau_worm * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
     # Metropolis Sampling
     #R = 1 # debugging
     if np.random.random() < R: # Accept
@@ -305,7 +308,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
     # Number of lattice sites and Number of flat regions on the worm site
     L = len(data_struct)
-    N_flats = len(data_struct[hx])
+    N_flats = len(data_struct[hx]) - 1 # Number of flats before worm was inserted
     
     # Identify the type of worm
     if hk > tk : is_worm = True   # worm
@@ -332,6 +335,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
              tau_next = data_struct[tx][tk+1][0]
         n_i = data_struct[hx][hk-1][1]
         N_after_tail = n_i
+    N_after_head = N_after_tail - 1
 
     # Calculate the length of the flat interval and the length of the worm/antiworm
     tau_flat = tau_next - tau_prev
@@ -357,10 +361,23 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 
         N_check = N_tracker(data_struct_tmp,beta)
         if N_check <= N-1 or N_check >= N+1: return False 
-                   
+        
+    # Calculate diagonal energy difference
+    dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
+    if dV != 0:
+        scale = 1/np.abs(dV)
+        loc = 0
+        b = tau_next-tau_prev
+
     # Metropolis sampling
     p_dw, p_iw = 0.5,0.5 # p_iw/p_dw
-    R = 1/ ( (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail )
+    if dV != 0:
+        R = scale * (1-np.exp(-b/scale)) * (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
+        R = 1/R
+    else: # dV == 0, tau_worm sampled from uniform distribution
+        R = (p_dw/p_iw) * L * N_flats * tau_worm * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
+        R = 1/R
+    
     # Accept
     if np.random.random() < R:
         
