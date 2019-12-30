@@ -16,15 +16,6 @@ N.~Metropolis, A.~W. Rosenbluth, M.~N. Rosenbluth, A.~H. Teller, and E.~Teller.
 \bibAnnoteFile{doi:10.1063/1.1699114}
 \newline\urlprefix\url{https://doi.org/10.1063/1.1699114}
 
-\bibitem{Prokof_ev_1998}
-N.~V. Prokof'ev, B.~V. Svistunov, and I.~S. Tupitsyn.
-\newblock \enquote{Exact, complete, and universal continuous-time worldline
-  monte carlo approach to the statistics of discrete quantum systems.}
-\newblock Journal of Experimental and Theoretical Physics \textbf{87}, 310
-  (1998).
-\bibAnnoteFile{Prokof_ev_1998}
-\newline\urlprefix\url{https://doi.org/10.1134%2F1.558661}
-
 \bibitem{bkeng.metropolis}
 B.~Keng.
 \newblock \enquote{Markov chain monte carlo methods, rejection sampling and the

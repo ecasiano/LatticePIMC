@@ -347,9 +347,10 @@ Finally, insert back the $H_\mathrm{worm}$ terms and the weight $\mathcal{Z}_0$ 
 where the off-diagonal elements $\bra{\alpha_{q-1}} H_1 \ket{\alpha_q}$ and $\bra{\alpha_{q-1}} H_\mathrm{worm} \ket{\alpha_q}$ are given by Eq.~\eqref{eq:off_diagonal_elements} and Eq.~\eqref{eq:worm_elements}, the diagonal elements $\epsilon_{\alpha}$ are given by Eq.~\eqref{eq:diagonal_elements} and the approximation becomes exact in the limit $\beta\to\infty$.
 
 % -------------- Metropolis Sampling --------------- %
+
 \section{Metropolis sampling}
 
-In this section, a brief walkthrough of the Metropolis-Hastings algorithm \cite{doi:10.1063/1.1699114} will be given. First, the process of obtaining acceptance ratios that satisfy the Principle of Detailed Balance will be given. Then, the Metropolis-Hastings algorithm will be stated.
+In this section, a brief walkthrough of the Metropolis-Hastings algorithm \cite{doi:10.1063/1.1699114} will be given. First, the process of obtaining acceptance ratios that satisfy the Principle of Detailed Balance will be given. Then, the Metropolis-Hastings algorithm will be stated. The notes in this section follow the discussion in \cite{bkeng.metropolis}.
 
 \subsection{Deriving Metropolis acceptance ratios}
 
@@ -410,13 +411,9 @@ A(x \to x') = min\{1,R\} \text{ and } A(x' \to x) = min\{1,1/R\}
 
 As part of Metropolis sampling, proposed configurations will be accepted with the probabilities in Eq.~\eqref{eq:general_acceptance_probs}.
 
-\subsection{The Metropolis-Hastings algorithm}
-
-Essentialy, Eq.~\eqref{eq:sexytime} is an approximation. In the incredible paper by Prokokkokokok \cite{Prokof_ev_1998}, the authors play some Pokemon. In the Metropolis paper \cite{doi:10.1063/1.1699114}. On the Brian Keng's website \cite{bkeng.metropolis}
-
 \section{Lattice Worm Algorithm (WA) Updates}
 
-In this section, a set of ergodic lattice worm updates is introduced. First, an explanation of how each update changes the system is given.. Then, a walkthrough of the decisions that comprise each update will be given, including the probabilities for each desicion's outcome. Finally, the Metropolis conditions are derived or the direct sampling explained, depending on the update.
+In this section, a set of ergodic lattice worm updates is introduced. First, an explanation of how each update changes the system is given. Then, a walkthrough of the decisions that comprise each update will be given, including the probabilities for each desicion's outcome. Finally, the Metropolis conditions are derived or the direct sampling explained, depending on the update.
 
 	\subsection{Insert/Delete worm}
         
@@ -425,15 +422,20 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
     \begin{enumerate}
         \setcounter{enumi}{-1}
     \item Do with probability $p_{iw}$
-        \item Randomly choose an integer $i \in [0,L-1]$, where $L$ is the number of sites on the lattice. The $i^{th}$ site will be chosen wih probability $p_i = 1/L$.
-        \item Randomly choose an integer $f \in [0,F - 1]$, where $F$ is the number of flat regions on site $i$. The $f^{th}$ flat region will be chosen with probability $p_{f} = 1/F$
-        \item Count the number of particles $n_{flat}$ on the flat region and check if inserting an antiworm is possible:
+        \item Randomly choose an integer $i \in [0,L-1]$, where $L$ is the number of sites on the lattice. The $i^{th}$ site will be chosen wih probability $1/L$.
+        \item Randomly choose an integer $k \in [0,N_{\rm{flats}} - 1]$, where $N_{\rm{flats}}$ is the number of flat regions on site $i$. The flat region will be chosen with probability $1/N_{\rm{flats}}$
+        \item Count the number of particles $n_{\rm{flat}}$ on the flat region and check if inserting an antiworm is possible:
             \begin{enumerate}
-            \item If $n_{flat} = 0$ : Only a worm can be inserted with probability $p_{type} = 1$
+            \item If $n_{\rm{flat}} = 0$ : Only a worm can be inserted with probability $p_{type} = 1$
             \item Else: A worm or antiworm can be inserted with probability $p_{type} = 1/2$
             \end{enumerate}
-        \item Randomly choose a real number $\Delta\tau_{worm} = rand()*\Delta\tau_{flat}$, where $\Delta\tau_{flat}$ is the length of the flat region and $rand()$ is a random number from the uniform distribution in the interval $[0,1)$. The probability of the worm being of length $\Delta\tau_{worm}$ is $p_{len} = 1/{\Delta\tau_{flat}}$
-        \item Randomly select a real number $\tau = \tau_{min} + rand()*(\Delta\tau_{flat}-\Delta\tau_{worm})$, where $\tau_{min}$ is the lower bound of the flat region. The probability of inserting the worm (antiworm) tail (head) at $\tau$ is $p_{\tau} = 1/(\Delta\tau_{flat} - \Delta\tau_{worm})$.
+        \item Calculate the diagonal energy difference $dV = \epsilon_w - \epsilon$, where $\epsilon_w$ is the diagonal energy of the segment of path inside the flat with more particles. Based on the sign, choose the length of the worm or antiworm $\tau_{\rm{worm}}$:
+        	     \begin{enumerate}
+	     \item{if $dV \neq 0$ : Draw $\tau_{\rm{worm}}$ from $dV e^{-dV\tau_{\rm{worm}}}/(1-e^{-dV \tau_{\rm{flat}}})$}
+	     \item{Else: Draw $\tau_{\rm{worm}}$ from $U(0,1)*\tau_{\rm{flat}}$}
+	     \end{enumerate}
+	     where $\tau_{\rm{flat}} = \tau_{\rm{next}}-\tau_{\rm{prev}}$ is the length of the flat interval.
+        \item Randomly select a real number $\tau = \tau_{\rm{prev}} + U(0,1)*(\tau_{\rm{flat}}-\tau_{\rm{worm}})$, where $\tau_{\rm{prev}}$ is the lower bound of the flat region. The probability of inserting the worm (antiworm) tail (head) at $\tau$ is $p_{\tau} = 1/(\tau_{flat} - \tau_{worm})$.
         \item Calculate the ratio of weights of configurations pre and post worm insertion:
             %
             \begin{equation}

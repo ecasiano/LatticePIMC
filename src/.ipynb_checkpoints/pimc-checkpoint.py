@@ -146,15 +146,15 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 
     # Randomly select a flat tau interval at which to possibly insert worm
     N_flats = len(data_struct[i])
-    flat_min_idx = np.random.randint(N_flats)           # Index of lower bound of flat region
-    tau_prev = data_struct[i][flat_min_idx][0]
-    if flat_min_idx == N_flats - 1 : tau_next = beta     # In case that last flat is chosen
-    else : tau_next = data_struct[i][flat_min_idx+1][0]
+    k = np.random.randint(N_flats)           # Index of lower bound of flat region
+    tau_prev = data_struct[i][k][0]
+    if k == N_flats - 1 : tau_next = beta     # In case that last flat is chosen
+    else : tau_next = data_struct[i][k+1][0]
     tau_flat = tau_next - tau_prev                       # length of the flat interval
 
     # Randomly choose either to insert worm or, if possible, an antiworm
-    n_i = data_struct[i][flat_min_idx][1]  # initial number of particles in the flat interval
-    if n_i == 0 : # only worm can be inserted
+    n_flat = data_struct[i][k][1]  # initial number of particles in the flat interval
+    if n_flat == 0 : # only worm can be inserted
         insert_worm = True
         p_type = 1
     else:
@@ -171,11 +171,11 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
     # the energy of the segment of path adjacent the moving worm end with more particles. 
     if insert_worm:   
-        N_after_tail = n_i + 1
-        N_after_head = n_i
+        N_after_tail = n_flat + 1
+        N_after_head = n_flat
     else:
-        N_after_head = n_i - 1
-        N_after_tail = n_i
+        N_after_head = n_flat - 1
+        N_after_tail = n_flat
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
 
     # From the truncated exponential distribution, choose the length of the worm 
@@ -230,20 +230,20 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
         # Insert worm
         if insert_worm:
-            if flat_min_idx == N_flats - 1: # if selected flat is the last
+            if k == N_flats - 1: # if selected flat is the last
                 data_struct_tmp[i].append(tail_kink)
                 data_struct_tmp[i].append(head_kink)
             else:
-                data_struct_tmp[i].insert(flat_min_idx+1,tail_kink)
-                data_struct_tmp[i].insert(flat_min_idx+2,head_kink)
+                data_struct_tmp[i].insert(k+1,tail_kink)
+                data_struct_tmp[i].insert(k+2,head_kink)
         # Insert antiworm
         else:
-            if flat_min_idx == N_flats - 1: # last flat
+            if k == N_flats - 1: # last flat
                 data_struct_tmp[i].append(head_kink)
                 data_struct_tmp[i].append(tail_kink)
             else:
-                data_struct_tmp[i].insert(flat_min_idx+1,head_kink)
-                data_struct_tmp[i].insert(flat_min_idx+2,tail_kink)
+                data_struct_tmp[i].insert(k+1,head_kink)
+                data_struct_tmp[i].insert(k+2,tail_kink)
         
         N_check = N_tracker(data_struct_tmp,beta)
         if N_check <= N-1 or N_check >= N+1: return False
@@ -253,35 +253,35 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     if dV != 0:
         R = scale * (1-np.exp(-b/scale)) * (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
     if dV == 0:
-        R = (p_dw/p_iw) * L * N_flats * tau_worm * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
+        R = (p_dw/p_iw) * L * N_flats * tau_flat * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
     # Metropolis Sampling
     #R = 1 # debugging
     if np.random.random() < R: # Accept
         # Insert worm
         if insert_worm:
-            if flat_min_idx == N_flats - 1: # if selected flat is the last
+            if k == N_flats - 1: # if selected flat is the last
                 data_struct[i].append(tail_kink)
                 data_struct[i].append(head_kink)
             else:
-                data_struct[i].insert(flat_min_idx+1,tail_kink)
-                data_struct[i].insert(flat_min_idx+2,head_kink)
+                data_struct[i].insert(k+1,tail_kink)
+                data_struct[i].insert(k+2,head_kink)
 
             # Save ira and masha locations (site_idx, tau_idx)
-            tail_loc.extend([i,flat_min_idx+1])
-            head_loc.extend([i,flat_min_idx+2])
+            tail_loc.extend([i,k+1])
+            head_loc.extend([i,k+2])
 
         # Insert antiworm
         else:
-            if flat_min_idx == N_flats - 1: # last flat
+            if k == N_flats - 1: # last flat
                 data_struct[i].append(head_kink)
                 data_struct[i].append(tail_kink)
             else:
-                data_struct[i].insert(flat_min_idx+1,head_kink)
-                data_struct[i].insert(flat_min_idx+2,tail_kink)
+                data_struct[i].insert(k+1,head_kink)
+                data_struct[i].insert(k+2,tail_kink)
 
             # Save ira and masha locations (site_idx, tau_idx)
-            head_loc.extend([i,flat_min_idx+1])
-            tail_loc.extend([i,flat_min_idx+2])
+            head_loc.extend([i,k+1])
+            tail_loc.extend([i,k+2])
            
         return True
 
@@ -375,7 +375,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         R = scale * (1-np.exp(-b/scale)) * (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
         R = 1/R
     else: # dV == 0, tau_worm sampled from uniform distribution
-        R = (p_dw/p_iw) * L * N_flats * tau_worm * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
+        R = (p_dw/p_iw) * L * N_flats * tau_flat * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
         R = 1/R
     
     # Accept
@@ -945,7 +945,10 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     # Metropolis Sampling
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
     p_gsdw, p_gsiw = 0.5, 0.5
-    R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
+    if dV != 0:
+        R = 1 / ( scale * (1-np.exp(-b/scale)) * (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
+    else: # dV == 0
+        R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend * (beta-tau_prev) / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
     #print(R)
     if np.random.random() < R: # Accept
         
