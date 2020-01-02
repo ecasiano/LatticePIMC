@@ -2,6 +2,7 @@
 %\author{Emanuel Casiano-Diaz}
 %\date{September 6, 2019.}
 
+
 %Formatting Packages
 \documentclass[12pt, two sided]{article}
 \usepackage[utf8]{inputenc}
@@ -415,9 +416,8 @@ As part of Metropolis sampling, proposed configurations will be accepted with th
 
 In this section, a set of ergodic lattice worm updates is introduced. First, an explanation of how each update changes the system is given. Then, a walkthrough of the decisions that comprise each update will be given, including the probabilities for each desicion's outcome. Finally, the Metropolis conditions are derived or the direct sampling explained, depending on the update.
 
-	\subsection{Insert/Delete worm}
-        
-    The insert worm update creates a particle on a flat region of a worldline, then destroys it after a certain time, also inside the same flat region. Formally, the particle is created by acting on the state at that imaginary time with the bosonic creation operator (worm tail) and anihilated by acting with the bosonic anihilation operator (worm head). An antiworm can instead be inserted by first inserting the worm head and then the tail. In other words, an antiworm will first anihilate a particle and create one at a later time inside the flat region. The update proceeds as follows:
+	\subsubsection{Insert worm}      
+    The insert worm update creates a particle on a flat region of a worldline, then destroys it after a certain time, also inside the same flat region. Formally, the particle is created by acting on the state at that imaginary time with the bosonic creation operator (worm tail) and anihilated by acting with the bosonic anihilation operator (worm head). An antiworm can instead be inserted by first inserting the worm head and then the tail. In other words, an antiworm will first anihilate a particle and create one at a later time inside the flat region. Propose update if there are no worm ends present. The update proceeds as follows: \\
 %
     \begin{enumerate}
         \setcounter{enumi}{-1}
@@ -435,182 +435,214 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
 	     \item{Else: Draw $\tau_{\rm{worm}}$ from $U(0,1)*\tau_{\rm{flat}}$}
 	     \end{enumerate}
 	     where $\tau_{\rm{flat}} = \tau_{\rm{next}}-\tau_{\rm{prev}}$ is the length of the flat interval.
-        \item Randomly select a real number $\tau = \tau_{\rm{prev}} + U(0,1)*(\tau_{\rm{flat}}-\tau_{\rm{worm}})$, where $\tau_{\rm{prev}}$ is the lower bound of the flat region. The probability of inserting the worm (antiworm) tail (head) at $\tau$ is $p_{\tau} = 1/(\tau_{flat} - \tau_{worm})$.
-        \item Calculate the ratio of weights of configurations pre and post worm insertion:
-            %
-            \begin{equation}
-            \frac{W_+}{W_-} = \eta^2 e^{-\Delta\tau_{worm} \Delta V}
-            \label{eq:insert_ratios}
-            \end{equation}
-            %
-            where $W_+$ and $W_-$ are the weights of the configuration with a worm and no worm, respectively, $\eta$ is the worm fugacity and $\Delta V$ is the change in potential energy pre and post worm insertion. 
+        \item Randomly select a real number $\tau = \tau_{\rm{prev}} + U(0,1)*(\tau_{\rm{flat}}-\tau_{\rm{worm}})$, where $\tau_{\rm{prev}}$ is the lower bound of the flat region. The probability of inserting the worm (antiworm) tail (head) at $\tau$ is $1/(\tau_{flat} - \tau_{worm})$.
     \end{enumerate}
     %
+    
+    \subsubsection{Delete worm}
+    The delete worm update is proposed when there are two worm ends present on the same site and same flat interval. The update will be attempted with probability $p_{dw}$.
+    
+    \subsubsection{Timeshift}
+    The timeshift update is proposed when there is at least one worm end present. A worm end is selected randomly, then moved backward or forward in the imaginary time direction. The update proceeds as follows:
+    \begin{enumerate}
+    \item{Choose a worm end with probability $p_{\rm{wormend}}=1/2$ or $p_{\rm{wormend}}=1$, depending if there's two or one worm ends, respectively.}
+    \item{Calculate $dV=\epsilon_{w}-\epsilon$.}
+    \begin{enumerate}
+    \item{if $dV \neq 0$ : Draw $\tau^\prime$ from $dV e^{-dV\tau^\prime}/(1-e^{-dV \tau_{\rm{flat}}})$}
+    \item{Else: Draw $\tau^\prime$ from $U(0,1)*\tau_{\rm{flat}}$}
+    \end{enumerate}
+    \end{enumerate}
 
-    \subsection{Insert/Delete ground state (gs) worm}
-    These updates will be very similar to the insert/delete worm update. The main difference is that these are particular to the case of zero temperature. Remember that at zero temperature, imaginary time is not subject to periodic boundary conditions, as is the case at finite temperature. Instead, open boundary conditions are imposed in the imaginary time direction, while keeping the space direction periodic. 
-
-    The open boundary conditions will allow now for the insertion of worms that will have one of its ends go past either the $\tau = 0$ or the $\tau = \beta$ boundaries. These worms that go past the imaginary time boundaries will be called ground state (gs) worms. In practice, inserting a gs-worm will look like inserting only one worm end to the worldline configuration at a time, and analogously for deletion. 
-
-    \subsubsection{Insert gs-worm}
-
-    At $T=0$, a ground state (gs) worm or antiworm can be inserted. One of the ends of this worm will lie either past the $\tau=0$ or the $\tau=\beta$ boundaries. The other end, will lie in the flat region preceding this boundary (i.e, the first or the last flat region). In practice, this will look like inserting a single worm end to the worldline configuration at these flat regions. This worm end can only be inserted if there are no worm ends or one worm end present. The update proceeds as
-    follows:
+    \subsubsection{Insert worm from $\tau=0$}
+    
+    At $T=0$, open boundary conditions (OBC) are imposed in the imaginary time direction.  This allows for the insertion of worms from the imaginary time edges, that is $\tau=0$ and $\tau=\beta$. This update can only be done if there is at most one other worm end present. To insert a worm or antiworm from the $\tau=0$ edge, we proceed as follows.
+    
     % Insert gs-worm %
     \begin{enumerate}
         \setcounter{enumi}{-1}
-    \item Do with probability $p_{gsiw}$
+    \item Do with probability $p_{\rm{iwz}}$
     \item Choose site with probability $p=1/L$
-    \item Choose first or last flat:
-        \begin{enumerate}
-            \item if $n_{flats} = 1$: treat the flat as first or last (depending on the implementation) with $p=1$
-            \item else: $p=1/2$
-        \end{enumerate}
-    \item Choose gs-worm or gs-antiworm:
-        if $n_i=0$: can only insert worm with prob. $p=1$ 
-        else: choose either with $p=1/2$
-    \item Choose the insertion time of the worm end $\tau = \tau_{min} + rand() (\tau_{max}-\tau_{min})$ with probability $p=1/(\tau_{max}-\tau_{min})$
+    \item Count particles on the first flat to determine the type of worm to be inserted.
+    \begin{enumerate}
+    \item{If $n=0$: propose to insert a worm from $\tau=0$ with probability $p_{\rm{type}}=1$}
+    \item{Else: propose to insert worm or antiworm from $\tau=0$ with $p_{\rm{type}}=1/2$}
+    \end{enumerate}
+    \item{Calculate $dV=\epsilon_{w}-\epsilon$.}
+    \begin{enumerate}
+    \item{if $dV \neq 0$ : Draw $\tau^\prime$ from $dV e^{-dV\tau^\prime}/(1-e^{-dV \tau_{\rm{flat}}})$}
+    \item{Else: Draw $\tau^\prime$ from $U(0,1)*\tau_{\rm{flat}}$}
+    \end{enumerate}
     \end{enumerate}
 
-    \subsubsection{Delete gs-worm}
-    The Delete gs-worm update can only be done if there's at least one worm end on the worldline configuration. A random worm end is chosen and then deleted. The update proceeds as follows:
+    \subsubsection{Delete worm from $\tau=0$}
+    
+    The delete worm from zero update can only be done if there's at least one worm end on the worldline configuration, and that also lies on the first flat of the site. The worm end is chosen and deleted from the configuration. The update proceeds as follows
+    
     % Delete gs-worm %
     \begin{enumerate}
         \setcounter{enumi}{-1}
-    \item Do with probability $p_{gsdw}$
-    \item Choose the worm end to be deleted with probability $p=1/2$
+    \item Do with probability $p_{dwz}$
+    \item Count how many worm ends are present.
+    \begin{enumerate}
+    \item{If only one worm end is present, choose it with probability $p_{\rm{wormend}}=1$}.
+    \item{Else, choose the wormend randomly with probability $p_{\rm{wormend}}=1/2$}
     \end{enumerate}
-
-    \subsubsection{Acceptance probabilities of gs-worm insert/delete}
-
-    From detailed balance:
+    \end{enumerate}
+    
+    \subsubsection{Insert worm from $\tau=\beta$}
+    
+    This update is analogous to inserting a worm end from $\tau=0$. The only difference is that the worm end is proposed to be inserted in the last flat of a site.
+    
+    \subsubsection{Delete worm from $\tau=\beta$}
+    
+    This update can only be proposed if there is at least one worm end on the last flat of a site. Otherwise, the update is analogous to deleting from $\tau=0$.
+    
+    \subsection{Weight ratios of updates}
+    
+    The weight of a worldline configuration can be read off from the partition function Eq.~\eqref{eq:Z_0}:
     %
     \begin{equation}
-        w_- p_{gsiw}^{att} p_{gsiw}^{acc} = W_+ p_{gsdw}^{att} p_{gsdw}^{acc}
+    W \approx (-1)^{Q}  C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q} \prod_{q=1}^Q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
+(H_1^{\alpha_{q-1},\alpha_q} + H_\mathrm{worm}^{\alpha_{q-1},\alpha_q})
     \end{equation}
     %
-
-    Solving for the ratio of acceptance probabilities:
-    %
-    \begin{equation}
-        \frac{p_{gsiw}^{acc}}{p_{gsdw}^{acc}} = \frac{p_{gsdw}^{att} W_+}{p_{gsiw}^{att} W_-}  
-    \end{equation}
-    %
-
-    Inserting the attempt probabilities:
-    %
-    \begin{equation}
-        \frac{p_{gsiw}^{att}}{p_{gsdw}^{att}} = \frac{p_{gsdw}^{att}}{p_{gsiw}^{att}} \frac{L(\tau_{max}-\tau_{min})}{p_{flat}} \frac{W_+}{W-}
-    \end{equation}
-    %
-
-    where $p_{flat}$ is the probability of choosing either the first or last flat region of the worldline. If there are no kinks in the worldline, $p_{flat}=1$, and if there are kinks, $p_{flat=1/2}$.
-
-
-    The ratio of weights for configurations after a gs-worm insertion and after it is deleted is:
-    %
-    \begin{equation}
-        \frac{W_+}{W_-} = \eta e^{-\Delta \tau \Delta V}
-    \end{equation}
-    %
-
-	\subsection{Timeshift}
-
+    For each of the ergodic set of moves discussed, the ratio of post and pre update weights need to be calculated. These will show up in the detailed balance equation and will thus be necessary to get the Metropolis condition for each update. In this section, the weigh ratio for each update is shown.
+    
 	\subsection{Summary of weight ratios}	
     \begin{enumerate}
         \setcounter{enumi}{0}
     \item Insert:  $\frac{W^\prime}{W}= \eta^2 n_i^{\alpha_w} e^{-(\epsilon_w-\epsilon)(\tau_h-\tau_t)}$
+    
     \item Delete: $\frac{W^\prime}{W}= 1/(\eta^2 n_i^{\alpha_w} e^{-(\epsilon_w-\epsilon)(\tau_h-\tau_t)})$
+    
     \item Timeshift
     	\begin{enumerate}
 	\item{Shift head: $\frac{W^\prime}{W}=e^{-(\epsilon_w-\epsilon)(\tau_h^\prime-\tau_h)}$}
 	\item{Shift tail: $\frac{W^\prime}{W}=e^{-(\epsilon_w-\epsilon)(\tau_t-\tau_t^\prime)}$}
 	\end{enumerate}
+	
     \item Insert from $\tau=0$
     	\begin{enumerate}
 	\item{Worm: $\frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-(\epsilon_w-\epsilon)\tau_h}$ }
 	\item{Antiworm:$\frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}e^{-(\epsilon_w-\epsilon)(-\tau_t)}$ }
 	\end{enumerate}
-    \item Insert from $\tau=\beta$
-    	\begin{enumerate}
-	\item{Worm: $\frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-(\epsilon_w-\epsilon)(\beta-\tau_t)}$}
-	\item{Antiworm: $\frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}e^{-(\epsilon_w-\epsilon)(\tau_h - \beta)}$}
-	\end{enumerate}
+	
     \item Delete from $\tau=0$
     	\begin{enumerate}
 	\item{Worm: $\frac{W^\prime}{W}= 1/(\eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-(\epsilon_w-\epsilon)\tau_h})$}
 	\item{Antiworm: $\frac{W^\prime}{W}= 1/(\eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}e^{-(\epsilon_w-\epsilon)(-\tau_t)}) $}
 	\end{enumerate}
+	
+    \item Insert from $\tau=\beta$
+    	\begin{enumerate}
+	\item{Worm: $\frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-(\epsilon_w-\epsilon)(\beta-\tau_t)}$}
+	\item{Antiworm: $\frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}e^{-(\epsilon_w-\epsilon)(\tau_h - \beta)}$}
+	\end{enumerate}
+	
     \item Delete from $\tau=\beta$
     	\begin{enumerate}
 	\item{Worm: $\frac{W^\prime}{W}= 1/( \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-(\epsilon_w-\epsilon)(\beta-\tau_t)})$}
 	\item{Antiworm: $\frac{W^\prime}{W}= 1/(\eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}e^{-(\epsilon_w-\epsilon)(\tau_t - \beta)})$}
 	\end{enumerate}
+	
     \end{enumerate}
 
 \subsection{Summary of attempt probability ratios}
+
+	Let $p(\alpha\to\alpha^\prime)$ be the probability of attempting an update that takes the system from configuration $\alpha$ to $\alpha^\prime$. As part of the detailed balance equation of each move, the ratio of attempt probabilities for the reverse and forward updates are needed. In this section, the ratio of attempt probabilities are shown for each move.
 	\begin{enumerate}
 	\setcounter{enumi}{0}
-		\item Insert: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot e^{(\epsilon_w-\epsilon)(\tau_h-\tau_t)}$
-		\item Delete: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1/(\frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot e^{(\epsilon_w-\epsilon)(\tau_h-\tau_t)})$
+		\item Insert: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta} \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot e^{(\epsilon_w-\epsilon)(\tau_h-\tau_t)}$
+		
+		\item Delete: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1/(\frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta}  \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot e^{(\epsilon_w-\epsilon)(\tau_h-\tau_t)})$
+		
 		\item Timeshift
 		\begin{enumerate}
-		\item{Shift head: $R =  e^{(\epsilon_w-\epsilon)(\tau_h^\prime-\tau_h)}$}
-		\item{Shift tail: $R = e^{(\epsilon_w-\epsilon)(\tau_t-\tau_t^\prime)}$}
+		\item{Shift head: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} =  e^{(\epsilon_w-\epsilon)(\tau_h^\prime-\tau_h)}$}
+		\item{Shift tail: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = e^{(\epsilon_w-\epsilon)(\tau_t-\tau_t^\prime)}$}
 		\end{enumerate}
+		
 		\item Insert from $\tau=0$
 		\begin{enumerate}
-		\item{worm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)\tau_h}$ }
-		\item{antiworm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(-\tau_t)}$}
+		\item{worm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)\tau_h}$ }
+		\item{antiworm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(-\tau_t)}$}
 		\end{enumerate}
-		\item Insert from $\tau=\beta$
-		\begin{enumerate}
-		\item{worm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(\beta-\tau_t)}$}
-		\item{antiworm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(\tau_h-\beta)}$}
-		\end{enumerate}
+
 		\item Delete from $\tau=0$
 		\begin{enumerate}
-		\item{worm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1/(\frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)\tau_h})$ }
-		\item{antiworm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)}=1/(\frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(-\tau_t)})$}
+		\item{worm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1/(\frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)\tau_h})$ }
+		\item{antiworm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)}=1/(\frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(-\tau_t)})$}
 		\end{enumerate}
+		
+		\item Insert from $\tau=\beta$
+		\begin{enumerate}
+		\item{worm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(\beta-\tau_t)}$}
+		\item{antiworm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(\tau_h-\beta)}$}
+		\end{enumerate}
+		
 		\item Delete from $\tau=\beta$ 
 		\begin{enumerate}
-		\item{worm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1/(\frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(\beta-\tau_t)})$}
-		\item{antiworm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1/(\frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(\tau_h-\beta)})$}
+		\item{worm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1/(\frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(\beta-\tau_t)})$}
+		\item{antiworm: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1/(\frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} e^{(\epsilon_w-\epsilon)(\tau_h-\beta)})$}
 		\end{enumerate}
 	\end{enumerate}
 	
 \subsection{Summary of Metropolis conditions}
+	
+	The Metropolis condition of each update is given by:
+	%
+	\begin{equation}
+	R = \frac{W^\prime}{W} \frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)}
+	\end{equation}
+	%
+	In this section, the Metropolis condition of each update is shown.
 	\begin{enumerate}
 	\setcounter{enumi}{0}
-		\item Insert: $R = \frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot \eta^2 n_i^{\alpha_w}$
-		\item Delete: $R = 1/(\frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot \eta^2 n_i^{\alpha_w} )$
+		\item Insert: $R =  \frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta}  \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot \eta^2 n_i^{\alpha_w}$
+		
+		\item Delete: $R = 1/(\frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta}  \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot \eta^2 n_i^{\alpha_w} )$
+		
 		\item Timeshift: 		
 		\begin{enumerate}
 		\item{Shift head: $R =  1$}
 		\item{Shift tail: $R = 1$}
 		\end{enumerate}
+		
 		\item Insert from $\tau=0$
 		\begin{enumerate}
-		\item{worm: $R =  \frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}} $ }
-		\item{antiworm: $R =  \frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}$}
+		\item{worm: $R =  \frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}} $ }
+		\item{antiworm: $R =  \frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}$}
 		\end{enumerate}
-		\item Insert from $\tau=\beta$
-		\begin{enumerate}
-		\item{worm: $R =  \frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}}\eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}} $}
-		\item{antiworm: $R =  \frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}$}
-		\end{enumerate}
+		
 		\item Delete from $\tau=0$
 		\begin{enumerate}
-		\item{worm: $R =  1/(\frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}} ) $ }
-		\item{antiworm: $R = 1/(\frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}})$}
+		\item{worm: $R =  1/(\frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}} ) $ }
+		\item{antiworm: $R = 1/(\frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}})$}
 		\end{enumerate}
+		
+		\item Insert from $\tau=\beta$
+		\begin{enumerate}
+		\item{worm: $R =  \frac{p_{\rm{dwb}}}{p_{\rm{iwb}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}}\eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}} $}
+		\item{antiworm: $R =  \frac{p_{\rm{dwb}}}{p_{\rm{iwb}}} \frac{1}{\Theta} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}$}
+		\end{enumerate}
+		
 		\item Delete from $\tau=\beta$ 
 		\begin{enumerate}
-		\item{worm: $R =  1/(\frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}})$}
-		\item{antiworm: $R =  1/(\frac{p_{\rm{gsdw}}}{p_{\rm{gsiw}}} \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}})$}
+		\item{worm: $R =  1/(\frac{p_{\rm{dwb}}}{p_{\rm{iwb}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}})$}
+		\item{antiworm: $R =  1/(\frac{p_{\rm{dwb}}}{p_{\rm{iwb}}} \frac{1}{\Theta}  \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}})$}
 		\end{enumerate}
+		
 	\end{enumerate}
+	
+	where,
+	%
+	\begin{equation}
+	\Theta = \begin{cases}
+	dV/(1-e^{-dV\tau_{\rm{flat}}}), & dV\neq0 \\
+	1/{\tau_{\rm{flat}}}, & dV=0
+	\end{cases}
+	\end{equation}
+	%
 
 % References
 \phantomsection 

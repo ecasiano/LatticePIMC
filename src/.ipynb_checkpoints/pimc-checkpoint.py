@@ -252,7 +252,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities   
     if dV != 0:
         R = scale * (1-np.exp(-b/scale)) * (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
-    if dV == 0:
+    else: # dV==0
         R = (p_dw/p_iw) * L * N_flats * tau_flat * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
     # Metropolis Sampling
     #R = 1 # debugging
