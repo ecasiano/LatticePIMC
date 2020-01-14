@@ -306,7 +306,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     tx = tail_loc[0]
     tk = tail_loc[1]
     
-    # Number of lattice sites and Number of flat regions on the worm site
+    # Number of lattice sites and number of flat regions on the worm site
     L = len(data_struct)
     N_flats = len(data_struct[hx]) - 1 # Number of flats before worm was inserted
     
@@ -332,7 +332,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         if tk == len(data_struct[tx])-1:
             tau_next = beta
         else:
-             tau_next = data_struct[tx][tk+1][0]
+            tau_next = data_struct[tx][tk+1][0]
         n_i = data_struct[hx][hk-1][1]
         N_after_tail = n_i
     N_after_head = N_after_tail - 1
@@ -347,7 +347,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     else:
         p_type = 1/2
         
-    # Check if N is conserved on canonical simulations
+    # Check if N would be conserved in canonical simulations
     if canonical:
         data_struct_tmp = deepcopy(data_struct)
     
@@ -515,7 +515,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         tau_next = data_struct[i][1][0]
     # tau_prev = 0
     
-    # Decide between worm/antiworm based on the worm ends present
+    # Choose worm/antiworm insertion based on the worm ends present
     if head_loc == [] and tail_loc != []: # can only insert worm head (worm)
         insert_worm = True
         p_type = 1 # can only insert worm tail (antiworm)s
@@ -542,7 +542,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     if insert_worm:
         N_after_tail = n_i + 1
         N_after_head = n_i
-    else:
+    else: # insert antiworm
         N_after_head = n_i - 1
         N_after_tail = n_i
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -552,7 +552,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     b = tau_next
     if dV == 0: # uniform distribution
         tau_worm = b*np.random.random()
-    elif insert_worm:
+    elif insert_worm: # tau_worm > 0
         if dV > 0: # Decreasing truncated exponential distribution
             scale = 1/abs(dV)    
             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
@@ -560,7 +560,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
             scale = 1/abs(dV)    
             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
             tau_worm = -tau_worm + b
-    else: # insert antiworm
+    else: # insert antiworm (tau_worm < 0)
         if dV > 0: # Increasing truncated exponential distribution
             scale = 1/abs(dV)    
             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
@@ -573,13 +573,13 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     # This is important for detailed balance.
     if head_loc == [] and tail_loc == []:
         p_wormend = 1 # if no ends initially, we end up with only one end after insertion, delete chooses this one
-    else:
+    else: # one worm end already present
         p_wormend = 0.5 # delete might have to choose between two ends
     
     # Build the kinks to be inserted to the data structture if the move is accepted
     if insert_worm:
         worm_end_kink = [tau_worm,N_after_head,(i,i)]  # kinks to be inserted to
-        first_flat = [0,N_after_tail,(i,i)]           # the data structure
+        first_flat = [0,N_after_tail,(i,i)]            # the data structure
     else:
         worm_end_kink = [tau_worm,N_after_tail,(i,i)]
         first_flat = [0,N_after_head,(i,i)]
@@ -643,14 +643,14 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     L = len(data_struct)
     
     # Save the indices of the worm end to be deleted
-    if head_loc != [] and tail_loc == []: # only head present
+    if head_loc != [] and tail_loc == []: # only head present (worm)
         x = head_loc[0]                  # site index 
         k = head_loc[1]                  # kink index
         delete_head = True
         p_wormend = 1
         if k != 1:  # head needs to be on first flat
             return None
-    elif head_loc == [] and tail_loc != [] : # only tail present
+    elif head_loc == [] and tail_loc != [] : # only tail present (antiworm)
         x = tail_loc[0]                     # site index 
         k = tail_loc[1]                     # kink index
         delete_head = False
@@ -661,14 +661,14 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         x = head_loc[0]                # site index 
         k = head_loc[1]                # kink index
         delete_head = True
-        p_wormend = 1
-        if k != 1: # head not on first flat, try tail
+        p_wormend = 1  # BUG!!!!!!!!!!!!!!!
+        if k != 1: # if head not on first flat, try tail
             x = tail_loc[0]
             k = tail_loc[1]
             delete_head = False
-            if k != 1: # tail not on last first either, stop.
+            if k != 1: # tail not on first flat either, stop.
                 return None
-        else:  # head on first flat, check tail too.
+        else:  # head on first flat, but check tail too.
             tx = tail_loc[0]
             tk = tail_loc[1]
             if tk == 1: # if both ends on first flast, choose randomly
@@ -676,19 +676,19 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
                     x = tx
                     k = tk
                     delete_head = False
-                    p_wormend = 0.5
+                p_wormend = 0.5
                     
     # Get tau_next
-    if k == len(data_struct[x]) - 1:
+    if k == len(data_struct[x]) - 1: # worldline almost completely flat
         tau_next = beta
     else:
         tau_next = data_struct[x][k+1][0]
        
-    # Number of particles in flat after the near zero worm end
+    # Number of particles in flat after the zero worm
     n_i = data_struct[x][k][1]
-    if delete_head:
+    if delete_head: # delete worm
         N_after_tail = n_i+1
-    else:
+    else: # delete antiworm
         N_after_tail = n_i
     N_after_head = N_after_tail-1
         
@@ -909,7 +909,7 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
                     x = tx
                     k = tk
                     delete_head = False
-                    p_wormend = 0.5   
+                p_wormend = 0.5   
     
     # Get tau_prev
     tau_prev = data_struct[x][k-1][0]
