@@ -112,6 +112,17 @@ def n_i_pimc(data_struct,beta):
 
 '----------------------------------------------------------------------------------'
 
+def check_worm(head_loc,tail_loc):
+    '''Determine if the worldline configuration contains a worm end(s)'''
+    
+    if head_loc != [] or tail_loc != []:
+        return True
+    
+    else:
+        return False
+
+'----------------------------------------------------------------------------------'
+
 def egs_theory(L,U,mu):
     '''Calculates BH model theoretical ground state energy with no hopping'''
     
@@ -177,6 +188,8 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         N_after_head = n_flat - 1
         N_after_tail = n_flat
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
+    
+    # Plot dV vs N and check that it scales with N_after_tail
 
     # From the truncated exponential distribution, choose the length of the worm 
     loc = 0
@@ -184,6 +197,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     if dV == 0: # uniform distribution
         tau_worm = b*np.random.random()
     elif insert_worm:
+        #print("what")
         if dV > 0: # Decreasing truncated exponential distribution
             scale = 1/abs(dV)    
             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
@@ -192,6 +206,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
             tau_worm = -tau_worm + b
     else: # insert antiworm
+        #print("what what")
         if dV > 0: # Increasing truncated exponential distribution
             scale = 1/abs(dV)    
             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
@@ -255,7 +270,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     else: # dV==0
         R = (p_dw/p_iw) * L * N_flats * tau_flat * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
     # Metropolis Sampling
-    #R = 1 # debugging
+    # R = 1 # debugging
     if np.random.random() < R: # Accept
         # Insert worm
         if insert_worm:
@@ -377,7 +392,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     else: # dV == 0, tau_worm sampled from uniform distribution
         R = (p_dw/p_iw) * L * N_flats * tau_flat * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
         R = 1/R
-    
+    # R = 1 # for debugging
     # Accept
     if np.random.random() < R:
         
