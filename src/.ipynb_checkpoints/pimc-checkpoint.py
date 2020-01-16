@@ -184,9 +184,9 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     if insert_worm:   
         N_after_tail = n_flat + 1
         N_after_head = n_flat
-    else:
-        N_after_head = n_flat - 1
+    else: # antiworm
         N_after_tail = n_flat
+        N_after_head = n_flat - 1
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
     
     # Plot dV vs N and check that it scales with N_after_tail
@@ -197,7 +197,6 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     if dV == 0: # uniform distribution
         tau_worm = b*np.random.random()
     elif insert_worm:
-        #print("what")
         if dV > 0: # Decreasing truncated exponential distribution
             scale = 1/abs(dV)    
             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
@@ -206,7 +205,6 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
             tau_worm = -tau_worm + b
     else: # insert antiworm
-        #print("what what")
         if dV > 0: # Increasing truncated exponential distribution
             scale = 1/abs(dV)    
             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
@@ -224,7 +222,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         tau_t = tau_h + tau_worm
 
     # Reject update if worm end is inserted at the bottom kink of the flat
-    # (this will probably never happen in the 2 years I have left to complete my PhD :p )
+    # (this will probably never happen in the 2 years I have left to complete my PhD)
     if tau_h == tau_prev or tau_t == tau_prev : return False
 
     # Reject update if both worm ends are at the same tau
@@ -269,6 +267,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         R = scale * (1-np.exp(-b/scale)) * (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
     else: # dV==0
         R = (p_dw/p_iw) * L * N_flats * tau_flat * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
+    # print(R)
     # Metropolis Sampling
     # R = 1 # debugging
     if np.random.random() < R: # Accept
@@ -548,7 +547,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         p_type = 0.5 
     
     # For debugging
-    insert_worm = False
+    # insert_worm = True
         
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
@@ -558,8 +557,8 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         N_after_tail = n_i + 1
         N_after_head = n_i
     else: # insert antiworm
-        N_after_head = n_i - 1
         N_after_tail = n_i
+        N_after_head = n_i - 1
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
     
     # From the truncated exponential distribution, choose the length of the worm
@@ -621,7 +620,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     else: # dV == 0
         R = (p_gsdw/p_gsiw) * L * p_wormend * tau_next / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
    # R = 1 # for debugging
-    #print(R)
+    print(R,N_after_tail)
     if np.random.random() < R: # Accept
         if len(data_struct[i]) == 1: # Worldline is flat throughout
             data_struct[i].append(worm_end_kink)
