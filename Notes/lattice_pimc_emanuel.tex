@@ -426,13 +426,13 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
         \item Randomly choose an integer $k \in [0,N_{\rm{flats}} - 1]$, where $N_{\rm{flats}}$ is the number of flat regions on site $i$. The flat region will be chosen with probability $1/N_{\rm{flats}}$
         \item Count the number of particles $n_{\rm{flat}}$ on the flat region and check if inserting an antiworm is possible:
             \begin{enumerate}
-            \item If $n_{\rm{flat}} = 0$ : Only a worm can be inserted with probability $p_{type} = 1$
-            \item Else: A worm or antiworm can be inserted with probability $p_{type} = 1/2$
+            \item If $n_{\rm{flat}} = 0$ : Only a worm can be inserted with probability $p_{\rm{type}} = 1$
+            \item Else: A worm or antiworm can be inserted with probability $p_{\rm{type}}t = 1/2$
             \end{enumerate}
         \item Calculate the diagonal energy difference $dV = \epsilon_w - \epsilon$, where $\epsilon_w$ is the diagonal energy of the segment of path inside the flat with more particles. Based on the sign, choose the length of the worm or antiworm $\tau_{\rm{worm}}$:
         	     \begin{enumerate}
-	     \item{if $dV \neq 0$ : Draw $\tau_{\rm{worm}}$ from $dV e^{-dV\tau_{\rm{worm}}}/(1-e^{-dV \tau_{\rm{flat}}})$}
-	     \item{Else: Draw $\tau_{\rm{worm}}$ from $U(0,1)*\tau_{\rm{flat}}$}
+	     \item{if $dV \neq 0$ : Draw $\tau_{\rm{worm}}$ from $p_{\tau_{\rm{worm}}}=dV e^{-dV\tau_{\rm{worm}}}/(1-e^{-dV \tau_{\rm{flat}}})$}
+	     \item{Else: Choose $\tau_{\rm{worm}}$ with probability $p_{\tau_{\rm{worm}}} = \frac{1}{\tau_{\rm{flat}}}$}
 	     \end{enumerate}
 	     where $\tau_{\rm{flat}} = \tau_{\rm{next}}-\tau_{\rm{prev}}$ is the length of the flat interval.
         \item Randomly select a real number $\tau = \tau_{\rm{prev}} + U(0,1)*(\tau_{\rm{flat}}-\tau_{\rm{worm}})$, where $\tau_{\rm{prev}}$ is the lower bound of the flat region. The probability of inserting the worm (antiworm) tail (head) at $\tau$ is $1/(\tau_{flat} - \tau_{worm})$.
@@ -442,16 +442,64 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
     \subsubsection{Delete worm}
     The delete worm update is proposed when there are two worm ends present on the same site and same flat interval. The update will be attempted with probability $p_{dw}$.
     
+    The Metropolis condition for the insert/delete update pair becomes:
+    %
+    \begin{align}
+    R_{\rm{insert}} &= \frac{W^\prime }{W } \frac{p(\alpha^\prime \to \alpha)}{p(\alpha \to \alpha^\prime)} \nonumber \\
+    &= \eta^2 n_i^{\alpha_w} e^{-dV \tau_{\rm{worm}}} \cdot \frac{L \cdot N_{\rm{flats}} \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\tau_{\rm{worm}}} \cdot p_{\rm{type}}} \frac{p_{\rm{dw}}}{p_{\rm{iw}}}
+    \end{align}
+    %
+    
+    Recalling that $p_{\tau_{\rm{worm}}}$ depends on the value of the diagonal energy difference $dV=\epsilon_{w}-\epsilon$, the Metropolis condition can be rewritten as a piece-wise defined function:
+    %
+    \begin{equation}
+    R_{\rm{insert}}  =
+    \begin{cases}
+      \eta^2 n_i^{\alpha_w} \frac{(1-e^{-dV \tau_{\rm{flat}}})}{dV} \cdot \frac{L \cdot N_{\rm{flats}} \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \frac{p_{\rm{dw}}}{p_{\rm{iw}}} & dV \neq 0 \\
+        \eta^2 n_i^{\alpha_w} e^{-dV \tau_{\rm{worm}}} \cdot \frac{L \cdot N_{\rm{flats}} \cdot  \tau_{\rm{flat}} \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \frac{p_{\rm{dw}}}{p_{\rm{iw}}} & dV = 0 \\
+    \end{cases}
+    \end{equation}
+    %
+    
+    and $R_{\rm{delete}} = 1/R_{\rm{insert}}$.
+    
     \subsubsection{Timeshift}
     The timeshift update is proposed when there is at least one worm end present. A worm end is selected randomly, then moved backward or forward in the imaginary time direction. The update proceeds as follows:
     \begin{enumerate}
     \item{Choose a worm end with probability $p_{\rm{wormend}}=1/2$ or $p_{\rm{wormend}}=1$, depending if there's two or one worm ends, respectively.}
     \item{Calculate $dV=\epsilon_{w}-\epsilon$.}
     \begin{enumerate}
-    \item{if $dV \neq 0$ : Draw $\tau^\prime$ from $dV e^{-dV\tau^\prime}/(1-e^{-dV \tau_{\rm{flat}}})$}
-    \item{Else: Draw $\tau^\prime$ from $U(0,1)*\tau_{\rm{flat}}$}
+    \item{if $dV \neq 0$ : Draw $\tau^\prime$ from $p_{\tau} = dV e^{-dV\tau^\prime}/(1-e^{-dV \tau_{\rm{flat}}})$}
+    \item{Else: Draw $\tau^\prime$ from $U(0,1)*\tau_{\rm{flat}}$, i.e with probability $p_{\tau} = 1/{\tau_{\rm{flat}}}$}
     \end{enumerate}
     \end{enumerate}
+    
+    The Metropolis condition becomes:
+    %
+   % \begin{align}
+    %R_{\rm{timeshift}} &= \frac{W^\prime }{W } \frac{p(\alpha^\prime \to \alpha)}{p(\alpha \to \alpha^\prime)} \nonumber \\
+    %&= e^{-dV (\tau^\prime - \tau)}
+    %\end{align}
+    %   
+    %
+    \begin{equation}
+    R_{\rm{timeshift}} =
+    \begin{cases}
+    1 & dV\neq0 \\
+    e^{-dV (\tau_h^\prime - \tau_h)} & dV=0
+    \end{cases}
+    \end{equation}
+    %
+    The above derivation assumes timeshift of a worm head. In the case of a tail shift:
+    %
+    \begin{equation}
+    R_{\rm{timeshift}} =
+    \begin{cases}
+    1 & dV\neq0 \\
+    e^{-dV (\tau_t- \tau_t^\prime)} & dV=0
+    \end{cases}
+    \end{equation}
+    %    
 
     \subsubsection{Insert worm from $\tau=0$}
     
@@ -469,8 +517,8 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
     \end{enumerate}
     \item{Calculate $dV=\epsilon_{w}-\epsilon$.}
     \begin{enumerate}
-    \item{if $dV \neq 0$ : Draw $\tau^\prime$ from $dV e^{-dV\tau^\prime}/(1-e^{-dV \tau_{\rm{flat}}})$}
-    \item{Else: Draw $\tau^\prime$ from $U(0,1)*\tau_{\rm{flat}}$}
+    \item{if $dV \neq 0$ : Draw $\tau$ from $p_{\tau_h}=dV e^{-dV\tau_h}/(1-e^{-dV \tau_{\rm{flat}}})$}
+    \item{Else: Choose $\tau$ with probability $p_{\tau_h} = 1/\tau_{\rm{flat}}$ }
     \end{enumerate}
     \end{enumerate}
 
@@ -482,16 +530,60 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
     \begin{enumerate}
         \setcounter{enumi}{-1}
     \item Do with probability $p_{dwz}$
-    \item Count how many worm ends are present.
+    \item Count how many worm ends are present near zero.
     \begin{enumerate}
     \item{If only one worm end is present, choose it with probability $p_{\rm{wormend}}=1$}.
-    \item{Else, choose the wormend randomly with probability $p_{\rm{wormend}}=1/2$}
+    \item{Else, choose the worm end randomly with probability $p_{\rm{wormend}}=1/2$}
     \end{enumerate}
     \end{enumerate}
+    
+    The Metropolis condition of the insert/delete from zero update becomes:
+    %
+    \begin{align}
+    R_{\rm{insertZero}}  &= \frac{W^\prime }{W } \frac{p(\alpha^\prime \to \alpha)}{p(\alpha \to \alpha^\prime)} \nonumber \\
+    &=   \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-dV \tau_h} \cdot \frac{L \cdot p_{\rm{wormend}}}{p_{\tau_h} \cdot p_{\rm{type}}} \frac{p_{\rm{dwz}}}{p_{\rm{iwz}}}
+    \end{align}
+    %
+    
+    Which can be expressed as a piece-wise defined function, depending on the value of $dV$:
+    %
+    \begin{equation}
+    R_{\rm{insertZero}}  =
+    \begin{cases}
+\eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}} \frac{(1-e^{-dV\tau_{\rm{flat}}})}{dV} \cdot \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \frac{p_{\rm{dwz}}}{p_{\rm{iwz}}}& dV \neq 0 \\
+\eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{-dV \tau_h} \cdot \frac{L \cdot \tau_{\rm{flat}} \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} & dV = 0 \\
+    \end{cases}
+    \end{equation}
+    %
+    
+    The above derivation assumes insertion of a worm near zero. In the case of an antiworm near zero, the ratio of weights becomes instead:
+    %
+    \begin{equation}
+    \frac{W^\prime}{W}= \eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha}}{C_{\alpha_w}}e^{-(\epsilon_w-\epsilon)(-\tau_t)}
+    \end{equation}
+    %
+    Notice that the only difference with the case of a worm insertion is that $\tau_h \to -\tau_t$. This implies that in the case that $dV\neq0$, the length of the antiworm is drawn from:
+    %
+    \begin{equation}
+    p_{\tau_t}=dV e^{dV\tau_t}/(1-e^{-dV \tau_{\rm{flat}}})
+    \end{equation}
+    %
+    The Metropolis condition when inserting an antiworm near zero becomes:
+    %
+    \begin{equation}
+    R_{\rm{insertZero}}  =
+    \begin{cases}
+\eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}} \frac{(1-e^{-dV\tau_{\rm{flat}}})}{dV} \cdot \frac{L \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \frac{p_{\rm{dwz}}}{p_{\rm{iwz}}}& dV \neq 0 \\
+\eta \sqrt{n_i^{\alpha_w}} \frac{C_{\alpha_w}}{C_{\alpha}}e^{dV \tau_t} \cdot \frac{L \cdot \tau_{\rm{flat}} \cdot p_{\rm{wormend}}}{p_{\rm{type}}} \frac{p_{\rm{dwz}}}{p_{\rm{iwz}}} & dV = 0 \\
+    \end{cases}
+    \end{equation}
+    %
+    
+    and $R_{\rm{deleteZero}} = 1/R_{\rm{insertZero}}$.
     
     \subsubsection{Insert worm from $\tau=\beta$}
     
-    This update is analogous to inserting a worm end from $\tau=0$. The only difference is that the worm end is proposed to be inserted in the last flat of a site.
+    This update is analogous to inserting a worm end from $\tau=0$. The only difference is that the worm end is proposed to be inserted in the last flat of a site. The Metropolis condition
     
     \subsubsection{Delete worm from $\tau=\beta$}
     
@@ -500,13 +592,16 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
     \subsection{Weight ratios of updates}
     
     The weight of a worldline configuration can be read off from the partition function Eq.~\eqref{eq:Z_0}:
+    \\
+    ***INSERT WEIGHT EXPRESSION HERE***
+    \\
     %
-    \begin{equation}
-    W \approx (-1)^{Q}  C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q} \prod_{q=1}^Q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
-(H_1^{\alpha_{q-1},\alpha_q} + H_\mathrm{worm}^{\alpha_{q-1},\alpha_q})
-    \end{equation}
+    %\begin{equation}
+    %W \approx (-1)^{Q}  C_{\alpha_0} C_{\alpha_Q}^* e^{-\epsilon_{\alpha_Q} \tau_Q} \prod_{q=1}^Q e^{-\epsilon_{\alpha_{q-1}}(\tau_{q-1}-\tau_q)} 
+%(H_1^{\alpha_{q-1},\alpha_q} + H_\mathrm{worm}^{\alpha_{q-1},\alpha_q})
+    %\end{equation}
     %
-    For each of the ergodic set of moves discussed, the ratio of post and pre update weights need to be calculated. These will show up in the detailed balance equation and will thus be necessary to get the Metropolis condition for each update. In this section, the weigh ratio for each update is shown.
+    For each the moves in the ergodic set of updates discussed, the rhe ratio of post and pre update weights need to be calculated. These will show up in the detailed balance equation and will thus be necessary to get the Metropolis condition for each update. In this section, the weigh ratio for each update is shown.
     
 	\subsection{Summary of weight ratios}	
     \begin{enumerate}
@@ -552,9 +647,9 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
 	Let $p(\alpha\to\alpha^\prime)$ be the probability of attempting an update that takes the system from configuration $\alpha$ to $\alpha^\prime$. As part of the detailed balance equation of each move, the ratio of attempt probabilities for the reverse and forward updates are needed. In this section, the ratio of attempt probabilities are shown for each move.
 	\begin{enumerate}
 	\setcounter{enumi}{0}
-		\item Insert: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta} \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot e^{(\epsilon_w-\epsilon)(\tau_h-\tau_t)}$
+		\item Insert: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = \frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta} \frac{L \cdot N_{\rm{flats}} \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot e^{(\epsilon_w-\epsilon)(\tau_h-\tau_t)}$
 		
-		\item Delete: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1/(\frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta}  \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot e^{(\epsilon_w-\epsilon)(\tau_h-\tau_t)})$
+		\item Delete: $\frac{p(\alpha^\prime\to\alpha)}{p(\alpha\to\alpha^\prime)} = 1/(\frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta}  \frac{L \cdot N_{\rm{flats}} \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot e^{(\epsilon_w-\epsilon)(\tau_h-\tau_t)})$
 		
 		\item Timeshift
 		\begin{enumerate}
@@ -598,9 +693,9 @@ In this section, a set of ergodic lattice worm updates is introduced. First, an 
 	In this section, the Metropolis condition of each update is shown.
 	\begin{enumerate}
 	\setcounter{enumi}{0}
-		\item Insert: $R =  \frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta}  \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot \eta^2 n_i^{\alpha_w}$
+		\item Insert: $R =  \frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta}  \frac{L \cdot N_{\rm{flats}} \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot \eta^2 n_i^{\alpha_w}$
 		
-		\item Delete: $R = 1/(\frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta}  \frac{L \cdot F \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot \eta^2 n_i^{\alpha_w} )$
+		\item Delete: $R = 1/(\frac{p_{\rm{dw}}}{p_{\rm{iw}}} \cdot \frac{1}{\Theta}  \frac{L \cdot N_{\rm{flats}} \cdot (\tau_{\rm{flat}}-\tau_{\rm{worm}})}{p_{\rm{type}}} \cdot \eta^2 n_i^{\alpha_w} )$
 		
 		\item Timeshift: 		
 		\begin{enumerate}
