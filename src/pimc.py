@@ -624,7 +624,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     else: # dV == 0
         R = (p_gsdw/p_gsiw) * L * p_wormend * tau_next / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
     # R = 1 # for debugging
-    # print(R,N_after_tail)
+    # print("R_insertZero=",R)
     if np.random.random() < R: # Accept
         if len(data_struct[i]) == 1: # Worldline is flat throughout
             data_struct[i].append(worm_end_kink)
@@ -659,44 +659,47 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     # Cannot delete if there are no worm ends present
     if head_loc == [] and tail_loc == []: return None
     
+    # Cannot delete if there are no worm ends near zero
+    if head_loc != [] and tail_loc != []: # both worm ends present
+        if head_loc[1] != 1 and tail_loc[1] != 1:
+            return None
+    elif head_loc != [] and tail_loc == []: # only head present
+        if head_loc[1] != 1:
+            return None
+    else: # only tail present
+        if tail_loc[1] != 1:
+            return None
+    
     # Number of lattice sites
     L = len(data_struct)
-    
-    # Save the indices of the worm end to be deleted
-    if head_loc != [] and tail_loc == []: # only head present (worm)
-        x = head_loc[0]                  # site index 
-        k = head_loc[1]                  # kink index
-        delete_head = True
+
+    # Decide which worm end to delete
+    if head_loc and tail_loc: # both worm ends present (at least one is on a first flat)
+        if head_loc[1] == 1 and tail_loc[1] == 1: # both on first flat, choose randomly
+            delete_head = True
+            if np.random.random() < 0.5:
+                delete_head = False # delete tail
+            p_wormend = 0.5
+        elif head_loc[1] != 1: # head not on first flat, tail is thus on a first flat
+            delete_head = False # delete tail (antiworm)
+            p_wormend = 1
+        else: #tail not on first flat, head is thus on a first flat
+            delete_head = True
+            p_wormend = 1
+    elif not(tail_loc): # only head present (it must be on first flat if we made it here)
+        delete_head = True # delete head (worm)
         p_wormend = 1
-        if k != 1:  # head needs to be on first flat
-            return None
-    elif head_loc == [] and tail_loc != [] : # only tail present (antiworm)
-        x = tail_loc[0]                     # site index 
-        k = tail_loc[1]                     # kink index
-        delete_head = False
-        p_wormend = 1                       # probability of choosing this wormend
-        if k != 1:      # tail not on first flat
-            return None
-    else: # both worm ends present
-        x = head_loc[0]                # site index 
-        k = head_loc[1]                # kink index
-        delete_head = True
-        p_wormend = 1  # BUG!!!!!!!!!!!!!!!
-        if k != 1: # if head not on first flat, try tail
-            x = tail_loc[0]
-            k = tail_loc[1]
-            delete_head = False
-            if k != 1: # tail not on first flat either, stop.
-                return None
-        else:  # head on first flat, but check tail too.
-            tx = tail_loc[0]
-            tk = tail_loc[1]
-            if tk == 1: # if both ends on first flast, choose randomly
-                if np.random.random() < 0.5:
-                    x = tx
-                    k = tk
-                    delete_head = False
-                p_wormend = 0.5
+    else: # only tail present (on first flat)
+        delete_head = False # delete tail (antiworm)
+        p_wormend = 1
+        
+    # Get the site and kink indices of the worm end to be deleted
+    if delete_head:
+        x = head_loc[0]
+        k = head_loc[1]
+    else: # delete tail
+        x = tail_loc[0]
+        k = tail_loc[1]
                     
     # Get tau_next
     if k == len(data_struct[x]) - 1: # worldline almost completely flat
@@ -755,8 +758,7 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
                 if head_loc[0] == tail_loc[0] and tail_loc[1] > head_loc[1]:
                     tail_loc[1] -= 1
             del head_loc[:]
-
-        
+       
         else: # delete tail
             data_struct[x][0][1] += 1
             # Reindex if there was another end on the same worldline
@@ -897,44 +899,51 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     # Cannot delete if there are no worm ends present
     if head_loc == [] and tail_loc == []: return None
     
+    # Cannot delete if there are no worm ends near beta (last flat)
+    if head_loc != [] and tail_loc != []: # both worm ends present
+        hk_last = len(data_struct[head_loc[0]]) - 1 # index of the last kink on the head site
+        tk_last = len(data_struct[tail_loc[0]]) - 1 # index of the last kink on the tail site
+        if head_loc[1] != hk_last and tail_loc[1] != tk_last:
+            return None
+    elif head_loc != [] and tail_loc == []: # only head present
+        hk_last = len(data_struct[head_loc[0]]) - 1
+        if head_loc[1] != hk_last:
+            return None
+    else: # only tail present
+        tk_last = len(data_struct[tail_loc[0]]) - 1
+        if tail_loc[1] != tk_last:
+            return None
+    
     # Number of lattice sites
     L = len(data_struct)
-    
-    # Save the indices of worm end to be deleted
-    if head_loc != [] and tail_loc == []: # only head present
-        x = head_loc[0]                  # site index 
-        k = head_loc[1]                  # kink index
-        delete_head = True
+
+    # Decide which worm end to delete
+    if head_loc and tail_loc: # both worm ends present (at least one is on a last flat)
+        if head_loc[1] == hk_last and tail_loc[1] == tk_last: # both on last, choose randomly
+            delete_head = True
+            if np.random.random() < 0.5:
+                delete_head = False # delete tail (worm)
+            p_wormend = 0.5
+        elif head_loc[1] != hk_last: # head not on last flat, tail is thus on a last flat
+            delete_head = False # delete tail (worm)
+            p_wormend = 1
+        else: # tail not on last flat, head is thus on a last flat
+            delete_head = True
+            p_wormend = 1
+    elif not(tail_loc): # only head present (it must be on last flat if we made it here)
+        delete_head = True # delete head (antiworm)
         p_wormend = 1
-        if k != len(data_struct[x])-1:  # head needs to be on last flat
-            return None
-    elif head_loc == [] and tail_loc != [] : # only tail present
-        x = tail_loc[0]                     # site index 
-        k = tail_loc[1]                     # kink index
-        delete_head = False
-        p_wormend = 1                       # probability of choosing this wormend
-        if k != len(data_struct[x])-1:      # tail not on last flat
-            return None
-    else: # both worm ends present
-        x = head_loc[0]                # site index 
-        k = head_loc[1]                # kink index
-        delete_head = True
+    else: # only tail present (on last flat)
+        delete_head = False # delete tail (worm)
         p_wormend = 1
-        if k != len(data_struct[x])-1: # head not on last flat, try tail
-            x = tail_loc[0]
-            k = tail_loc[1]
-            delete_head = False
-            if k != len(data_struct[x])-1: # tail no on last flat either, stop.
-                return None
-        else:  # head on last flat, check tail too.
-            tx = tail_loc[0]
-            tk = tail_loc[1]
-            if tk == len(data_struct[tx])-1: # both ends on last flast, choose randomly
-                if np.random.random() < 0.5:
-                    x = tx
-                    k = tk
-                    delete_head = False
-                p_wormend = 0.5   
+        
+    # Get the site and kink indices of the worm end to be deleted
+    if delete_head:
+        x = head_loc[0]
+        k = head_loc[1]
+    else: # delete tail
+        x = tail_loc[0]
+        k = tail_loc[1]    
     
     # Get tau_prev
     tau_prev = data_struct[x][k-1][0]
@@ -974,7 +983,7 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         R = 1 / ( scale * (1-np.exp(-b/scale)) * (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
     else: # dV == 0
         R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend * (beta-tau_prev) / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
-    print("R_delBeta=",R)
+    #print("R_delBeta=",R)
     if np.random.random() < R: # Accept
         
         del data_struct[x][k]
