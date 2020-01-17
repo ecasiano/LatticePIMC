@@ -528,23 +528,27 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     else:
         tau_next = data_struct[i][1][0]
     # tau_prev = 0
-    
+        
     # Choose worm/antiworm insertion based on the worm ends present
-    if head_loc == [] and tail_loc != []: # can only insert worm head (worm)
-        insert_worm = True
-        p_type = 1 # can only insert worm tail (antiworm)s
-    elif head_loc != [] and tail_loc == []: # can only insert tail (antiworm from zero)
-        insert_worm = False
-        p_type = 1
-    elif data_struct[i][0][1] == 0 and head_loc == []: # can't insert tail if no particles
-        insert_worm = True
-        p_type = 1
-    else: # choose to insert either worm end with equal probability
-        if np.random.random() < 0.5:
+    n_i = data_struct[i][0][1] # original number of particles in the flat
+    if not(head_loc) and not(tail_loc): # No worm ends present
+        if n_i == 0: # can only insert worm if there's no particles
             insert_worm = True
+            p_type = 1
+        else: # insert worm or antiworm randomly
+            insert_worm = True
+            if np.random.random() < 0.5:
+                insert_worm = False
+            p_type = 0.5
+    elif head_loc: # only worm head present, can only insert tail (antiworm)
+        if n_i == 0:
+            return False # can't insert antiworm if no particles on flat
         else:
-            insert_worm = False
-        p_type = 0.5 
+            insert_worm = False # insert antiworm
+            p_type = 1
+    else: # only tail present, can only insert head (worm)
+       insert_worm = True
+       p_type = 1            
     
     # For debugging
     # insert_worm = True
@@ -619,8 +623,8 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         R = scale * (1-np.exp(-b/scale)) * (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
     else: # dV == 0
         R = (p_gsdw/p_gsiw) * L * p_wormend * tau_next / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
-   # R = 1 # for debugging
-    print(R,N_after_tail)
+    # R = 1 # for debugging
+    # print(R,N_after_tail)
     if np.random.random() < R: # Accept
         if len(data_struct[i]) == 1: # Worldline is flat throughout
             data_struct[i].append(worm_end_kink)
@@ -739,6 +743,7 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         R = 1 / ( scale * (1-np.exp(-b/scale)) * (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
     else: # dV==0
         R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend * tau_next / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
+    #print("R_delZero=",R)
     if np.random.random() < R: # Accept
         
         del data_struct[x][k]
@@ -784,22 +789,26 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     # Determine the lower bound of the last flat of the site
     tau_prev = data_struct[i][k_last][0]
     
-    # Decide between worm/antiworm insertion based on the worm ends present
-    if head_loc == [] and tail_loc != []: # can only insert worm head (antiworm)
-        insert_worm = False
-        p_type = 1 # can only insert worm tail (antiworm)
-    elif head_loc != [] and tail_loc == []: # insert tail (worm from beta)
-        insert_worm = True 
-        p_type = 1
-    elif data_struct[i][k_last][1] == 0 and tail_loc == []: # can't insert head if no particles
-        insert_worm = True
-        p_type = 1
-    else: # choose to insert either worm end with equal probability
-        if np.random.random() < 0.5:
+    # Choose worm/antiworm insertion based on the worm ends present
+    n_i = data_struct[i][k_last][1] # original number of particles in the flat
+    if not(head_loc) and not(tail_loc): # No worm ends present
+        if n_i == 0: # can only insert worm if there's no particles
             insert_worm = True
-        else:
-            insert_worm = False
-        p_type = 0.5  
+            p_type = 1
+        else: # if there's particles, insert worm or antiworm randomly
+            insert_worm = True
+            if np.random.random() < 0.5:
+                insert_worm = False
+            p_type = 0.5
+    elif tail_loc: # only worm tail present, can only insert head (antiworm)
+        if n_i == 0:
+            return False
+        else: # if there's particles, insert the antiworm
+            insert_worm = False # insert antiworm
+            p_type = 1
+    else: # only head present, can only insert tail (worm)
+       insert_worm = True
+       p_type = 1   
      
     # For debubbing
     # insert_worm = False
@@ -807,7 +816,6 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     # MEASURE THE DIFFERENCE IN DIAGONAL ENERGY. To ensure exponential DECAY of the 
     # update's weight, the difference will be taken always as dV = eps_w - eps, where eps_w is
     # the energy of the segment of path adjacent the moving worm end with more particles. 
-    n_i = data_struct[i][k_last][1] # particles originally in last flat
     if insert_worm:
         N_after_tail = n_i + 1
         N_after_head = n_i # technically, head will not be inserted
@@ -844,10 +852,10 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     else:
         p_wormend = 0.5 # delete might have to choose between two ends
               
-    # Build the kinks to be inserted to the data structture if the move is accepted
+    # Build the kinks to be appended to the data structture if the move is accepted
     if insert_worm:
         worm_end_kink = [beta-tau_worm,N_after_tail,(i,i)]  # kinks to be inserted to
-    else:
+    else: # antiworm
         worm_end_kink = [beta-tau_worm,N_after_head,(i,i)]
         
     # Check if the update would violate conservation of total particle number
@@ -867,6 +875,7 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         R = scale * (1-np.exp(-b/scale)) * (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
     else: # dV == 0
         R = (p_gsdw/p_gsiw) * L * p_wormend * (beta-tau_prev) / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
+    # print(R)
     if np.random.random() < R: # Accept    
         data_struct[i].append(worm_end_kink)
                         
@@ -965,7 +974,7 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         R = 1 / ( scale * (1-np.exp(-b/scale)) * (p_gsdw/p_gsiw) * L * p_wormend / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
     else: # dV == 0
         R = 1 / ( (p_gsdw/p_gsiw) * L * p_wormend * (beta-tau_prev) / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre )
-    #print(R)
+    print("R_delBeta=",R)
     if np.random.random() < R: # Accept
         
         del data_struct[x][k]
