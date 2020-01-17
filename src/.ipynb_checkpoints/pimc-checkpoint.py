@@ -142,7 +142,7 @@ def egs_theory(L,U,mu):
 
 '----------------------------------------------------------------------------------'
 
-def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
+def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insert_worm_data,insert_anti_data):
     
     '''Inserts a worm or antiworm'''
 
@@ -226,8 +226,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     if tau_h == tau_prev or tau_t == tau_prev : return False
 
     # Reject update if both worm ends are at the same tau
-    if tau_h == tau_t :
-        return False
+    if tau_h == tau_t : return False
 
     # Build the worm end kinks to be inserted on i
     if insert_worm: # worm
@@ -260,6 +259,12 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         
         N_check = N_tracker(data_struct_tmp,beta)
         if N_check <= N-1 or N_check >= N+1: return False
+      
+    # Add to worm/antiworm proposal counters
+    if insert_worm:
+        insert_worm_data[1] += 1
+    else:
+        insert_anti_data[1] += 1
         
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities   
@@ -297,6 +302,12 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
             head_loc.extend([i,k+1])
             tail_loc.extend([i,k+2])
            
+        # Add to ACCEPTANCE counters
+        if insert_worm:
+            insert_worm_data[0] += 1
+        else: # insert antiworm
+            insert_anti_data[0] += 1
+        
         return True
 
     # Reject
@@ -305,7 +316,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 
 '----------------------------------------------------------------------------------'
 
-def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
+def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,delete_worm_data,delete_anti_data):
 
     # Can only propose worm deletion if both worm ends are present
     if head_loc == [] or tail_loc == [] : return None
@@ -383,6 +394,12 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         loc = 0
         b = tau_next-tau_prev
 
+    # Add to delete worm/antiworm PROPOSAL counters
+    if is_worm:
+        delete_worm_data[1] += 1
+    else: # delete antiworm
+        delete_anti_data[1] += 1
+    
     # Metropolis sampling
     p_dw, p_iw = 0.5,0.5 # p_iw/p_dw
     if dV != 0:
@@ -407,6 +424,11 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         del head_loc[:]
         del tail_loc[:]
         
+        # Add to delete ACCEPTANCE counters
+        if is_worm:
+            delete_worm_data[0] += 1
+        else: # delete antiworm
+            delete_anti_data[0] += 1
         return True
 
     # Reject
@@ -511,7 +533,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
 
 '----------------------------------------------------------------------------------'
 
-def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
+def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insertZero_worm_data,insertZero_anti_data):
     
     # Cannot insert if there's two worm ends present
     if head_loc != [] and tail_loc != []: return None
@@ -616,6 +638,12 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         N_check = N_tracker(data_struct_tmp,beta)
         if N_check <= N-1 or N_check >= N+1: return False
         
+    # Add to insertZero PROPOSAL counters
+    if insert_worm:
+        insertZero_worm_data[1] += 1
+    else: # insert antiworm
+        insertZero_anti_data[1] += 1
+        
     # Build the Metropolis Ratio   
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
     p_gsdw, p_gsiw = 0.5, 0.5
@@ -647,6 +675,12 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
                 if head_loc[0] == i:
                     head_loc[1] += 1 
 
+        # Add to insertZero ACCEPTANCE counters
+        if insert_worm:
+            insertZero_worm_data[0] += 1
+        else: # insert antiworm
+            insertZero_anti_data[0] += 1
+            
         return True
         
     else: # Reject
@@ -654,7 +688,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
 
 '----------------------------------------------------------------------------------'
 
-def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
+def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteZero_worm_data,deleteZero_anti_data):
 
     # Cannot delete if there are no worm ends present
     if head_loc == [] and tail_loc == []: return None
@@ -739,6 +773,12 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         scale = 1/np.abs(dV)
         b = tau_next
         
+    # Add to deleteZero PROPOSAL counters
+    if delete_head: # delete worm
+        deleteZero_worm_data[1] += 1
+    else: # delete antiworm
+        deleteZero_anti_data[1] += 1
+        
     # Metropolis Sampling
     p_gsdw,p_gsiw = 0.5,0.5
     C_post,C_pre = 0.5,0.5
@@ -767,6 +807,12 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
                     head_loc[1] -= 1                
             del tail_loc[:]
             
+        # Add to deleteZero ACCEPTANCE counters
+        if delete_head: # delete worm
+            deleteZero_worm_data[0] += 1
+        else: # delete antiworm
+            deleteZero_anti_data[0] += 1
+            
         return True
     
     else: # Reject 
@@ -774,7 +820,7 @@ def delete_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
 '----------------------------------------------------------------------------------'
 
-def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
+def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insertBeta_worm_data,insertBeta_anti_data):
     
     # Cannot insert if there's two worm end already present
     if head_loc != [] and tail_loc != []: return None
@@ -870,6 +916,12 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         if N_check <= N-1 or N_check >= N+1: 
             return False 
         
+    # Add to insertBeta PROPSAL counters
+    if insert_worm:
+        insertBeta_worm_data[1] += 1
+    else: # insert antiworm
+        insertBeta_anti_data[1] += 1
+            
     # Build the Metropolis Ratio   
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
     p_gsdw, p_gsiw = 0.5, 0.5
@@ -887,6 +939,12 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         else: # insert antiworm
             head_loc.extend([i,k_last+1])
 
+        # Add to insertZero ACCEPTANCE counters
+        if insert_worm:
+            insertBeta_worm_data[0] += 1
+        else: # insert antiworm
+            insertBeta_anti_data[0] += 1
+            
         return True
         
     else: # Reject
@@ -894,7 +952,7 @@ def insert_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
     
 '----------------------------------------------------------------------------------'
 
-def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
+def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteBeta_worm_data,deleteBeta_anti_data):
 
     # Cannot delete if there are no worm ends present
     if head_loc == [] and tail_loc == []: return None
@@ -976,6 +1034,12 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         scale = 1/np.abs(dV)
         b = beta-tau_prev
     
+    # Add to deleteBeta PROPOSAL counters
+    if delete_head: # delete worm
+        deleteBeta_worm_data[1] += 1
+    else: # delete antiworm
+        deleteBeta_anti_data[1] += 1
+            
     # Metropolis Sampling
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
     p_gsdw, p_gsiw = 0.5, 0.5
@@ -994,6 +1058,12 @@ def delete_gsworm_beta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N):
         else: # delete tail
             del tail_loc[:]
               
+        # Add to deleteBeta ACCEPTANCE counters
+        if delete_head: # delete worm
+            deleteBeta_worm_data[0] += 1
+        else: # delete antiworm
+            deleteBeta_anti_data[0] += 1
+            
         return True
     
     else: # Reject 
