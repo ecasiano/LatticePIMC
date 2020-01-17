@@ -272,6 +272,13 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insert_w
         R = scale * (1-np.exp(-b/scale)) * (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
     else: # dV==0
         R = (p_dw/p_iw) * L * N_flats * tau_flat * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
+    
+#     if np.random.random() < 0.01:
+#         if insert_worm:
+#             print("R_worm: ",R)
+#         else:
+#             print("R_anti: ",R)
+            
     # print(R)
     # Metropolis Sampling
     # R = 1 # debugging
@@ -652,7 +659,7 @@ def insert_gsworm_zero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,i
     else: # dV == 0
         R = (p_gsdw/p_gsiw) * L * p_wormend * tau_next / p_type * eta * np.sqrt(N_after_tail) * C_post/C_pre
     # R = 1 # for debugging
-    # print("R_insertZero=",R)
+    #=print("R_insertZero=",R)
     if np.random.random() < R: # Accept
         if len(data_struct[i]) == 1: # Worldline is flat throughout
             data_struct[i].append(worm_end_kink)
