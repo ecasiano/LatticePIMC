@@ -189,37 +189,60 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insert_w
         N_after_head = n_flat - 1
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
     
-    # Plot dV vs N and check that it scales with N_after_tail
-
+#     # From the truncated exponential distribution, choose the length of the worm 
+#     loc = 0
+#     b = tau_next - tau_prev
+#     if dV == 0: # uniform distribution
+#         tau_worm = b*np.random.random()
+#     elif insert_worm:
+#         if dV > 0: # Decreasing truncated exponential distribution
+#             scale = 1/abs(dV)    
+#             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
+#         else: # dV < 0, Increasing truncexpon
+#             scale = 1/abs(dV)    
+#             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+#             tau_worm = -tau_worm + b
+#     else: # insert antiworm
+#         if dV > 0: # Increasing truncated exponential distribution
+#             scale = 1/abs(dV)    
+#             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+#             tau_worm = -tau_worm + b
+#         else: # dV < 0 , decreasing truncated exponential distribution
+#             scale = 1/abs(dV)    
+#             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]          
+        
     # From the truncated exponential distribution, choose the length of the worm 
     loc = 0
     b = tau_next - tau_prev
+    scale = 1/abs(dV)    
     if dV == 0: # uniform distribution
-        tau_worm = b*np.random.random()
+        tau_worm = b*np.random.random() # length of the worm
+        p_tau_worm = 1/tau_flat # probability of sampling
     elif insert_worm:
         if dV > 0: # Decreasing truncated exponential distribution
-            scale = 1/abs(dV)    
-            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0] # Worm length
-        else: # dV < 0, Increasing truncexpon
-            scale = 1/abs(dV)    
             tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
-            tau_worm = -tau_worm + b
+            p_tau_worm = (1/scale)/(1-np.exp(-b/scale))
+        else: # dV < 0, Increasing truncexpon
+            x = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+            tau_worm = -x+b
+            p_tau_worm = (1/scale)/(np.exp(dV*b)-1) * np.exp(2*dV*tau_worm)
     else: # insert antiworm
         if dV > 0: # Increasing truncated exponential distribution
-            scale = 1/abs(dV)    
-            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
-            tau_worm = -tau_worm + b
+            x = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]
+            tau_worm = x-b
+            p_tau_worm = (1/scale)/(np.exp(dV*b)-1)
         else: # dV < 0 , decreasing truncated exponential distribution
-            scale = 1/abs(dV)    
-            tau_worm = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]  
-        
+            x = truncexpon.rvs(b=b/scale,scale=scale,loc=loc,size=1)[0]  
+            tau_worm = -x
+            p_tau_worm = (1/scale)/(1-np.exp(-b/scale)) * np.exp(2*dV*tau_worm)
+    
     # Randomly choose the time where the first worm end will be inserted
     if insert_worm: # worm
-        tau_t = tau_prev + np.random.random()*(tau_flat - tau_worm) # worm tail (creates a particle)
-        tau_h = tau_t + tau_worm                                    # worm head (destroys a particle)
+        tau_t = tau_prev + np.random.random()*(tau_flat - abs(tau_worm)) # worm tail (creates a particle)
+        tau_h = tau_t + abs(tau_worm)                                    # worm head (destroys a particle)
     else: # antiworm
-        tau_h = tau_prev + np.random.random()*(tau_flat - tau_worm)
-        tau_t = tau_h + tau_worm
+        tau_h = tau_prev + np.random.random()*(tau_flat - abs(tau_worm))
+        tau_t = tau_h + abs(tau_worm)
 
     # Reject update if worm end is inserted at the bottom kink of the flat
     # (this will probably never happen in the 2 years I have left to complete my PhD)
@@ -268,10 +291,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insert_w
         
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities   
-    if dV != 0:
-        R = scale * (1-np.exp(-b/scale)) * (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
-    else: # dV==0
-        R = (p_dw/p_iw) * L * N_flats * tau_flat * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
+    R = (p_dw/p_iw) * L * N_flats * (tau_flat - abs(tau_worm)) / (p_tau_worm*p_type) * eta**2 * N_after_tail
     
 #     if np.random.random() < 0.01:
 #         if insert_worm:
@@ -371,7 +391,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,delete_w
 
     # Calculate the length of the flat interval and the length of the worm/antiworm
     tau_flat = tau_next - tau_prev
-    tau_worm = np.abs(tau_h-tau_t)
+    tau_worm = tau_h-tau_t
     
     # Worm insert probability of choosing between worm or antiworm
     if n_i == 0:
@@ -397,24 +417,34 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,delete_w
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
     if dV != 0:
-        scale = 1/np.abs(dV)
         loc = 0
         b = tau_next-tau_prev
+    scale = 1/abs(dV)
 
+    # Calculate the factor coming from the appropriate tau_worm distribution
+    if dV == 0:
+        p_tau_worm = 1/tau_flat
+    elif dV > 0:
+        if is_worm:
+            p_tau_worm = (1/scale)/(1-np.exp(-b/scale))
+        else: # antiworm
+            p_tau_worm = (1/scale)/(np.exp(dV*b)-1)
+    else: # dV < 0
+        if is_worm:
+            p_tau_worm = (1/scale)/(np.exp(dV*b)-1) * np.exp(2*dV*tau_worm)
+        else: # antiworm
+            p_tau_worm = (1/scale)/(1-np.exp(-b/scale)) * np.exp(2*dV*tau_worm)
+            
     # Add to delete worm/antiworm PROPOSAL counters
     if is_worm:
         delete_worm_data[1] += 1
     else: # delete antiworm
         delete_anti_data[1] += 1
-    
+            
     # Metropolis sampling
     p_dw, p_iw = 0.5,0.5 # p_iw/p_dw
-    if dV != 0:
-        R = scale * (1-np.exp(-b/scale)) * (p_dw/p_iw) * L * N_flats * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
-        R = 1/R
-    else: # dV == 0, tau_worm sampled from uniform distribution
-        R = (p_dw/p_iw) * L * N_flats * tau_flat * (tau_flat - tau_worm) / p_type * eta**2 * N_after_tail
-        R = 1/R
+    R = (p_dw/p_iw) * L * N_flats * (tau_flat - abs(tau_worm)) / (p_tau_worm*p_type) * eta**2 * N_after_tail
+    R = 1/R
     # R = 1 # for debugging
     # Accept
     if np.random.random() < R:
