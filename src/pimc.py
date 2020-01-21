@@ -1008,8 +1008,27 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteBet
     
     else: # Reject 
         return False
+    
 '----------------------------------------------------------------------------------'
 
+def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insert_kink_before_data):
+    
+    # Update only possible if there is at least one worm end present
+    if not(head_loc) and not(tail_loc): return None
+    
+    # Number of lattice sites
+    L = len(data_struct)
+    
+    return True
+    
+'----------------------------------------------------------------------------------'
+ 
+def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insert_kink_before_data):
+    
+    return True
+    
+'----------------------------------------------------------------------------------'
+    
 # Visualize worldline configurations for Lattice Path Integral Monte Carlo (PIMC)
 def view_worldlines(data_struct,beta,figure_name=None):
     import matplotlib.pyplot as plt
