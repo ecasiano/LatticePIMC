@@ -1046,19 +1046,17 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     if j==-1:
         j = L-1 # head hops to last site
       
-    # Retrieve the time of the worm head
+    # Retrieve the time of the worm head (and tail if present)
     tau_h = data_struct[i][k][0]
-    
-    # If present, retrieve the time of the worm tail
     if tail_loc:
         tau_t = data_struct[tail_loc[0]][tail_loc[1]][0]
+
+    # Determine the lower bounds of the flat where head lives
+    tau_prev_i = data_struct[i][k-1][0] # lower bound of head src site  
     
     # Retrieve the no. of particles before/after head
     n_i = data_struct[i][k][1] # after head
     n_wi = n_i+1 # before head
-    
-    # Determine the lower bounds of the flat where head lives
-    tau_prev_i = data_struct[i][k-1][0] # lower bound of head src site
     
     # Determine the lower bounds of the flat where head will move to
     for idx in range(len(data_struct[j])):
@@ -1114,13 +1112,13 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
         # Add to ACCEPTANCE counter
         ikbh_data[0] += 1
     
+        # Delete the worm end from site i
+        del data_struct[i][k]
+        
         # Build the kinks to be inserted to each site
         kink_i = [tau_kink,n_i,(i,j)]
         kink_j = [tau_kink,n_wj,(i,j)]
         head_kink_j = [tau_h,n_j,(j,j)]
-        
-        # Delete the worm end from site i
-        del data_struct[i][k]
                 
         # Insert kinks
         data_struct[i].insert(k,kink_i)
@@ -1143,9 +1141,106 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     
 '----------------------------------------------------------------------------------'
  
-def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insert_kink_before_data):
+def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,dkbh_data):
     
-    return True
+    # Update only possible if there is worm head present
+    if not(head_loc): return None
+    
+    # Retrieve the head indices
+    j = head_loc[0] # site (also destination site of the kink)
+    k = head_loc[1] # kink
+    
+    # Retrieve the source site of the kink before the head
+    i = data_struct[j][k-1][2][0]
+
+    # Update only possible if there's an actual kink before the head
+    if i == j: return None # i.e, the kink cannot be worm end or initial element
+    
+    # Add to PROPOSAL counter
+    dkbh_data[1] += 1
+    
+    # Number of lattice sites
+    L = len(data_struct)    
+    
+    # Retrieve the time of the head (and tail if present)
+    tau_h = data_struct[j][k][0]
+    if tail_loc:
+        tau_t = data_struct[tail_loc[0]][tail_loc[1]][0]
+    
+    # Retrieve the time of the kink
+    tau_kink = data_struct[j][k-1][0]
+    
+    # Retrieve the time of the "kink" before the kink (i.e, the lower bound)
+    tau_prev_j = data_struct[j][k-2][0]
+   
+    # Retrieve the no. of particles after/before worm head
+    n_j = data_struct[j][k][1] # after worm head
+    n_wj = n_j+1 # before worm head
+    
+    # Determine the lower bound of the flat region of the kink src site
+    for idx in range(len(data_struct[i])):
+        tau = data_struct[i][idx][0] # imaginary time
+        n = data_struct[i][idx][1]   # particles in the flat
+        if tau < tau_kink:
+            tau_prev_i = tau
+            n_wi = n # Particles before the kink on the src site
+            tau_prev_i_idx = idx
+        else: break
+    n_i = n_wi-1 # No. of particles on i after the particle hop
+    
+    # Determine the lowest time at which the kink could've been inserted
+    tau_min = max(tau_prev_i,tau_prev_j)
+    
+    # Determine probability of particle hopping left or right
+    if len(data_struct) > 2:
+        p_site = 0.5
+    else: # only 2 sites
+        p_site = 1
+    
+    # Check if the update would violate conservation of total particle number
+    
+    # Calculate the diagonal energy difference on both sites
+    dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
+    dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
+    
+    # Calculate the weight ratio W'/W
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    
+    # Build the Metropolis ratio (R)
+    p_dkbh,p_ikbh = 0.5,0.5
+    R = W * (p_dkbh/p_ikbh) * (tau_h-tau_min)/p_site
+    R = 1/R
+    
+    # Metropolis Sampling
+    if np.random.random() < R: # Accept
+        
+        # Add to ACCEPTANCE counter
+        dkbh_data[0] += 1
+        
+        # Delete the kink structure on both sites
+        del data_struct[j][k] # deletes the worm head from j
+        del data_struct[j][k-1] # deletes the kink from j
+        del data_struct[i][tau_prev_i_idx+1] # deletes the kink from i
+    
+        # Build the worm head kink to be moved to i
+        head_kink_i = [tau_h,n_i,(i,i)]
+        
+        # Insert the worm kink on i
+        data_struct[i].insert(tau_prev_i_idx+1,head_kink_i)
+        
+        # Readjust head indices
+        head_loc[0] = i
+        head_loc[1] = tau_prev_i_idx+1
+
+        # Readjust tail indices if on site j and at later time
+        if tail_loc:
+            if tail_loc[0] == j and tau_t > tau_h:
+                tail_loc[1] -= 2 # kink and head insertion raises tail idx by two
+        
+        return True
+    
+    else: # Reject
+        return False
     
 '----------------------------------------------------------------------------------'
     
