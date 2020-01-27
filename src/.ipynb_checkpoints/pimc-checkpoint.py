@@ -1198,6 +1198,22 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
         p_site = 1
     
     # Check if the update would violate conservation of total particle number
+    if canonical: # do the check for Canonical simulation
+        data_struct_tmp = deepcopy(data_struct)
+        
+        # Delete the kink structure on both sites
+        del data_struct_tmp[j][k] # deletes the worm head from j
+        del data_struct_tmp[j][k-1] # deletes the kink from j
+        del data_struct_tmp[i][tau_prev_i_idx+1] # deletes the kink from i
+    
+        # Build the worm head kink to be moved to i
+        head_kink_i = [tau_h,n_i,(i,i)]
+        
+        # Insert the worm kink on i
+        data_struct_tmp[i].insert(tau_prev_i_idx+1,head_kink_i)
+        
+        N_check = N_tracker(data_struct_tmp,beta)
+        if N_check <= N-1 or N_check >= N+1: return False
     
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1243,6 +1259,150 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
         return False
     
 '----------------------------------------------------------------------------------'
+
+def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,ikah_data):
+
+    # Update only possible if there is a worm head present
+    if not(head_loc): return None
+    
+    # Need at least two sites for a spaceshift
+    if len(data_struct) <= 1: return None
+    
+    # Add to PROPOSAL counter
+    ikah_data[1] += 1
+    
+    # Retrieve worm head indices (i:site,k:kink)
+    i = head_loc[0]
+    k = head_loc[1]
+    
+    # Number of lattice sites
+    L = len(data_struct)
+    
+    # Randomly choose destination site (j) of the head
+    if len(data_struct) == 2: # Only two sites
+        j = i-1
+        p_site = 1 # probability of hopping to site j
+    else: # 3 sites or more
+        if np.random.random() < 0.5:
+            j = i+1 # Head hops to the right
+            if j == L: # PBC's
+                j = 0
+        else: # Head hops to the left
+            j = i-1
+        p_site = 0.5
+    
+    # Need to make the j exclusively positive for plotting purposes
+    if j==-1:
+        j = L-1 # head hops to last site
+      
+    # Retrieve the time of the worm head (and tail if present)
+    tau_h = data_struct[i][k][0]
+    if tail_loc:
+        tau_t = data_struct[tail_loc[0]][tail_loc[1]][0]
+
+    # Determine the upper bounds of the flat where head lives
+    if k == len(data_struct[i])-1: # head is the last "kink" on the site
+        tau_next_i = beta
+    else:
+        tau_next_i = data_struct[i][k+1][0] # upper bound of head src site  
+    
+    # Retrieve the no. of particles before/after head
+    n_i = data_struct[i][k][1] # after head
+    n_wi = n_i+1 # before head
+    
+    # Determine the lower bound of the flat where head will move to
+    for idx in range(len(data_struct[j])):
+        tau = data_struct[j][idx][0] # imaginary time
+        n = data_struct[j][idx][1]   # particles in flat idx
+        if tau > tau_h:
+            break
+        else:
+            tau_next_j = tau
+            n_wj = n # Number of particles originally in the flat
+            tau_prev_j_idx = idx     
+    n_j = n_wj-1 # No. of particles on j after the particle hop
+    
+    # Determine the upper bound of the flat where head will move to
+    tau_next_j_idx = tau_prev_j_idx+1
+    if tau_prev_j_idx == len(data_struct[j])-1:
+        tau_next_j = beta
+    else:
+        tau_next_j = data_struct[j][tau_prev_j_idx+1][0]
+
+    # Determine the highest time at which the kink can be inserted
+    tau_max = min(tau_next_i,tau_next_j)
+    
+    # Randomly choose the time of the kink
+    tau_kink = tau_h + np.random.random()*(tau_max-tau_h)
+    
+    # Check if the update would violate conservation of total particle number
+    if canonical: # do the check for Canonical simulation
+        data_struct_tmp = deepcopy(data_struct)
+        
+        # Delete the worm end from site i
+        del data_struct_tmp[i][k]
+        
+        # Build the kinks to be inserted to each site
+        kink_i = [tau_kink,n_i,(i,j)]
+        kink_j = [tau_kink,n_wj,(i,j)]
+        head_kink_j = [tau_h,n_j,(j,j)]
+                
+        # Insert kinks
+        data_struct_tmp[i].insert(k,kink_i) # kink on i
+        data_struct_tmp[j].insert(tau_next_j_idx,kink_j) # kink on j
+        data_struct_tmp[j].insert(tau_next_j_idx,head_kink_j) # head kink on j
+        
+        N_check = N_tracker(data_struct_tmp,beta)
+        if N_check <= N-1 or N_check >= N+1: return False
+        
+    # Calculate the diagonal energy difference on both sites
+    dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
+    dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
+    
+    # Calculate the weight ratio W'/W
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    
+    # Build the Metropolis ratio (R)
+    p_dkah,p_ikah = 0.5,0.5
+    R = W * (p_dkah/p_ikah) * (tau_max-tau_h)/p_site
+        
+    # Metropolis sampling
+    if np.random.random() < R: # Accept
+        
+        # Add to ACCEPTANCE counter
+        ikah_data[0] += 1
+    
+        # Delete the worm end from site i
+        del data_struct[i][k]
+        
+        # Build the kinks to be inserted to each site
+        kink_i = [tau_kink,n_i,(i,j)]
+        kink_j = [tau_kink,n_wj,(i,j)]
+        head_kink_j = [tau_h,n_j,(j,j)]
+                
+        # Insert kinks
+        data_struct[i].insert(k,kink_i) # kink on i
+        data_struct[j].insert(tau_next_j_idx,kink_j) # kink on j
+        data_struct[j].insert(tau_next_j_idx,head_kink_j) # head kink on j
+                       
+        # Readjust head indices
+        head_loc[0] = j
+        head_loc[1] = tau_next_j_idx
+        
+        # Readjust tail indices if on head dest site and at later time
+        if tail_loc:
+            if tail_loc[0] == j and tau_t > tau_h:
+                tail_loc[1] += 2 # kink and head insertion raises tail idx by two
+        
+        return True
+    
+    else: # Reject
+        return False
+    
+'----------------------------------------------------------------------------------'
+
+'----------------------------------------------------------------------------------'
+
     
 # Visualize worldline configurations for Lattice Path Integral Monte Carlo (PIMC)
 def view_worldlines(data_struct,beta,figure_name=None):
