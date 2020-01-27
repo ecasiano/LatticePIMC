@@ -1074,6 +1074,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     
     # Randomly choose the time of the kink
     tau_kink = tau_min + np.random.random()*(tau_h-tau_min)
+    if tau_kink == tau_min: return False
     
     # Check if the update would violate conservation of total particle number
     if canonical: # do the check for Canonical simulation
@@ -1105,6 +1106,9 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
     R = W * (p_dkbh/p_ikbh) * (tau_h-tau_min)/p_site
+    
+    print(tau_h-tau_min)
+    #print(R)
     
     # Metropolis sampling
     if np.random.random() < R: # Accept
@@ -1227,6 +1231,9 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     R = W * (p_dkbh/p_ikbh) * (tau_h-tau_min)/p_site
     R = 1/R
     
+    #print(tau_h-tau_min)
+    #print(R) # GETTING NEGATIVES!!!!!
+    
     # Metropolis Sampling
     if np.random.random() < R: # Accept
         
@@ -1334,6 +1341,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     
     # Randomly choose the time of the kink
     tau_kink = tau_h + np.random.random()*(tau_max-tau_h)
+    if tau_kink == tau_h: return False
     
     # Check if the update would violate conservation of total particle number
     if canonical: # do the check for Canonical simulation
@@ -1361,11 +1369,14 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     
     # Calculate the weight ratio W'/W
     W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    #print(n_wj)
     
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
     R = W * (p_dkah/p_ikah) * (tau_max-tau_h)/p_site
-        
+    #print(tau_max-tau_h)
+    #print(R) # GETTING NEGATIVES!!!!!
+
     # Metropolis sampling
     if np.random.random() < R: # Accept
         
@@ -1400,6 +1411,137 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
         return False
     
 '----------------------------------------------------------------------------------'
+
+def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,dkah_data):
+
+    # Update only possible if there is worm head present
+    if not(head_loc): return None
+    
+    # Cannot do update if there's nothing after the head
+    if head_loc[1] == len(data_struct[head_loc[0]])-1: return None
+    
+    # Retrieve the head indices
+    j = head_loc[0] # site (also destination site of the kink)
+    k = head_loc[1] # kink
+    
+    # Retrieve the source site of the kink after the head
+    i = data_struct[j][k+1][2][0]
+
+    # Update only possible if there's an actual kink (not wormend) after the head
+    if i == j: return None
+    
+    # Add to PROPOSAL counter
+    dkah_data[1] += 1
+    
+    # Number of lattice sites
+    L = len(data_struct)    
+    
+    # Retrieve the time of the head (and tail if present)
+    tau_h = data_struct[j][k][0]
+    if tail_loc:
+        tau_t = data_struct[tail_loc[0]][tail_loc[1]][0]
+    
+    # Retrieve the time of the kink
+    tau_kink = data_struct[j][k+1][0]
+    
+    # Retrieve the time of the "kink" after the kink (i.e, the upper bound)
+    if k+1 == len(data_struct[j])-1:
+        tau_next_j = beta
+    else:
+        tau_next_j = data_struct[j][k+2][0]
+   
+    # Retrieve the no. of particles after/before worm head
+    n_j = data_struct[j][k][1] # after worm head
+    n_wj = n_j+1 # before worm head
+    
+    # Determine the lower bound of the flat region of the kink SRC site
+    for idx in range(len(data_struct[i])):
+        tau = data_struct[i][idx][0] # imaginary time
+        n = data_struct[i][idx][1]   # particles in the flat
+        if tau < tau_kink:
+            tau_prev_i = tau
+            n_wi = n # Particles before the kink on the src site
+            tau_prev_i_idx = idx
+        else: break
+    n_i = n_wi-1 # No. of particles on i after the particle hop
+    
+    # Determine tau_next_i
+    if tau_prev_i_idx+1 == len(data_struct[i])-1:
+        tau_next_i = beta
+    else:
+        tau_next_i = data_struct[i][tau_prev_i_idx][0]
+    
+    # Determine the highest time at which the kink could've been inserted
+    tau_max = min(tau_next_i,tau_next_j)
+    
+    # Determine probability of particle hopping left or right
+    if len(data_struct) > 2: # more than 2 sites
+        p_site = 0.5
+    else: # only 2 sites
+        p_site = 1
+    
+    # Check if the update would violate conservation of total particle number
+    if canonical: # do the check for Canonical simulation
+        data_struct_tmp = deepcopy(data_struct)
+        
+        # Delete the kink structure on both sites
+        del data_struct_tmp[j][k+1] # deletes the kink from j
+        del data_struct_tmp[j][k] # deletes the worm head from j
+        del data_struct_tmp[i][tau_prev_i_idx+1] # deletes the kink from i
+    
+        # Build the worm head kink to be moved to i
+        head_kink_i = [tau_h,n_i,(i,i)]
+        
+        # Insert the worm kink on i
+        data_struct_tmp[i].insert(tau_prev_i_idx+1,head_kink_i)
+        
+        N_check = N_tracker(data_struct_tmp,beta)
+        if N_check <= N-1 or N_check >= N+1: return False
+    
+    # Calculate the diagonal energy difference on both sites
+    dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
+    dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
+    
+    # Calculate the weight ratio W'/W
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    
+    # Build the Metropolis ratio (R)
+    p_dkah,p_ikah = 0.5,0.5
+    R = W * (p_dkah/p_ikah) * (tau_max-tau_h)/p_site
+    R = 1/R
+    
+    #print(tau_max-tau_h)
+    #print(R) # GETTING NEGATIVES!!!!!
+    # Metropolis Sampling
+    if np.random.random() < R: # Accept
+        
+        # Add to ACCEPTANCE counter
+        dkah_data[0] += 1
+        
+        # Delete the kink structure on both sites
+        del data_struct[j][k+1] # deletes the kink from j
+        del data_struct[j][k] # deletes the worm head from j
+        del data_struct[i][tau_prev_i_idx+1] # deletes the kink from i
+    
+        # Build the worm head kink to be moved to i
+        head_kink_i = [tau_h,n_i,(i,i)]
+        
+        # Insert the worm kink on i
+        data_struct[i].insert(tau_prev_i_idx+1,head_kink_i)
+        
+        # Readjust head indices
+        head_loc[0] = i
+        head_loc[1] = tau_prev_i_idx+1
+
+        # Readjust tail indices if on site j and at later time
+        if tail_loc:
+            if tail_loc[0] == j and tau_t > tau_h:
+                tail_loc[1] -= 2 # kink and head insertion raises tail idx by two
+        
+        return True
+    
+    else: # Reject
+        return False
 
 '----------------------------------------------------------------------------------'
 
