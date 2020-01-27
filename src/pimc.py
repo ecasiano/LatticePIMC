@@ -1077,6 +1077,26 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     # Randomly choose the time of the kink
     tau_kink = tau_min + np.random.random()*(tau_h-tau_min)
     
+    # Check if the update would violate conservation of total particle number
+    if canonical: # do the check for Canonical simulation
+        data_struct_tmp = deepcopy(data_struct)
+        
+        # Build the kinks to be inserted to each site
+        kink_i = [tau_kink,n_i,(i,j)]
+        kink_j = [tau_kink,n_wj,(i,j)]
+        head_kink_j = [tau_h,n_j,(j,j)]
+        
+        # Delete the worm end from site i
+        del data_struct_tmp[i][k]
+        
+        # Insert kinks
+        data_struct_tmp[i].insert(k,kink_i)
+        data_struct_tmp[j].insert(tau_prev_j_idx+1,head_kink_j)
+        data_struct_tmp[j].insert(tau_prev_j_idx+1,kink_j)
+        
+        N_check = N_tracker(data_struct_tmp,beta)
+        if N_check <= N-1 or N_check >= N+1: return False
+        
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
