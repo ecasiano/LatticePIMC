@@ -1019,7 +1019,10 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     # Need at least two sites for a spaceshift
     if len(data_struct) <= 1: return None
     
-    # Retrieve worm head indices (site,kink)
+    # Add to PROPOSAL counter
+    ikbh_data[1] += 1
+    
+    # Retrieve worm head indices (i:site,k:kink)
     i = head_loc[0]
     k = head_loc[1]
     
@@ -1029,7 +1032,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     # Randomly choose destination site (j) of the head
     if len(data_struct) == 2: # Only two sites
         j = i-1
-        p_site = 1
+        p_site = 1 # probability of hopping to site j
     else: # 3 sites or more
         if np.random.random() < 0.5:
             j = i+1 # Head hops to the right
@@ -1039,27 +1042,32 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
             j = i-1
         p_site = 0.5
     
-    # Make the j positive if it was -1
+    # Need to make the j exclusively positive for plotting purposes
     if j==-1:
         j = L-1 # head hops to last site
       
     # Retrieve the time of the worm head
-    print(i,k)
     tau_h = data_struct[i][k][0]
+    
+    # If present, retrieve the time of the worm tail
+    if tail_loc:
+        tau_t = data_struct[tail_loc[0]][tail_loc[1]][0]
     
     # Retrieve the no. of particles before/after head
     n_i = data_struct[i][k][1] # after head
     n_wi = n_i+1 # before head
     
-    # Determine the lower bounds of the flats on both sites
-    tau_prev_i = data_struct[i][k-1][0] # head site lower bound
+    # Determine the lower bounds of the flat where head lives
+    tau_prev_i = data_struct[i][k-1][0] # lower bound of head src site
+    
+    # Determine the lower bounds of the flat where head will move to
     for idx in range(len(data_struct[j])):
-        tau = data_struct[j][idx][0]
-        n = data_struct[j][idx][1]
+        tau = data_struct[j][idx][0] # imaginary time
+        n = data_struct[j][idx][1]   # particles in flat idx
         if tau <= tau_h:
             tau_prev_j = tau
             n_j = n # Number of particles originally in the flat
-            j_kink_idx = idx+1
+            tau_prev_j_idx = idx
         else: break
     n_wj = n_j+1 # No. of particles on j after the particle hop
     
@@ -1079,11 +1087,14 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
     R = W * (p_dkbh/p_ikbh) * (tau_h-tau_min)/p_site
-    print(R)
+    
     # Metropolis sampling
     if np.random.random() < R: # Accept
         
-        # Build the kink on each site
+        # Add to ACCEPTANCE counter
+        ikbh_data[0] += 1
+    
+        # Build the kinks to be inserted to each site
         kink_i = [tau_kink,n_i,(i,j)]
         kink_j = [tau_kink,n_wj,(i,j)]
         head_kink_j = [tau_h,n_j,(j,j)]
@@ -1093,22 +1104,17 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
                 
         # Insert kinks
         data_struct[i].insert(k,kink_i)
-        data_struct[j].insert(j_kink_idx,head_kink_j)
-        data_struct[j].insert(j_kink_idx,kink_j)
-        
-        # Readjust tail indices if on src site
-        if tail_loc:
-            if tail_loc[0] == i and tail_loc[1] > k:
-                tail_loc[1] -= 1
-                
-        # Readjust tail indices if on dest. site
-        if tail_loc:
-            if tail_loc[0] == j and tail_loc[1] > j_kink_idx:
-                tail_loc[1] += 1
-                
+        data_struct[j].insert(tau_prev_j_idx+1,head_kink_j)
+        data_struct[j].insert(tau_prev_j_idx+1,kink_j)
+                       
         # Readjust head indices
         head_loc[0] = j
-        head_loc[1] = j_kink_idx+1
+        head_loc[1] = tau_prev_j_idx+2
+        
+        # Readjust tail indices if on head dest site and at later time
+        if tail_loc:
+            if tail_loc[0] == j and tau_t > tau_h:
+                tail_loc[1] += 2 # kink and head insertion raises tail idx by two
         
         return True
     
