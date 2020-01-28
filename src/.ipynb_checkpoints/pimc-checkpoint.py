@@ -1107,10 +1107,6 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     p_dkbh,p_ikbh = 0.5,0.5
     R = W * (p_dkbh/p_ikbh) * (tau_h-tau_min)/p_site
     
-    #print(tau_h-tau_min)
-    #print(R)
-    if tau_h-tau_min < 0: return 666
-    
     # Metropolis sampling
     if np.random.random() < R: # Accept
         
@@ -1240,9 +1236,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     p_dkbh,p_ikbh = 0.5,0.5
     R = W * (p_dkbh/p_ikbh) * (tau_h-tau_min)/p_site
     R = 1/R
-    
-    if tau_h-tau_min < 0: return 666
-    
+        
     # Metropolis Sampling
     if np.random.random() < R: # Accept
 
@@ -1333,7 +1327,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
         if tau > tau_h:
             break
         else:
-            tau_next_j = tau
+            tau_prev_j = tau
             n_wj = n # Number of particles originally in the flat
             tau_prev_j_idx = idx     
     n_j = n_wj-1 # No. of particles on j after the particle hop
@@ -1343,7 +1337,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     if tau_prev_j_idx == len(data_struct[j])-1:
         tau_next_j = beta
     else:
-        tau_next_j = data_struct[j][tau_prev_j_idx+1][0]
+        tau_next_j = data_struct[j][tau_next_j_idx][0]
 
     # Determine the highest time at which the kink can be inserted
     tau_max = min(tau_next_i,tau_next_j)
@@ -1378,17 +1372,10 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     
     # Calculate the weight ratio W'/W
     W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
-    #print(n_wj)
     
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
     R = W * (p_dkah/p_ikah) * (tau_max-tau_h)/p_site
-
-    if tau_max-tau_h < 0: 
-        print(data_struct[i][k-1][1],data_struct[i][k][1])
-        print("i:",i,"j:",j)
-        print(tau_next_i,tau_next_j)
-        return 666
     
     # Metropolis sampling
     if np.random.random() < R: # Accept
@@ -1477,6 +1464,9 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
             tau_prev_i_idx = idx
         else: break
     n_i = n_wi-1 # No. of particles on i after the particle hop
+    
+    # Deletion cannnot interfere w/ kinks on other site
+    if tau_h <= tau_prev_i: return None
     
     # Determine tau_next_i
     if tau_prev_i_idx+1 == len(data_struct[i])-1:
