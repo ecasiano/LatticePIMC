@@ -1107,8 +1107,9 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     p_dkbh,p_ikbh = 0.5,0.5
     R = W * (p_dkbh/p_ikbh) * (tau_h-tau_min)/p_site
     
-    print(tau_h-tau_min)
+    #print(tau_h-tau_min)
     #print(R)
+    if tau_h-tau_min < 0: return 666
     
     # Metropolis sampling
     if np.random.random() < R: # Accept
@@ -1154,11 +1155,15 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     j = head_loc[0] # site (also destination site of the kink)
     k = head_loc[1] # kink
     
-    # Retrieve the source site of the kink before the head
-    i = data_struct[j][k-1][2][0]
+    # Retrieve the source and dest site of the kink before the head
+    src = data_struct[j][k-1][2][0]
+    dest = data_struct[j][k-1][2][1]
 
     # Update only possible if there's an actual kink before the head
-    if i == j: return None # i.e, the kink cannot be worm end or initial element
+    if src == dest: return None # i.e, the kink cannot be worm end or initial element
+    
+    # Site where head will return to after kink deletion
+    i = src
     
     # Add to PROPOSAL counter
     dkbh_data[1] += 1
@@ -1181,7 +1186,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     n_j = data_struct[j][k][1] # after worm head
     n_wj = n_j+1 # before worm head
     
-    # Determine the lower bound of the flat region of the kink src site
+    # Determine the lower bound of the flat region of the kink src site (i)
     for idx in range(len(data_struct[i])):
         tau = data_struct[i][idx][0] # imaginary time
         n = data_struct[i][idx][1]   # particles in the flat
@@ -1196,7 +1201,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     tau_min = max(tau_prev_i,tau_prev_j)
     
     # Determine probability of particle hopping left or right
-    if len(data_struct) > 2:
+    if len(data_struct) > 2: # 3 or more lattice sites
         p_site = 0.5
     else: # only 2 sites
         p_site = 1
@@ -1230,17 +1235,21 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     p_dkbh,p_ikbh = 0.5,0.5
     R = W * (p_dkbh/p_ikbh) * (tau_h-tau_min)/p_site
     R = 1/R
+    #if tau_h-tau_min < 0: return 666
     
-    #print(tau_h-tau_min)
-    #print(R) # GETTING NEGATIVES!!!!!
+    if i == j: 
+        print(i,j)
+        return 666
     
     # Metropolis Sampling
     if np.random.random() < R: # Accept
-        
+
         # Add to ACCEPTANCE counter
         dkbh_data[0] += 1
         
         # Delete the kink structure on both sites
+        print(i,j)
+        lol = data_struct[i][tau_prev_i_idx+1]
         del data_struct[j][k] # deletes the worm head from j
         del data_struct[j][k-1] # deletes the kink from j
         del data_struct[i][tau_prev_i_idx+1] # deletes the kink from i
@@ -1374,9 +1383,13 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
     R = W * (p_dkah/p_ikah) * (tau_max-tau_h)/p_site
-    #print(tau_max-tau_h)
-    #print(R) # GETTING NEGATIVES!!!!!
 
+    if tau_max-tau_h < 0: 
+        print(data_struct[i][k-1][1],data_struct[i][k][1])
+        print("i:",i,"j:",j)
+        print(tau_next_i,tau_next_j)
+        return 666
+    
     # Metropolis sampling
     if np.random.random() < R: # Accept
         
@@ -1469,7 +1482,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     if tau_prev_i_idx+1 == len(data_struct[i])-1:
         tau_next_i = beta
     else:
-        tau_next_i = data_struct[i][tau_prev_i_idx][0]
+        tau_next_i = data_struct[i][tau_prev_i_idx+2][0]
     
     # Determine the highest time at which the kink could've been inserted
     tau_max = min(tau_next_i,tau_next_j)
@@ -1510,8 +1523,6 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     R = W * (p_dkah/p_ikah) * (tau_max-tau_h)/p_site
     R = 1/R
     
-    #print(tau_max-tau_h)
-    #print(R) # GETTING NEGATIVES!!!!!
     # Metropolis Sampling
     if np.random.random() < R: # Accept
         
