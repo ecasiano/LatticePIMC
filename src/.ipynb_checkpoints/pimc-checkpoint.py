@@ -1155,18 +1155,11 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     j = head_loc[0] # site (also destination site of the kink)
     k = head_loc[1] # kink
     
-    # Retrieve the source and dest site of the kink before the head
-    src = data_struct[j][k-1][2][0]
-    dest = data_struct[j][k-1][2][1]
+    # Retrieve the source site of the kink before the head
+    i = data_struct[j][k-1][2][0]
 
     # Update only possible if there's an actual kink before the head
-    if src == dest: return None # i.e, the kink cannot be worm end or initial element
-    
-    # Site where head will return to after kink deletion
-    i = src
-    
-    # Add to PROPOSAL counter
-    dkbh_data[1] += 1
+    if i == j: return None # i.e, the kink cannot be worm end or initial element
     
     # Number of lattice sites
     L = len(data_struct)    
@@ -1197,6 +1190,18 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
         else: break
     n_i = n_wi-1 # No. of particles on i after the particle hop
     
+    # Determine the upper bound of the flat on site i.
+    if tau_prev_i_idx+1 == len(data_struct[i])-1:
+        tau_next_i = beta
+    else:
+        tau_next_i = data_struct[i][tau_prev_i_idx+2][0]
+
+    # Deletion cannnot interfere w/ kinks on other site
+    if tau_h >= tau_next_i: return None
+    
+    # Add to PROPOSAL counter
+    dkbh_data[1] += 1
+
     # Determine the lowest time at which the kink could've been inserted
     tau_min = max(tau_prev_i,tau_prev_j)
     
@@ -1235,11 +1240,8 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     p_dkbh,p_ikbh = 0.5,0.5
     R = W * (p_dkbh/p_ikbh) * (tau_h-tau_min)/p_site
     R = 1/R
-    #if tau_h-tau_min < 0: return 666
     
-    if i == j: 
-        print(i,j)
-        return 666
+    if tau_h-tau_min < 0: return 666
     
     # Metropolis Sampling
     if np.random.random() < R: # Accept
@@ -1248,8 +1250,6 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
         dkbh_data[0] += 1
         
         # Delete the kink structure on both sites
-        print(i,j)
-        lol = data_struct[i][tau_prev_i_idx+1]
         del data_struct[j][k] # deletes the worm head from j
         del data_struct[j][k-1] # deletes the kink from j
         del data_struct[i][tau_prev_i_idx+1] # deletes the kink from i
