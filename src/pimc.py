@@ -1404,7 +1404,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
         if tail_loc:
             if tail_loc[0] == j and tau_t > tau_h:
                 tail_loc[1] += 2 # kink and head insertion raises tail idx by two
-        
+        #
         return True
     
     else: # Reject
