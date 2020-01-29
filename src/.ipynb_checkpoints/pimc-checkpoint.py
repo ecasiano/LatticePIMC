@@ -115,7 +115,7 @@ def n_i_pimc(data_struct,beta):
 def check_worm(head_loc,tail_loc):
     '''Determine if the worldline configuration contains a worm end(s)'''
     
-    if head_loc != [] or tail_loc != []:
+    if head_loc or tail_loc:
         return True
     
     else:
@@ -1859,6 +1859,12 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     tau_t = data_struct[i][k][0]
     if head_loc:
         tau_h = data_struct[head_loc[0]][head_loc[1]][0]
+        
+    # Determine the upper bounds of the flat where tail lives
+    if k == len(data_struct[i])-1: # head is the last "kink" on the site
+        tau_next_i = beta
+    else:
+        tau_next_i = data_struct[i][k+1][0] # upper bound of head src site 
 
     # Determine the lower bounds of the flat where tail lives
     tau_prev_i = data_struct[i][k-1][0] # lower bound of tail src site 
@@ -2042,7 +2048,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
         del data_struct_tmp[i][tau_prev_i_idx+1] # deletes the kink from i
     
         # Build the worm tail kink to be moved to i
-        head_kink_i = [tau_t,n_wi,(i,i)]
+        tail_kink_i = [tau_t,n_wi,(i,i)]
         
         # Insert the worm kink on i
         data_struct_tmp[i].insert(tau_prev_i_idx+1,tail_kink_i)
@@ -2074,7 +2080,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
         del data_struct[i][tau_prev_i_idx+1] # deletes the kink from i
     
         # Build the worm tail kink to be moved to i
-        head_kink_i = [tau_t,n_wi,(i,i)]
+        tail_kink_i = [tau_t,n_wi,(i,i)]
         
         # Insert the worm kink on i
         data_struct[i].insert(tau_prev_i_idx+1,tail_kink_i)
@@ -2086,8 +2092,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
         # Readjust head indices if on site j and at later time
         if head_loc:
             if head_loc[0] == j and tau_h > tau_t:
-                head_loc[1] -= 2 # kink and head deletion lowers tail idx by two
-        
+                head_loc[1] -= 2 # kink and head deletion lowers tail idx by two        
         return True
     
     else: # Reject
