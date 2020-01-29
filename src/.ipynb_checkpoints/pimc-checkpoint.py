@@ -1546,6 +1546,30 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
 
 '----------------------------------------------------------------------------------'
 
+def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,ikbt_data):
+
+    return None
+
+'----------------------------------------------------------------------------------'
+
+def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,dkbt_data):
+    
+    return None
+    
+'----------------------------------------------------------------------------------'
+
+def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,ikat_data):
+    
+    return None
+
+'----------------------------------------------------------------------------------'
+
+def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,dkat_data):
+    
+    return None
+
+'----------------------------------------------------------------------------------'
+
     
 # Visualize worldline configurations for Lattice Path Integral Monte Carlo (PIMC)
 def view_worldlines(data_struct,beta,figure_name=None):
