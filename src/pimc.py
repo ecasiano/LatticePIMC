@@ -55,22 +55,51 @@ def N_tracker(data_struct,beta):
 
 '----------------------------------------------------------------------------------'
 
-def egs_pimc(data_struct,beta,U,mu):
-    '''Calculates pimc ground state energy at time slice tau=beta/2'''
+def get_alpha(data_struct,beta):
+    '''From data_struct, get the Fock state at imaginary time tau'''
     
     # Number of lattice sites
     L = len(data_struct)
-    # BoseHubbard Energy (for no hopping)
-    egs = 0
+    
+    # Initialize list that will contain the Fock state
+    alpha = [0]*L
+
+    # Iterate over every site and get the particle occupation at tau 
     for i in range(L):
         N_flats = len(data_struct[i]) # Number of flats on site i
         for k in range(N_flats):
             if data_struct[i][k][0] <= beta/2:
-                n_i = data_struct[i][k][1] # particles on i at beta/2
+                n_i = data_struct[i][k][1] # particles on i at tau
             else: break
-        egs += ( (U/2)*n_i*(n_i-1)-mu*n_i )
+        alpha[i] = n_i
+            
+    return alpha
+    
+'----------------------------------------------------------------------------------'
+
+def bh_diagonal(alpha,tau,U,mu):
+    '''Calculates Bose Hubbard ground state energy of Fock State alpha'''
+    
+    # Number of lattice sites
+    L = len(alpha)
+    
+    # Calculate BoseHubbard diagonal energy
+    diagonal = 0  
+    # Diagonal
+    for i in range(L):
+        n_i = alpha[i]
+        diagonal += ( (U/2)*n_i*(n_i-1)-mu*n_i )
                     
-    return egs
+    return diagonal
+
+'----------------------------------------------------------------------------------'
+
+def bh_kinetic(alpha,tau):
+    
+    # Calculate BoseHubbard kinetic energy
+    kinetic = 0
+    
+    return kinetic
 
 '----------------------------------------------------------------------------------'
 
@@ -358,7 +387,10 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,delete_w
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities   
     R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L * N_flats * tau_flat**2
-    R = 1/R
+    if R == 0:
+        R = 1000000 # "infinity"
+    else:
+        R = 1/R
     
     # Metropolis sampling
     if np.random.random() < R:
@@ -727,8 +759,10 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteZer
     # Build the Metropolis Ratio  (R)  
     p_dz, p_iz = 0.5,0.5
     R = W * (p_dz/p_iz) * L * p_wormend * tau_flat / p_type
-    R = 1/R
-    
+    if R == 0:
+        R = 1000000 # "infinity"
+    else:
+        R = 1/R    
     # Metropolis sampling
     if np.random.random() < R: # Accept
         
@@ -985,8 +1019,10 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteBet
     # Build the Metropolis Ratio   
     p_db, p_ib = 0.5, 0.5
     R = W * (p_db/p_ib) * L * p_wormend * tau_flat / p_type
-    R = 1/R
-    
+    if R == 0:
+        R = 1000000 # "infinity"
+    else:
+        R = 1/R    
     # Metropolis sampling
     if np.random.random() < R: # Accept
         
@@ -1238,8 +1274,10 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
     R = W * (p_dkbh/p_ikbh) * (tau_h-tau_min)/p_site
-    R = 1/R
-        
+    if R == 0:
+        R = 1000000 # "infinity"
+    else:
+        R = 1/R        
     # Metropolis Sampling
     if np.random.random() < R: # Accept
 
@@ -1520,8 +1558,10 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
     R = W * (p_dkah/p_ikah) * (tau_max-tau_h)/p_site
-    R = 1/R
-    
+    if R == 0:
+        R = 1000000 # "infinity"
+    else:
+        R = 1/R    
     # Metropolis Sampling
     if np.random.random() < R: # Accept
         
@@ -1785,8 +1825,10 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
     R = W * (p_dkbt/p_ikbt) * (tau_t-tau_min)/p_site
-    R = 1/R
-    
+    if R == 0:
+        R = 1000000 # "infinity"
+    else:
+        R = 1/R    
     # Metropolis Sampling
     if np.random.random() < R: # Accept
 
@@ -2066,8 +2108,11 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
     R = W * (p_dkat/p_ikat) * (tau_max-tau_t)/p_site
-    R = 1/R
-    
+    if R == 0:
+        R = 1000000 # "infinity"
+    else:
+        R = 1/R
+        
     # Metropolis Sampling
     if np.random.random() < R: # Accept
         
