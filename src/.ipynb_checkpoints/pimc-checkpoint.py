@@ -55,25 +55,34 @@ def N_tracker(data_struct,beta):
 
 '----------------------------------------------------------------------------------'
 
-def get_alpha(data_struct,beta):
-    '''From data_struct, get the Fock state at imaginary time tau'''
+def get_alphas(data_struct,beta):
+    '''From data_struct, get the Fock state at imaginary time beta/2
+    and configuration before this one'''
     
     # Number of lattice sites
     L = len(data_struct)
     
     # Initialize list that will contain the Fock state
-    alpha = [0]*L
-
-    # Iterate over every site and get the particle occupation at tau 
+    alpha_new = [0]*L
+    alpha_old = [0]*L
+    
+    # Iterate over every site and get the particle occupation at the kink times
     for i in range(L):
         N_flats = len(data_struct[i]) # Number of flats on site i
-        for k in range(N_flats):
-            if data_struct[i][k][0] <= beta/2:
-                n_i = data_struct[i][k][1] # particles on i at tau
-            else: break
-        alpha[i] = n_i
+        if N_flats > 1: # worldline with at least one kink
+            for k in range(1,N_flats): # Ignore the initial values (known)
+                if data_struct[i][k][0] <= beta/2:
+                    n_i_new = data_struct[i][k][1]  # particles on i at tau
+                    n_i_old = data_struct[i][k-1][1] # particles previously
+                else: break
+                alpha_new[i] = n_i_new
+                alpha_old[i] = n_i_old
+        else: # a flat worldline
+            alpha_new[i] = data_struct[i][0][1]
+            alpha_old[i] = data_struct[i][0][1]
             
-    return alpha
+    
+    return alpha_old,alpha_new
     
 '----------------------------------------------------------------------------------'
 
