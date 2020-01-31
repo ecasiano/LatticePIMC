@@ -86,7 +86,7 @@ def get_alphas(data_struct,beta):
     
 '----------------------------------------------------------------------------------'
 
-def bh_diagonal(alpha,tau,U,mu):
+def bh_diagonal(alpha,U,mu):
     '''Calculates Bose Hubbard ground state energy of Fock State alpha'''
     
     # Number of lattice sites
@@ -103,12 +103,45 @@ def bh_diagonal(alpha,tau,U,mu):
 
 '----------------------------------------------------------------------------------'
 
-def bh_kinetic(alpha,tau):
+def bh_kinetic(bra,ket,t):
+    '''Give a state and apply the kinetic operator of the BH-Model
+    to determine its contribution to the total kinetic energy'''
+
+    m = np.copy(ket)
+    L = np.shape(ket)[0] #Number of total sites in the configuration
+    kineticSum = 0 #Initialize total kinetic energy contribution
     
-    # Calculate BoseHubbard kinetic energy
-    kinetic = 0
+    #Loop for bdag_i*b_{i+1}
+    for i in range(L):
+        #Create boson on site i.
+        m[i] += 1
+
+        #Annihilate boson on site i+1 (do nothing if no bosons)
+        if m[(i+1)%(L)] != 0: m[(i+1)%(L)] -= 1 
+        else: m[(i+1)%(L)] = 0
+        
+        if np.array_equal(bra,m):
+            kineticSum += np.sqrt(ket[i]+1)*np.sqrt(ket[(i+1)%(L)])
+        
+        #Make m a copy of the original state n again.
+        m = np.copy(ket)
     
-    return kinetic
+    #Loop for b_i*bdag_{i+1}
+    for i in range(L):
+        #Create boson on site i+1.
+        m[(i+1)%(L)] += 1
+
+        #Annihilate boson on site i (do nothing if no bosons)
+        if m[i] != 0: m[i] -= 1 
+        else: m[i] = 0
+
+        if np.array_equal(bra,m):
+            kineticSum += np.sqrt(ket[i])*np.sqrt(ket[(i+1)%(L)]+1)
+
+        #Make m a copy of the original state n again.
+        m = np.copy(ket)
+        
+    return -kineticSum
 
 '----------------------------------------------------------------------------------'
 
