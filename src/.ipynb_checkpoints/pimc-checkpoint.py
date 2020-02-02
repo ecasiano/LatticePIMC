@@ -55,35 +55,41 @@ def N_tracker(data_struct,beta):
 
 '----------------------------------------------------------------------------------'
 
-def get_alphas(data_struct,beta):
-    '''From data_struct, get the Fock state at imaginary time beta/2
-    and configuration before this one'''
+def bh_egs(data_struct,beta,dtau,U,mu,t):
+    ''''Count the kinks in the interval [0.4*beta,0.6*beta]'''
     
     # Number of lattice sites
     L = len(data_struct)
     
-    # Initialize list that will contain the Fock state
-    alpha_new = [0]*L
-    alpha_old = [0]*L
+    # Store the configuration at beta/2 (need for diagonal energy)
+    alpha = [0]*L
     
-    # Iterate over every site and get the particle occupation at the kink times
+    # Iterate over every site and count the kinks in [beta/2-dtau,beta/2+dtau]
+    n_kinks = 0 # number of kinks
     for i in range(L):
         N_flats = len(data_struct[i]) # Number of flats on site i
-        if N_flats > 1: # worldline with at least one kink
-            for k in range(1,N_flats): # Ignore the initial values (known)
-                if data_struct[i][k][0] <= beta/2:
-                    n_i_new = data_struct[i][k][1]  # particles on i at tau
-                    n_i_old = data_struct[i][k-1][1] # particles previously
-                else: break
-                alpha_new[i] = n_i_new
-                alpha_old[i] = n_i_old
-        else: # a flat worldline
-            alpha_new[i] = data_struct[i][0][1]
-            alpha_old[i] = data_struct[i][0][1]
-            
+        for k in range(N_flats): # Ignore the initial values (known)
+            tau = data_struct[i][k][0]
+            if tau <= 0.5*beta:
+                n_i = data_struct[i][k][1] # no. particles in the flat
+                alpha[i] = n_i # Get Fock state at beta/2 (for diagonal energy)
+                if tau >= 0.5*beta-dtau and tau <= 0.5*beta+dtau:
+                    kink_src = data_struct[i][k][2][1] # source site of the kink
+                    if i == kink_src: # This avoids double counting the kinks
+                        n_kinks += 1                      
+            else: break
+                              
+    # Calculate kinetic energy estimator
+    kinetic = -n_kinks/beta
     
-    return alpha_old,alpha_new
+    # Calculate diagonal energy
+    diagonal = 0  
+    for i in range(L):
+        n_i = alpha[i]
+        diagonal += ( (U/2)*n_i*(n_i-1)-mu*n_i )                
     
+    return kinetic,diagonal
+
 '----------------------------------------------------------------------------------'
 
 def bh_diagonal(alpha,U,mu):
@@ -100,48 +106,6 @@ def bh_diagonal(alpha,U,mu):
         diagonal += ( (U/2)*n_i*(n_i-1)-mu*n_i )
                     
     return diagonal
-
-'----------------------------------------------------------------------------------'
-
-def bh_kinetic(bra,ket,t):
-    '''Give a state and apply the kinetic operator of the BH-Model
-    to determine its contribution to the total kinetic energy'''
-
-    m = np.copy(ket)
-    L = np.shape(ket)[0] #Number of total sites in the configuration
-    kineticSum = 0 #Initialize total kinetic energy contribution
-    
-    #Loop for bdag_i*b_{i+1}
-    for i in range(L):
-        #Create boson on site i.
-        m[i] += 1
-
-        #Annihilate boson on site i+1 (do nothing if no bosons)
-        if m[(i+1)%(L)] != 0: m[(i+1)%(L)] -= 1 
-        else: m[(i+1)%(L)] = 0
-        
-        if np.array_equal(bra,m):
-            kineticSum += np.sqrt(ket[i]+1)*np.sqrt(ket[(i+1)%(L)])
-        
-        #Make m a copy of the original state n again.
-        m = np.copy(ket)
-    
-    #Loop for b_i*bdag_{i+1}
-    for i in range(L):
-        #Create boson on site i+1.
-        m[(i+1)%(L)] += 1
-
-        #Annihilate boson on site i (do nothing if no bosons)
-        if m[i] != 0: m[i] -= 1 
-        else: m[i] = 0
-
-        if np.array_equal(bra,m):
-            kineticSum += np.sqrt(ket[i])*np.sqrt(ket[(i+1)%(L)]+1)
-
-        #Make m a copy of the original state n again.
-        m = np.copy(ket)
-        
-    return -kineticSum
 
 '----------------------------------------------------------------------------------'
 
