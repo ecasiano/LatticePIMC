@@ -582,11 +582,22 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insertZer
     # Calculate diagonal energy difference dV = \epsilon_w - \epsilon
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
     
-    # If there are two wormends present, the deleteZero move has to randomly choose which worm end to delete
+    # If there are two wormends present, the delete move has to randomly choose which to remove
     if not(head_loc) and not(tail_loc): # no ends initially
         p_wormend = 1 # we end up with only one end after insertion, deleteZero would choose this one
     else: # one worm end already present
-        p_wormend = 0.5 # deleteZero might have to choose between two ends
+        if insert_worm: # if insert worm (i.e, a head), the end present was a tail
+            tk = tail_loc[1] # kink idx of the tail
+            if tk != 1: # tail was present but not on first flat, deleteZerocannot choose it
+                p_wormend = 1                
+            else: # tail was present and on first flat, deleteZero can choose either end
+                p_wormend = 0.5
+        else: # if insert anti (i.e, a tail) the end present was a head
+            hk = head_loc[1] # kink idx of the head
+            if hk != 1: # head was present but not on first flat, delete cannot choose it
+                p_wormend = 1                
+            else: # head was present and on first flat, deleteBeta can choose either end
+                p_wormend = 0.5
     
     # Build the kinks to be inserted to the data structure if the move is accepted
     if insert_worm:
@@ -728,11 +739,23 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteZer
         N_after_tail = n_i
     N_after_head = N_after_tail-1
         
-    # Worm insert probability of choosing between worm or antiworm
-    if n_i == 0:
-        p_type = 1 # Only a worm could've been inserted
-    else:
-        p_type = 1/2
+#     # Worm insert probability of choosing between worm or antiworm
+#     if n_i == 0:
+#         p_type = 1 # Only a worm could've been inserted
+#     else:
+#         p_type = 1/2
+        
+    # Worm insert (the reverse update) probability of choosing between worm or antiworm
+    if head_loc and tail_loc: # When insertBeta was proposed, there was one end already present
+        if delete_head: # In the deleted head configuration, there must have still been a tail.
+            p_type = 1 # Only a head could've been inserted
+        if not(delete_head): # In the deleted tail config, there must have still been a head.
+            p_type = 1 # Only a tail could've been inserted
+    else: # When insertBeta was proposed, there were no worm ends present. Choose type randomly.
+        if n_i==0: # If there were no particles on the flat, only a head could've been inserted.
+            p_type = 1
+        else: # If there were particles on the flat, either head or tail could've been inserted.
+            p_type = 1/2
         
     # Check if the update would violate conservation of total particle number
     if canonical: # do the check for Canonical simulation
@@ -870,7 +893,20 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insertBet
     if not(head_loc) and not(tail_loc): # no ends initially
         p_wormend = 1 # we end up with only one end after insertion, deleteZero would choose this one
     else: # one worm end already present
-        p_wormend = 0.5 # deleteZero might have to choose between two ends
+        if insert_worm: # if insert worm (i.e, a tail), the end present was a head
+            hk_last = len(data_struct[head_loc[0]]) - 1 # last kink idx of head site
+            hk = head_loc[1] # kink idx of the head
+            if hk != hk_last: # head was present but not on last flat, deleteBeta cannot choose it
+                p_wormend = 1                
+            else: # head was present and on last flat, deleteBeta can choose either end
+                p_wormend = 0.5
+        else: # if insert anti (i.e, a head), the end present was a tail
+            tk_last = len(data_struct[tail_loc[0]]) - 1 # last kink idx of tail site
+            tk = tail_loc[1] # kink idx of the tail
+            if tk != tk_last: # tail was present but not on last flat, delete cannot choose it
+                p_wormend = 1                
+            else: # head was present and on last flat, deleteBeta can choose either end
+                p_wormend = 0.5
               
     # Build the kinks to be appended to the data structure if the move is accepted
     if insert_worm:
@@ -993,10 +1029,16 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteBet
     N_after_head = N_after_tail-1
        
     # Worm insert (the reverse update) probability of choosing between worm or antiworm
-    if n_i == 0:
-        p_type = 1 # Only a worm could've been inserted
-    else:
-        p_type = 1/2
+    if head_loc and tail_loc: # When insertBeta was proposed, there was one end already present
+        if delete_head: # In the deleted head configuration, there must have still been a tail.
+            p_type = 1 # Only a head could've been inserted
+        if not(delete_head): # In the deleted tail config, there must have still been a head.
+            p_type = 1 # Only a tail could've been inserted
+    else: # When insertBeta was proposed, there were no worm ends present. Choose type randomly.
+        if n_i==0: # If there were no particles on the flat, only a tail could've been inserted.
+            p_type = 1
+        else: # If there were particles on the flat, either head or tail could've been inserted.
+            p_type = 1/2 
     
     # Check if the update would violate conservation of total particle number
     if canonical: # do the check for Canonical simulation
