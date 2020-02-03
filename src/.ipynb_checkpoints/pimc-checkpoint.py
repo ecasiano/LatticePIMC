@@ -17,9 +17,8 @@ def random_boson_config(L,N):
 
 '----------------------------------------------------------------------------------'
 
-def create_data_struct(alpha):
+def create_data_struct(alpha,L):
     '''Generate the [tau,N,(src,dest)] data_struct from the configuration'''
-    L = len(alpha)
 
     data_struct = []
     for i in range(L):
@@ -29,11 +28,8 @@ def create_data_struct(alpha):
 
 '----------------------------------------------------------------------------------'
 
-def N_tracker(data_struct,beta):
+def N_tracker(data_struct,beta,L):
     '''Count total particles in the worldline configuration'''
-    
-    # Number of lattice sites
-    L = len(data_struct)
     
     # Add paths
     l = 0
@@ -55,11 +51,8 @@ def N_tracker(data_struct,beta):
 
 '----------------------------------------------------------------------------------'
 
-def bh_egs(data_struct,beta,dtau,U,mu,t):
+def bh_egs(data_struct,beta,dtau,U,mu,t,L):
     ''''Count the kinks in the interval [0.4*beta,0.6*beta]'''
-    
-    # Number of lattice sites
-    L = len(data_struct)
     
     # Store the configuration at beta/2 (need for diagonal energy)
     alpha = [0]*L
@@ -92,28 +85,9 @@ def bh_egs(data_struct,beta,dtau,U,mu,t):
 
 '----------------------------------------------------------------------------------'
 
-def bh_diagonal(alpha,U,mu):
-    '''Calculates Bose Hubbard ground state energy of Fock State alpha'''
-    
-    # Number of lattice sites
-    L = len(alpha)
-    
-    # Calculate BoseHubbard diagonal energy
-    diagonal = 0  
-    # Diagonal
-    for i in range(L):
-        n_i = alpha[i]
-        diagonal += ( (U/2)*n_i*(n_i-1)-mu*n_i )
-                    
-    return diagonal
-
-'----------------------------------------------------------------------------------'
-
-def n_pimc(data_struct,beta):
+def n_pimc(data_struct,beta,L):
     '''Calculates total particle number at time slice tau=beta/2'''
-    
-    # Number of lattice sites
-    L = len(data_struct)
+
     # Average particle number at slice beta/2 (for no hopping)
     n = 0
     for i in range(L):
@@ -128,11 +102,9 @@ def n_pimc(data_struct,beta):
 
 '----------------------------------------------------------------------------------'
 
-def n_i_pimc(data_struct,beta):
+def n_i_pimc(data_struct,beta,L):
     '''Determine site occupation at time slice beta/2'''
     
-    # Number of lattice sites
-    L = len(data_struct)
     # Average particle number at slice beta/2 (for no hopping)
     n = [] # stores average particle number per site
     for i in range(L):
@@ -158,34 +130,12 @@ def check_worm(head_loc,tail_loc):
 
 '----------------------------------------------------------------------------------'
 
-def egs_theory(L,U,mu):
-    '''Calculates BH model theoretical ground state energy with no hopping'''
-    
-    # NOTE: This works for unit filling (not sure if otherwise works)
-    n_min = 1
-    #n_min = 1/2 + mu/U
-    #n_min = 1 + mu/U
-
-    #if n_min == 0.5 : 
-    #   n_min = 1   # python's round method goes down for 0.5
-    #else: 
-    #   n_min = round(n_min) # round to nearest integer
-    egs = L * (U/2*n_min*(n_min-1) - mu*n_min )
-    #egs = L * (U*n_min*(n_min-1) - mu*n_min )
-
-    return egs
-
-'----------------------------------------------------------------------------------'
-
-def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insert_worm_data,insert_anti_data):
+def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insert_worm_data,insert_anti_data):
     
     '''Inserts a worm or antiworm'''
 
     # Can only insert worm if there are NO wormends present
     if head_loc or tail_loc: return None
-
-    # Number of lattice sites
-    L = len(data_struct)
 
     # Randomly select a lattice site i on which to insert a worm or antiworm 
     i = np.random.randint(L)
@@ -263,7 +213,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insert_w
                 data_struct_tmp[i].insert(k+1,head_kink)
                 data_struct_tmp[i].insert(k+2,tail_kink)
         
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
     
     # Calculate the difference in diagonal energy dV = \epsilon_w - \epsilon
@@ -315,7 +265,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insert_w
 
 '----------------------------------------------------------------------------------'
 
-def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,delete_worm_data,delete_anti_data):
+def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,delete_worm_data,delete_anti_data):
 
     # Can only propose worm deletion if both worm ends are present
     if not(head_loc) or not(tail_loc) : return None
@@ -333,9 +283,6 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,delete_w
     # Retrieve the times of the worm head and tail 
     tau_h = data_struct[hx][hk][0]
     tau_t = data_struct[tx][tk][0]
-    
-    # Number of lattice sites
-    L = len(data_struct)
     
     # No. of flat regions BEFORE worm insertion
     N_flats = len(data_struct[hx]) - 2
@@ -384,7 +331,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,delete_w
             del data_struct_tmp[tx][tk] # Deletes masha
             del data_struct_tmp[hx][hk] # Deletes ira
 
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False 
             
     # Calculate diagonal energy difference
@@ -425,7 +372,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,delete_w
     
 '----------------------------------------------------------------------------------'
 
-def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
+def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical):
 
     # Reject update if there are is no worm end present
     if head_loc == [] and tail_loc == [] : return None
@@ -522,13 +469,10 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,canonical,N):
 
 '----------------------------------------------------------------------------------'
 
-def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insertZero_worm_data,insertZero_anti_data):
+def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertZero_worm_data,insertZero_anti_data):
     
     # Cannot insert if there's two worm ends present
     if head_loc and tail_loc: return None
-    
-    # Randomly choose a lattice site
-    L = len(data_struct)
 
     # Randomly select site i on which to insert a zero worm or antiworm
     i = np.random.randint(L)
@@ -618,7 +562,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insertZer
         
         data_struct_tmp[i][0] = first_flat # Modify the first flat
         
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
         
     # Build the weigh ratio W'/W
@@ -669,7 +613,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insertZer
 
 '----------------------------------------------------------------------------------'
 
-def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteZero_worm_data,deleteZero_anti_data):
+def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteZero_worm_data,deleteZero_anti_data):
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -684,9 +628,6 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteZer
     else: # only tail present
         if tail_loc[1] != 1:
             return None
-    
-    # Number of lattice sites
-    L = len(data_struct)
 
     # Decide which worm end to delete
     if head_loc and tail_loc: # both worm ends present (at least one is on a first flat)
@@ -739,12 +680,6 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteZer
         N_after_tail = n_i
     N_after_head = N_after_tail-1
         
-#     # Worm insert probability of choosing between worm or antiworm
-#     if n_i == 0:
-#         p_type = 1 # Only a worm could've been inserted
-#     else:
-#         p_type = 1/2
-        
     # Worm insert (the reverse update) probability of choosing between worm or antiworm
     if head_loc and tail_loc: # When insertBeta was proposed, there was one end already present
         if delete_head: # In the deleted head configuration, there must have still been a tail.
@@ -766,7 +701,7 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteZer
         else: # delete tail
             data_struct_tmp[x][0][1] += 1
     
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False 
   
     # Add to deleteZero PROPOSAL counters
@@ -826,13 +761,10 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteZer
     
 '----------------------------------------------------------------------------------'
 
-def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insertBeta_worm_data,insertBeta_anti_data):
+def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertBeta_worm_data,insertBeta_anti_data):
     
     # Cannot insert if there's two worm end already present
     if head_loc and tail_loc: return None
-    
-    # Randomly choose a lattice site
-    L = len(data_struct)
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
     i = np.random.randint(L)
@@ -920,7 +852,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insertBet
         
         data_struct_tmp[i].append(worm_end_kink)
         
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False 
             
     # Build the weight ratio W'/W
@@ -957,7 +889,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,insertBet
     
 '----------------------------------------------------------------------------------'
 
-def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteBeta_worm_data,deleteBeta_anti_data):
+def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteBeta_worm_data,deleteBeta_anti_data):
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -976,9 +908,6 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteBet
         tk_last = len(data_struct[tail_loc[0]]) - 1
         if tail_loc[1] != tk_last:
             return None
-    
-    # Number of lattice sites
-    L = len(data_struct)
 
     # Decide which worm end to delete
     if head_loc and tail_loc: # both worm ends present (at least one is on a last flat)
@@ -1045,7 +974,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteBet
         data_struct_tmp = deepcopy(data_struct)
         del data_struct_tmp[x][k]
     
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False 
         
     # Add to deleteBeta PROPOSAL counters
@@ -1071,6 +1000,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteBet
         R = 1000000 # "infinity"
     else:
         R = 1/R    
+        
     # Metropolis sampling
     if np.random.random() < R: # Accept
         
@@ -1095,13 +1025,13 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteBet
     
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,ikbh_data):
+def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,ikbh_data):
     
     # Update only possible if there is a worm head present
     if not(head_loc): return None
     
     # Need at least two sites for a spaceshift
-    if len(data_struct) <= 1: return None
+    if L <= 1: return None
     
     # Add to PROPOSAL counter
     ikbh_data[1] += 1
@@ -1110,25 +1040,22 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     i = head_loc[0]
     k = head_loc[1]
     
-    # Number of lattice sites
-    L = len(data_struct)
-    
     # Randomly choose destination site (j) of the head
-    if len(data_struct) == 2: # Only two sites
-        j = i-1
+    if L == 2: # Only two sites
+        j = i-1 # Hop head to the left
+        if j==-1: # PBC's
+            j = L-1 # head hops to last site
         p_site = 1 # probability of hopping to site j
     else: # 3 sites or more
         if np.random.random() < 0.5:
-            j = i+1 # Head hops to the right
-            if j == L: # PBC's
+            j = i+1 # Hop head to the right
+            if j == L: 
                 j = 0
         else: # Head hops to the left
             j = i-1
+            if j==-1:
+                j = L-1 # head hops to last site
         p_site = 0.5
-    
-    # Need to make the j exclusively positive for plotting purposes
-    if j==-1:
-        j = L-1 # head hops to last site
       
     # Retrieve the time of the worm head (and tail if present)
     tau_h = data_struct[i][k][0]
@@ -1177,7 +1104,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
         data_struct_tmp[j].insert(tau_prev_j_idx+1,head_kink_j)
         data_struct_tmp[j].insert(tau_prev_j_idx+1,kink_j)
         
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
         
     # Calculate the diagonal energy difference on both sites
@@ -1185,7 +1112,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * np.sqrt(n_wj*n_wi) * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
     
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1226,13 +1153,13 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     
 '----------------------------------------------------------------------------------'
  
-def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,dkbh_data):
+def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,dkbh_data):
     
     # Update only possible if there is worm head present
     if not(head_loc): return None
     
     # Need at least two sites for a spaceshift
-    if len(data_struct) <= 1: return None
+    if L <= 1: return None
     
     # Retrieve the head indices
     j = head_loc[0] # site (also destination site of the kink)
@@ -1242,10 +1169,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     i = data_struct[j][k-1][2][0]
 
     # Update only possible if there's an actual kink before the head
-    if i == j: return None # i.e, the kink cannot be worm end or initial element
-    
-    # Number of lattice sites
-    L = len(data_struct)    
+    if i == j: return None # i.e, the kink cannot be worm end or initial element   
     
     # Retrieve the time of the head (and tail if present)
     tau_h = data_struct[j][k][0]
@@ -1288,11 +1212,11 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     # Determine the lowest time at which the kink could've been inserted
     tau_min = max(tau_prev_i,tau_prev_j)
     
-    # Determine probability of particle hopping left or right
-    if len(data_struct) > 2: # 3 or more lattice sites
-        p_site = 0.5
-    else: # only 2 sites
+    # Determine the probability that the inverse move had of hopping the head to site j
+    if L == 2: # only 2 sites
         p_site = 1
+    else: # more than 2 sites
+        p_site = 0.5
     
     # Check if the update would violate conservation of total particle number
     if canonical: # do the check for Canonical simulation
@@ -1309,7 +1233,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
         # Insert the worm kink on i
         data_struct_tmp[i].insert(tau_prev_i_idx+1,head_kink_i)
         
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
     
     # Calculate the diagonal energy difference on both sites
@@ -1317,7 +1241,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * np.sqrt(n_wj*n_wi) * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
     
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1325,7 +1249,8 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     if R == 0:
         R = 1000000 # "infinity"
     else:
-        R = 1/R        
+        R = 1/R    
+        
     # Metropolis Sampling
     if np.random.random() < R: # Accept
 
@@ -1359,7 +1284,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,ikah_data):
+def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,ikah_data):
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1373,9 +1298,6 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     # Retrieve worm head indices (i:site,k:kink)
     i = head_loc[0]
     k = head_loc[1]
-    
-    # Number of lattice sites
-    L = len(data_struct)
     
     # Randomly choose destination site (j) of the head
     if len(data_struct) == 2: # Only two sites
@@ -1455,7 +1377,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
         data_struct_tmp[j].insert(tau_next_j_idx,kink_j) # kink on j
         data_struct_tmp[j].insert(tau_next_j_idx,head_kink_j) # head kink on j
         
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
         
     # Calculate the diagonal energy difference on both sites
@@ -1463,7 +1385,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * np.sqrt(n_wj*n_wi) * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
     
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1504,13 +1426,13 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,dkah_data):
+def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,dkah_data):
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
     
     # Need at least two sites for a spaceshift
-    if len(data_struct) <= 1: return None
+    if L <= 1: return None
     
     # Cannot do update if there's nothing after the head
     if head_loc[1] == len(data_struct[head_loc[0]])-1: return None
@@ -1523,13 +1445,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     i = data_struct[j][k+1][2][0]
 
     # Update only possible if there's an actual kink (not wormend) after the head
-    if i == j: return None
-    
-    # Add to PROPOSAL counter
-    dkah_data[1] += 1
-    
-    # Number of lattice sites
-    L = len(data_struct)    
+    if i == j: return None  
     
     # Retrieve the time of the head (and tail if present)
     tau_h = data_struct[j][k][0]
@@ -1549,7 +1465,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     n_j = data_struct[j][k][1] # after worm head
     n_wj = n_j+1 # before worm head
     
-    # Determine the lower bound of the flat region of the kink SRC site
+    # Determine the lower bound of the flat region of the kink SRC site (i)
     for idx in range(len(data_struct[i])):
         tau = data_struct[i][idx][0] # imaginary time
         n = data_struct[i][idx][1]   # particles in the flat
@@ -1563,6 +1479,9 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     # Deletion cannnot interfere w/ kinks on other site
     if tau_h <= tau_prev_i: return None
     
+    # Add to PROPOSAL counter
+    dkah_data[1] += 1
+    
     # Determine tau_next_i
     if tau_prev_i_idx+1 == len(data_struct[i])-1:
         tau_next_i = beta
@@ -1572,11 +1491,11 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     # Determine the highest time at which the kink could've been inserted
     tau_max = min(tau_next_i,tau_next_j)
     
-    # Determine probability of particle hopping left or right
-    if len(data_struct) > 2: # more than 2 sites
-        p_site = 0.5
-    else: # only 2 sites
+    # The inverse move (IKAH), had to choose which site head would hop to
+    if L == 2: # only two sites
         p_site = 1
+    else: # More than two sites
+        p_site = 0.5
     
     # Check if the update would violate conservation of total particle number
     if canonical: # do the check for Canonical simulation
@@ -1593,7 +1512,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
         # Insert the worm kink on i
         data_struct_tmp[i].insert(tau_prev_i_idx+1,head_kink_i)
         
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
     
     # Calculate the diagonal energy difference on both sites
@@ -1601,7 +1520,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * np.sqrt(n_wj*n_wi) * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
     
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1643,7 +1562,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,ikbt_data):
+def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,ikbt_data):
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1657,9 +1576,6 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     # Retrieve worm tail indices (i:site,k:kink)
     i = tail_loc[0]
     k = tail_loc[1]
-    
-    # Number of lattice sites
-    L = len(data_struct)
     
     # Randomly choose destination site (j) of the head
     if L == 2: # Only two sites
@@ -1728,7 +1644,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
         data_struct_tmp[j].insert(tau_prev_j_idx+1,tail_kink_j)
         data_struct_tmp[j].insert(tau_prev_j_idx+1,kink_j)
         
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False    
     
     # Calculate the diagonal energy difference on both sites
@@ -1736,7 +1652,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * np.sqrt(n_wj*n_wi) * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
     
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1777,7 +1693,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     
 '----------------------------------------------------------------------------------'
 
-def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,dkbt_data):
+def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,dkbt_data):
     
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1793,10 +1709,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     i = data_struct[j][k-1][2][1]
 
     # Update only possible if there's an actual kink before the tail
-    if i == j: return None # i.e, the kink cannot be worm end or initial element
-    
-    # Number of lattice sites
-    L = len(data_struct)    
+    if i == j: return None # i.e, the kink cannot be worm end or initial element   
     
     # Retrieve the time of the tail (and head if present)
     tau_t = data_struct[j][k][0]
@@ -1860,7 +1773,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
         # Insert the worm kink on i
         data_struct_tmp[i].insert(tau_prev_i_idx+1,tail_kink_i)
         
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
     
     # Calculate the diagonal energy difference on both sites
@@ -1868,7 +1781,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * np.sqrt(n_wj*n_wi) * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
     
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1910,7 +1823,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canoni
         
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,ikat_data):
+def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,ikat_data):
     
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1924,9 +1837,6 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     # Retrieve worm tail indices (i:site,k:kink)
     i = tail_loc[0]
     k = tail_loc[1]
-    
-    # Number of lattice sites
-    L = len(data_struct)
     
     # Randomly choose destination site (j) of the head
     if L == 2: # Only two sites
@@ -2005,7 +1915,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
         data_struct_tmp[j].insert(tau_next_j_idx,kink_j) # kink on j
         data_struct_tmp[j].insert(tau_next_j_idx,tail_kink_j) # tail kink on j
         
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
         
     # Calculate the diagonal energy difference on both sites
@@ -2013,7 +1923,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * np.sqrt(n_wj*n_wi) * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
     
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
@@ -2054,13 +1964,13 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonical,N,dkat_data):
+def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,dkat_data):
 
     # Update only possible if there is worm tail present
     if not(tail_loc): return None
     
     # Need at least two sites for a spaceshift
-    if len(data_struct) <= 1: return None
+    if L <= 1: return None
     
     # Cannot delete if there's nothing after the tail
     if tail_loc[1] == len(data_struct[tail_loc[0]])-1: return None
@@ -2073,13 +1983,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     i = data_struct[j][k+1][2][1]
 
     # Update only possible if there's an actual kink (not wormend) after the tail
-    if i == j: return None
-    
-    # Add to PROPOSAL counter
-    dkat_data[1] += 1
-    
-    # Number of lattice sites
-    L = len(data_struct)    
+    if i == j: return None   
     
     # Retrieve the time of the tail (and head if present)
     tau_t = data_struct[j][k][0]
@@ -2113,6 +2017,9 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     # Deletion cannnot interfere w/ kinks on other site
     if tau_t <= tau_prev_i: return None
     
+    # Add to PROPOSAL counter
+    dkat_data[1] += 1
+    
     # Determine tau_next_i
     if tau_prev_i_idx+1 == len(data_struct[i])-1:
         tau_next_i = beta
@@ -2122,11 +2029,11 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     # Determine the highest time at which the kink could've been inserted
     tau_max = min(tau_next_i,tau_next_j)
     
-    # Determine probability of particle hopping left or right
-    if len(data_struct) > 2: # more than 2 sites
-        p_site = 0.5
-    else: # only 2 sites
+    # The inverse move (IKAT), had to choose which site tail would hop to
+    if L == 2: # only two sites
         p_site = 1
+    else: # More than two sites
+        p_site = 0.5
     
     # Check if the update would violate conservation of total particle number
     if canonical: # do the check for Canonical simulation
@@ -2143,7 +2050,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
         # Insert the worm kink on i
         data_struct_tmp[i].insert(tau_prev_i_idx+1,tail_kink_i)
         
-        N_check = N_tracker(data_struct_tmp,beta)
+        N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
     
     # Calculate the diagonal energy difference on both sites
@@ -2151,7 +2058,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,canonic
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * np.sqrt(n_wj*n_wi) * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
     
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
