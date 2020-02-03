@@ -770,9 +770,9 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteZer
         if N_check <= N-1 or N_check >= N+1: return False 
   
     # Add to deleteZero PROPOSAL counters
-    if delete_head: # delete worm
+    if delete_head: # delete head (delete worm)
         deleteZero_worm_data[1] += 1
-    else: # delete antiworm
+    else: # delete tail (delete antiworm)
         deleteZero_anti_data[1] += 1
         
     # Calculate diagonal energy difference
@@ -1049,10 +1049,10 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteBet
         if N_check <= N-1 or N_check >= N+1: return False 
         
     # Add to deleteBeta PROPOSAL counters
-    if delete_head: # delete worm
-        deleteBeta_worm_data[1] += 1
-    else: # delete antiworm
+    if delete_head: # delete head (antiworm)
         deleteBeta_anti_data[1] += 1
+    else: # delete tail (worm)
+        deleteBeta_worm_data[1] += 1
         
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -1083,10 +1083,10 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,canonical,N,deleteBet
             del tail_loc[:]
               
         # Add to deleteBeta ACCEPTANCE counters
-        if delete_head: # delete worm
-            deleteBeta_worm_data[0] += 1
-        else: # delete antiworm
+        if delete_head: # delete antiworm
             deleteBeta_anti_data[0] += 1
+        else: # delete worm
+            deleteBeta_worm_data[0] += 1
             
         return True
     
