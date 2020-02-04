@@ -57,24 +57,30 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L):
     # Store the configuration at beta/2 (need for diagonal energy)
     alpha = [0]*L
     
-    # Iterate over every site and count the kinks in [beta/2-dtau,beta/2+dtau]
+    # Iterate over every site to get Fock state at beta/2 and kinks near it.
     n_kinks = 0 # number of kinks
     for i in range(L):
         N_flats = len(data_struct[i]) # Number of flats on site i
         for k in range(N_flats): # Ignore the initial values (known)
+            
+            # Count kinks in [beta/2-dtau,beta/2+dtau] (for kinetic energy)
             tau = data_struct[i][k][0]
+            if tau >= 0.5*beta-dtau and tau <= 0.5*beta+dtau:
+                kink_src = data_struct[i][k][2][1] # source site of the kink
+                if i == kink_src: # This avoids double counting the kinks
+                    n_kinks += 1                      
+                    
+            # Store the Fock state at beta/2 (to calculate diagonal energy)
             if tau <= 0.5*beta:
                 n_i = data_struct[i][k][1] # no. particles in the flat
                 alpha[i] = n_i # Get Fock state at beta/2 (for diagonal energy)
-                if tau >= 0.5*beta-dtau and tau <= 0.5*beta+dtau:
-                    kink_src = data_struct[i][k][2][1] # source site of the kink
-                    if i == kink_src: # This avoids double counting the kinks
-                        n_kinks += 1                      
-            else: break
+            
+            # Exit loop after 0.5*beta+tau
+            if tau > 0.5*beta+dtau: break
                               
     # Calculate kinetic energy estimator
-    # kinetic = -n_kinks/beta
-    kinetic = -n_kinks/(2*dtau) # the actual time interval being sampled
+    kinetic = -n_kinks/beta
+    # kinetic = -n_kinks/(2*dtau) # the actual time interval being sampled
 
     
     # Calculate diagonal energy
@@ -264,7 +270,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insert
     # Reject
     else:
         return False
-
+    
 '----------------------------------------------------------------------------------'
 
 def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,delete_worm_data,delete_anti_data):
