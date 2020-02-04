@@ -73,7 +73,9 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L):
             else: break
                               
     # Calculate kinetic energy estimator
-    kinetic = -n_kinks/beta
+    #kinetic = -n_kinks/beta
+    kinetic = -n_kinks/(2*dtau) # the actual time interval being sampled
+
     
     # Calculate diagonal energy
     diagonal = 0  
@@ -372,7 +374,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,delete
     
 '----------------------------------------------------------------------------------'
 
-def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical):
+def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,advance_head_data,recede_head_data,advance_tail_data,recede_tail_data):
 
     # Reject update if there are is no worm end present
     if head_loc == [] and tail_loc == [] : return None
@@ -404,9 +406,6 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical):
             shift_head = True
         else:
             shift_head = False
-
-    # For debugging
-    # shift_head = False
 
     # Save the site and kink indices of the end that will be moved
     if shift_head == True :
@@ -457,11 +456,27 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical):
         else:
             tau_new = tau_prev + r 
     
+    # Add to ACCEPTANCE and PROPOSAL counter
+    if shift_head:
+        if tau_new > tau_h: # advance head
+            advance_head_data[0] += 1 # acceptance
+            advance_head_data[1] += 1 # proposal
+        else: # recede head
+            recede_head_data[0] += 1 
+            recede_head_data[1] += 1 
+    else: # shift tail
+        if tau_new > tau_t: # advance tail
+            advance_tail_data[0] += 1 
+            advance_tail_data[1] += 1 
+        else: # recede tail
+            recede_tail_data[0] += 1 
+            recede_tail_data[1] += 1
+            
     # Accept
     tau_old = data_struct[x][k][0] # original time of the worm end
     data_struct[x][k][0] = tau_new
     if canonical:
-        N_check = N_tracker(data_struct,beta)
+        N_check = N_tracker(data_struct,beta,L)
         if N_check <= N-1 or N_check >= N+1:
             data_struct[x][k][0] = tau_old # reject update if N not conserved
         
@@ -1112,7 +1127,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * np.sqrt(n_wj*n_wi) * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
     
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1241,7 +1256,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * np.sqrt(n_wj*n_wi) * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
     
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1385,7 +1400,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * np.sqrt(n_wj*n_wi) * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
     
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1487,7 +1502,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
         tau_next_i = beta
     else:
         tau_next_i = data_struct[i][tau_prev_i_idx+2][0]
-    
+        
     # Determine the highest time at which the kink could've been inserted
     tau_max = min(tau_next_i,tau_next_j)
     
@@ -1520,7 +1535,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * np.sqrt(n_wj*n_wi) * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
     
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1652,7 +1667,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * np.sqrt(n_wj*n_wi) * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
     
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1753,7 +1768,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     tau_min = max(tau_prev_i,tau_prev_j)
     
     # Determine probability of particle hopping left or right
-    if len(data_struct) > 2: # 3 or more lattice sites
+    if L > 2: # 3 or more lattice sites
         p_site = 0.5
     else: # only 2 sites
         p_site = 1
@@ -1781,7 +1796,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * np.sqrt(n_wj*n_wi) * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
     
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1829,7 +1844,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     if not(tail_loc): return None
     
     # Need at least two sites for a spaceshift
-    if len(data_struct) <= 1: return None
+    if L <= 1: return None
             
     # Add to PROPOSAL counter
     ikat_data[1] += 1
@@ -1923,7 +1938,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * np.sqrt(n_wj*n_wi) * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
     
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
@@ -2058,7 +2073,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
     
     # Calculate the weight ratio W'/W
-    W = t * np.sqrt(n_wj*n_wi) * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
     
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
