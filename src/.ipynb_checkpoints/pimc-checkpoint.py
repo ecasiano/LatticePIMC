@@ -73,7 +73,7 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L):
             else: break
                               
     # Calculate kinetic energy estimator
-    #kinetic = -n_kinks/beta
+    # kinetic = -n_kinks/beta
     kinetic = -n_kinks/(2*dtau) # the actual time interval being sampled
 
     
