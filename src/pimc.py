@@ -68,6 +68,7 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L):
             if tau >= 0.5*beta-dtau and tau <= 0.5*beta+dtau:
                 kink_src = data_struct[i][k][2][1] # source site of the kink
                 if i == kink_src: # This avoids double counting the kinks
+                #if i == i: # This avoids double counting the kinks
                     n_kinks += 1                      
                     
             # Store the Fock state at beta/2 (to calculate diagonal energy)
@@ -79,8 +80,8 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L):
             if tau > 0.5*beta+dtau: break
                               
     # Calculate kinetic energy estimator
-    kinetic = -n_kinks/beta
-    # kinetic = -n_kinks/(2*dtau) # the actual time interval being sampled
+    # kinetic = -n_kinks/beta
+    kinetic = -n_kinks/(2*dtau) # the actual time interval being sampled
 
     
     # Calculate diagonal energy
@@ -223,6 +224,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insert
         
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
+        # if N_check != N: print("BAD: insert")
     
     # Calculate the difference in diagonal energy dV = \epsilon_w - \epsilon
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -341,6 +343,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,delete
 
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False 
+        # if N_check != N: print("BAD: delete")
             
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -348,10 +351,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,delete
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities   
     R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L * N_flats * tau_flat**2
-    if R == 0:
-        R = 1000000 # "infinity"
-    else:
-        R = 1/R
+    R = 1/R
     
     # Metropolis sampling
     if np.random.random() < R:
@@ -485,8 +485,129 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,advance
         N_check = N_tracker(data_struct,beta,L)
         if N_check <= N-1 or N_check >= N+1:
             data_struct[x][k][0] = tau_old # reject update if N not conserved
+        # if N_check != N: print("BAD: timeshift")
+
         
     return True
+
+'----------------------------------------------------------------------------------'
+
+# Uniform distribution version
+
+# def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,advance_head_data,recede_head_data,advance_tail_data,recede_tail_data):
+
+#     # Reject update if there are is no worm end present
+#     if head_loc == [] and tail_loc == [] : return None
+    
+#     # Choose which worm end to move   
+#     if head_loc and tail_loc: # both worm ends present
+#         hx = head_loc[0]                # site index 
+#         hk = head_loc[1]                # kink index
+#         tx = tail_loc[0]
+#         tk = tail_loc[1]
+#         # Retrieve the actual times of head and tail
+#         tau_h = data_struct[hx][hk][0]
+#         tau_t = data_struct[tx][tk][0]
+#         # Randomly choose to shift HEAD or TAIL
+#         if np.random.random() < 0.5:
+#             shift_head = True
+#         else:
+#             shift_head = False   
+#         p_wormend = 0.5
+#     elif head_loc: # only head present
+#         hx = head_loc[0]                # site index 
+#         hk = head_loc[1]                # kink index
+#         tau_h = data_struct[hx][hk][0]
+#         shift_head = True
+#         p_wormend = 1
+#     else: # only tail present
+#         tx = tail_loc[0]                # site index 
+#         tk = tail_loc[1]                # kink index
+#         tau_t = data_struct[tx][tk][0]
+#         shift_head = False
+#         p_wormend = 1
+
+#     # Save the site and kink indices of the end that will be moved
+#     if shift_head:
+#         x = hx
+#         k = hk
+#     else: # shift tail
+#         x = tx
+#         k = tk
+        
+#     # Number of particles before and after the worm end to be shifted
+#     n_f = data_struct[x][k][1]       # after
+#     n_o = data_struct[x][k-1][1]     # before
+
+#     # Measure difference in diagonal energy
+#     if shift_head:                              
+#         dV = (U/2)*(n_o*(n_o-1)-n_f*(n_f-1)) - mu*(n_o-n_f)
+#     else:
+#         dV = (U/2)*(n_f*(n_f-1)-n_o*(n_o-1)) - mu*(n_f-n_o)
+                    
+#     # Get tau_next
+#     if k == len(data_struct[x])-1:
+#         tau_next = beta
+#     else:
+#         tau_next = data_struct[x][k+1][0]  
+        
+#     # Get tau_prev
+#     tau_prev = data_struct[x][k-1][0]
+    
+#     # Calculate length of flat interval
+#     tau_flat = tau_next - tau_prev
+      
+#     # Randomly choose the new time of the worm end
+#     tau_new = tau_prev + tau_flat*np.random.random()
+      
+#     # Calculate the weight ratio W'/W
+#     if shift_head:
+#         W = np.exp(-dV*(tau_new-tau_h))
+#     else:
+#         W = np.exp(-dV*(tau_t-tau_new))
+
+#     # Build Metropolis condition (R)
+#     R = W
+    
+#     # Add to PROPOSAL counter
+#     if shift_head:
+#         if tau_new > tau_h: # advance head
+#             advance_head_data[1] += 1 # proposal
+#         else: # recede head
+#             recede_head_data[1] += 1 
+#     else: # shift tail
+#         if tau_new > tau_t: # advance tail
+#             advance_tail_data[1] += 1 
+#         else: # recede tail
+#             recede_tail_data[1] += 1
+            
+#     # Metropolis sampling
+#     if np.random.random() < R: # Accept        
+        
+#         # Add to ACCEPTANCE and PROPOSAL counter
+#         if shift_head:
+#             if tau_new > tau_h: # advance head
+#                 advance_head_data[0] += 1 # acceptance
+#             else: # recede head
+#                 recede_head_data[0] += 1 
+#         else: # shift tail
+#             if tau_new > tau_t: # advance tail
+#                 advance_tail_data[0] += 1 
+#             else: # recede tail
+#                 recede_tail_data[0] += 1 
+            
+#         # Modify the data structure
+#         tau_old = data_struct[x][k][0] # original time of the worm end
+#         data_struct[x][k][0] = tau_new
+#         if canonical:
+#             N_check = N_tracker(data_struct,beta,L)
+#             if N_check <= N-1 or N_check >= N+1:
+#                 data_struct[x][k][0] = tau_old # reject update if N not conserved
+        
+#         return True
+    
+#     # Reject
+#     else: return False
 
 '----------------------------------------------------------------------------------'
 
@@ -584,8 +705,9 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertZ
         data_struct_tmp[i][0] = first_flat # Modify the first flat
         
         N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False
-        
+        if N_check <= N-1 or N_check >= N+1: return False        
+        # if N_check != N: print("BAD: insertZero")
+
     # Build the weigh ratio W'/W
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
     if insert_worm:
@@ -724,6 +846,8 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteZ
     
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False 
+        # if N_check != N: print("BAD: deleteZero")
+
   
     # Add to deleteZero PROPOSAL counters
     if delete_head: # delete head (delete worm)
@@ -744,10 +868,8 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteZ
     # Build the Metropolis Ratio  (R)  
     p_dz, p_iz = 0.5,0.5
     R = W * (p_dz/p_iz) * L * p_wormend * tau_flat / p_type
-    if R == 0:
-        R = 1000000 # "infinity"
-    else:
-        R = 1/R    
+    R = 1/R
+        
     # Metropolis sampling
     if np.random.random() < R: # Accept
         
@@ -875,6 +997,8 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertB
         
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False 
+        # if N_check != N: print("BAD: insertBeta")
+
             
     # Build the weight ratio W'/W
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
@@ -997,6 +1121,8 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteB
     
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False 
+        # if N_check != N: print("BAD: deleteBeta")
+
         
     # Add to deleteBeta PROPOSAL counters
     if delete_head: # delete head (antiworm)
@@ -1017,10 +1143,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteB
     # Build the Metropolis Ratio   
     p_db, p_ib = 0.5, 0.5
     R = W * (p_db/p_ib) * L * p_wormend * tau_flat / p_type
-    if R == 0:
-        R = 1000000 # "infinity"
-    else:
-        R = 1/R    
+    R = 1/R
         
     # Metropolis sampling
     if np.random.random() < R: # Accept
@@ -1127,6 +1250,8 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
         
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
+        # if N_check != N: print("BAD: ikbh")
+
         
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1256,6 +1381,8 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
         
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
+        # if N_check != N: print("BAD: dkbh")
+
     
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1267,10 +1394,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
     R = W * (p_dkbh/p_ikbh) * (tau_h-tau_min)/p_site
-    if R == 0:
-        R = 1000000 # "infinity"
-    else:
-        R = 1/R    
+    R = 1/R   
         
     # Metropolis Sampling
     if np.random.random() < R: # Accept
@@ -1400,6 +1524,8 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
         
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
+        # if N_check != N: print("BAD: ikah")
+
         
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1535,6 +1661,8 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
         
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
+        # if N_check != N: print("BAD: dkah")
+
     
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1546,10 +1674,8 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
     R = W * (p_dkah/p_ikah) * (tau_max-tau_h)/p_site
-    if R == 0:
-        R = 1000000 # "infinity"
-    else:
-        R = 1/R    
+    R = 1/R
+        
     # Metropolis Sampling
     if np.random.random() < R: # Accept
         
@@ -1666,7 +1792,9 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
         data_struct_tmp[j].insert(tau_prev_j_idx+1,kink_j)
         
         N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False    
+        if N_check <= N-1 or N_check >= N+1: return False   
+        # if N_check != N: print("BAD: ikbt")
+
     
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1796,6 +1924,8 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
         
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
+        # if N_check != N: print("BAD: dkbt")
+
     
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1807,10 +1937,8 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
     R = W * (p_dkbt/p_ikbt) * (tau_t-tau_min)/p_site
-    if R == 0:
-        R = 1000000 # "infinity"
-    else:
-        R = 1/R    
+    R = 1/R
+        
     # Metropolis Sampling
     if np.random.random() < R: # Accept
 
@@ -1938,6 +2066,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
         
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
+        # if N_check != N: print("BAD: ikat")
         
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -2073,6 +2202,8 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
         
         N_check = N_tracker(data_struct_tmp,beta,L)
         if N_check <= N-1 or N_check >= N+1: return False
+        # if N_check != N: print("BAD: dkat")
+
     
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -2084,10 +2215,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
     R = W * (p_dkat/p_ikat) * (tau_max-tau_t)/p_site
-    if R == 0:
-        R = 1000000 # "infinity"
-    else:
-        R = 1/R
+    R = 1/R
         
     # Metropolis Sampling
     if np.random.random() < R: # Accept
