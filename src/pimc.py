@@ -139,7 +139,7 @@ def check_worm(head_loc,tail_loc):
 
 '----------------------------------------------------------------------------------'
 
-def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insert_worm_data,insert_anti_data):
+def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_check,insert_worm_data,insert_anti_data):
     
     '''Inserts a worm or antiworm'''
 
@@ -202,29 +202,19 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insert
         tail_kink = [tau_t,N_after_tail,(i,i)]
     
     # Check if the update would violate conservation of total particle number
-    if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-    
-        # Insert worm
-        if insert_worm:
-            if k == N_flats - 1: # if selected flat is the last
-                data_struct_tmp[i].append(tail_kink)
-                data_struct_tmp[i].append(head_kink)
-            else:
-                data_struct_tmp[i].insert(k+1,tail_kink)
-                data_struct_tmp[i].insert(k+2,head_kink)
-        # Insert antiworm
-        else:
-            if k == N_flats - 1: # last flat
-                data_struct_tmp[i].append(head_kink)
-                data_struct_tmp[i].append(tail_kink)
-            else:
-                data_struct_tmp[i].insert(k+1,head_kink)
-                data_struct_tmp[i].insert(k+2,tail_kink)
+    if canonical:
         
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False
-        # if N_check != N: print("BAD: insert")
+        # Determine the length of path to be modified
+        l_path = abs(tau_h-tau_t)
+        
+        # Determine the total particle change based on worm type
+        if insert_worm:
+            dN = +1 * l_path / beta
+        else: # antiworm
+            dN = -1 * l_path / beta
+            
+        # Reject the update if the total number is outside of (N-1,N+1) 
+        if (N_check[0]+dN) <= N-1 or (N_check[0]+dN) >= N+1: return False
     
     # Calculate the difference in diagonal energy dV = \epsilon_w - \epsilon
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -266,6 +256,10 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insert
             insert_worm_data[0] += 1
         else: # insert antiworm
             insert_anti_data[0] += 1
+
+        # For canonical simulations, modify total N tracker 
+        if canonical:
+            N_check[0] += dN
         
         return True
 
@@ -275,7 +269,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insert
     
 '----------------------------------------------------------------------------------'
 
-def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,delete_worm_data,delete_anti_data):
+def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_check,delete_worm_data,delete_anti_data):
 
     # Can only propose worm deletion if both worm ends are present
     if not(head_loc) or not(tail_loc) : return None
@@ -329,21 +323,20 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,delete
     else: # delete antiworm
         delete_anti_data[1] += 1
         
-    # Check if N would be conserved in canonical simulations
+    # Check if the update would violate conservation of total particle number
     if canonical:
-        data_struct_tmp = deepcopy(data_struct)
-    
-        # Delete the worm ends
-        if is_worm: # worm
-            del data_struct_tmp[hx][hk] # Deletes ira
-            del data_struct_tmp[tx][tk] # Deletes masha
-        else: # antiworm
-            del data_struct_tmp[tx][tk] # Deletes masha
-            del data_struct_tmp[hx][hk] # Deletes ira
-
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False 
-        # if N_check != N: print("BAD: delete")
+        
+        # Determine the length of path to be modified
+        l_path = abs(tau_h-tau_t)
+        
+        # Determine the total particle change based on worm type
+        if is_worm: # Delete worm
+            dN = -1 * l_path / beta
+        else: # Delete anti
+            dN = +1 * l_path / beta
+            
+        # Reject the update if the total number is outside of (N-1,N+1) 
+        if (N_check[0]+dN) <= N-1 or (N_check[0]+dN) >= N+1: return False
             
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -356,6 +349,12 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,delete
     # Metropolis sampling
     if np.random.random() < R:
         
+        # Add to delete ACCEPTANCE counters
+        if is_worm:
+            delete_worm_data[0] += 1
+        else: # delete antiworm
+            delete_anti_data[0] += 1
+            
         # Delete the worm ends
         if is_worm: # worm
             del data_struct[hx][hk] # Deletes ira
@@ -367,12 +366,11 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,delete
         # Update the locations ira and masha
         del head_loc[:]
         del tail_loc[:]
-        
-        # Add to delete ACCEPTANCE counters
-        if is_worm:
-            delete_worm_data[0] += 1
-        else: # delete antiworm
-            delete_anti_data[0] += 1
+            
+        # For canonical simulations, modify total N tracker 
+        if canonical:
+            N_check[0] += dN
+            
         return True
 
     # Reject
@@ -380,7 +378,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,delete
     
 '----------------------------------------------------------------------------------'
 
-def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,advance_head_data,recede_head_data,advance_tail_data,recede_tail_data):
+def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,N_check,advance_head_data,recede_head_data,advance_tail_data,recede_tail_data):
 
     # Reject update if there are is no worm end present
     if head_loc == [] and tail_loc == [] : return None
@@ -478,15 +476,34 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,advance
             recede_tail_data[0] += 1 
             recede_tail_data[1] += 1
             
-    # Accept
-    tau_old = data_struct[x][k][0] # original time of the worm end
-    data_struct[x][k][0] = tau_new
+    # Check if the update would violate conservation of total particle number
     if canonical:
-        N_check = N_tracker(data_struct,beta,L)
-        if N_check <= N-1 or N_check >= N+1:
-            data_struct[x][k][0] = tau_old # reject update if N not conserved
-        # if N_check != N: print("BAD: timeshift")
-
+            
+        # Determine the length of path to be modified
+        tau_old = data_struct[x][k][0] # original time of the worm end
+        l_path = abs(tau_new-tau_old)
+        
+        # Determine the total particle change based on wormend to be shifted
+        if shift_head: 
+            if tau_new > tau_old: # advance head
+                dN = +1 * l_path / beta
+            else: # recede head
+                dN = -1 * l_path / beta
+        else: # shift tail
+            if tau_new > tau_old: # advance tail
+                dN = -1 * l_path / beta
+            else: # recede tail
+                dN = +1 * l_path / beta
+       
+        # Reject the update if the total number is outside of (N-1,N+1) 
+        if (N_check[0]+dN) <= N-1 or (N_check[0]+dN) >= N+1: return False
+               
+    # Accept
+    data_struct[x][k][0] = tau_new
+    
+    # For canonical simulation, modify total N tracker
+    if canonical:
+        N_check[0] += dN
         
     return True
 
@@ -494,7 +511,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,advance
 
 # Uniform distribution version
 
-# def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,advance_head_data,recede_head_data,advance_tail_data,recede_tail_data):
+# def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,N_check,advance_head_data,recede_head_data,advance_tail_data,recede_tail_data):
 
 #     # Reject update if there are is no worm end present
 #     if head_loc == [] and tail_loc == [] : return None
@@ -611,7 +628,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,advance
 
 '----------------------------------------------------------------------------------'
 
-def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertZero_worm_data,insertZero_anti_data):
+def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_check,insertZero_worm_data,insertZero_anti_data):
     
     # Cannot insert if there's two worm ends present
     if head_loc and tail_loc: return None
@@ -695,18 +712,18 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertZ
         
     # Check if the update would violate conservation of total particle number
     if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-    
-        if len(data_struct_tmp[i]) == 1: # Worldline is flat throughout
-            data_struct_tmp[i].append(worm_end_kink)
-        else:
-            data_struct_tmp[i].insert(1,worm_end_kink)
+
+        # Determine the length of path to be modified
+        l_path = tau
         
-        data_struct_tmp[i][0] = first_flat # Modify the first flat
-        
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False        
-        # if N_check != N: print("BAD: insertZero")
+        # Determine the total particle change based on worm type
+        if insert_worm:
+            dN = +1 * l_path / beta
+        else: # antiworm
+            dN = -1 * l_path / beta
+            
+        # Reject the update if the total number is outside of (N-1,N+1) 
+        if (N_check[0]+dN) <= N-1 or (N_check[0]+dN) >= N+1: return False # int due to precision
 
     # Build the weigh ratio W'/W
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
@@ -749,6 +766,10 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertZ
         else: # insert antiworm
             insertZero_anti_data[0] += 1
             
+        # For canonical simulations, modify total N tracker 
+        if canonical:
+            N_check[0] += dN
+            
         return True
         
     else: # Reject
@@ -756,7 +777,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertZ
 
 '----------------------------------------------------------------------------------'
 
-def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteZero_worm_data,deleteZero_anti_data):
+def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_check,deleteZero_worm_data,deleteZero_anti_data):
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -837,16 +858,18 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteZ
         
     # Check if the update would violate conservation of total particle number
     if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-        del data_struct_tmp[x][k]
-        if delete_head:
-            data_struct_tmp[x][0][1] -= 1
-        else: # delete tail
-            data_struct_tmp[x][0][1] += 1
-    
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False 
-        # if N_check != N: print("BAD: deleteZero")
+
+        # Determine the length of path to be modified
+        l_path = tau
+        
+        # Determine the total particle change based on worm type
+        if delete_head: # delete worm
+            dN = -1 * l_path / beta
+        else: # delete anti
+            dN = +1 * l_path / beta
+            
+        # Reject the update if the total number is outside of (N-1,N+1) 
+        if (N_check[0]+dN) <= N-1 or (N_check[0]+dN) >= N+1: return False
 
   
     # Add to deleteZero PROPOSAL counters
@@ -896,6 +919,10 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteZ
             deleteZero_worm_data[0] += 1
         else: # delete antiworm
             deleteZero_anti_data[0] += 1
+
+        # For canonical simulations, modify total N tracker 
+        if canonical:
+            N_check[0] += dN
             
         return True
     
@@ -904,7 +931,7 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteZ
     
 '----------------------------------------------------------------------------------'
 
-def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertBeta_worm_data,insertBeta_anti_data):
+def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_check,insertBeta_worm_data,insertBeta_anti_data):
     
     # Cannot insert if there's two worm end already present
     if head_loc and tail_loc: return None
@@ -991,14 +1018,18 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertB
         
     # Check if the update would violate conservation of total particle number
     if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-        
-        data_struct_tmp[i].append(worm_end_kink)
-        
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False 
-        # if N_check != N: print("BAD: insertBeta")
 
+        # Determine the length of path to be modified
+        l_path = beta-tau
+        
+        # Determine the total particle change based on worm type
+        if insert_worm:
+            dN = +1 * l_path / beta
+        else: # antiworm
+            dN = -1 * l_path / beta
+            
+        # Reject the update if the total number is outside of (N-1,N+1) 
+        if (N_check[0]+dN) <= N-1 or (N_check[0]+dN) >= N+1: return False
             
     # Build the weight ratio W'/W
     C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
@@ -1027,6 +1058,10 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertB
         else: # insert antiworm
             insertBeta_anti_data[0] += 1
             
+        # For canonical simulations, modify total N tracker 
+        if canonical:
+            N_check[0] += dN
+            
         return True
         
     else: # Reject
@@ -1034,7 +1069,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,insertB
     
 '----------------------------------------------------------------------------------'
 
-def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteBeta_worm_data,deleteBeta_anti_data):
+def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_check,deleteBeta_worm_data,deleteBeta_anti_data):
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -1116,12 +1151,18 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteB
     
     # Check if the update would violate conservation of total particle number
     if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-        del data_struct_tmp[x][k]
-    
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False 
-        # if N_check != N: print("BAD: deleteBeta")
+
+        # Determine the length of path to be modified
+        l_path = beta-tau
+        
+        # Determine the total particle change based on worm type
+        if delete_head: # delete head (anti)
+            dN = +1 * l_path / beta
+        else: # delete tail (worm)
+            dN = -1 * l_path / beta
+            
+        # Reject the update if the total number is outside of (N-1,N+1) 
+        if (N_check[0]+dN) <= N-1 or (N_check[0]+dN) >= N+1: return False
 
         
     # Add to deleteBeta PROPOSAL counters
@@ -1162,6 +1203,10 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteB
         else: # delete worm
             deleteBeta_worm_data[0] += 1
             
+        # For canonical simulations, modify total N tracker 
+        if canonical:
+            N_check[0] += dN
+            
         return True
     
     else: # Reject 
@@ -1169,7 +1214,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,deleteB
     
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,ikbh_data):
+def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_check,ikbh_data):
     
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1230,28 +1275,6 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     # Randomly choose the time of the kink
     tau_kink = tau_min + np.random.random()*(tau_h-tau_min)
     if tau_kink == tau_min: return False
-    
-    # Check if the update would violate conservation of total particle number
-    if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-        
-        # Build the kinks to be inserted to each site
-        kink_i = [tau_kink,n_i,(i,j)]
-        kink_j = [tau_kink,n_wj,(i,j)]
-        head_kink_j = [tau_h,n_j,(j,j)]
-        
-        # Delete the worm end from site i
-        del data_struct_tmp[i][k]
-        
-        # Insert kinks
-        data_struct_tmp[i].insert(k,kink_i)
-        data_struct_tmp[j].insert(tau_prev_j_idx+1,head_kink_j)
-        data_struct_tmp[j].insert(tau_prev_j_idx+1,kink_j)
-        
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False
-        # if N_check != N: print("BAD: ikbh")
-
         
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1299,7 +1322,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     
 '----------------------------------------------------------------------------------'
  
-def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,dkbh_data):
+def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_check,dkbh_data):
     
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1364,26 +1387,6 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     else: # more than 2 sites
         p_site = 0.5
     
-    # Check if the update would violate conservation of total particle number
-    if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-        
-        # Delete the kink structure on both sites
-        del data_struct_tmp[j][k] # deletes the worm head from j
-        del data_struct_tmp[j][k-1] # deletes the kink from j
-        del data_struct_tmp[i][tau_prev_i_idx+1] # deletes the kink from i
-    
-        # Build the worm head kink to be moved to i
-        head_kink_i = [tau_h,n_i,(i,i)]
-        
-        # Insert the worm kink on i
-        data_struct_tmp[i].insert(tau_prev_i_idx+1,head_kink_i)
-        
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False
-        # if N_check != N: print("BAD: dkbh")
-
-    
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
@@ -1429,7 +1432,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,ikah_data):
+def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_check,ikah_data):
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1504,28 +1507,6 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     # Randomly choose the time of the kink
     tau_kink = tau_h + np.random.random()*(tau_max-tau_h)
     if tau_kink == tau_h: return False
-    
-    # Check if the update would violate conservation of total particle number
-    if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-        
-        # Delete the worm end from site i
-        del data_struct_tmp[i][k]
-        
-        # Build the kinks to be inserted to each site
-        kink_i = [tau_kink,n_i,(i,j)]
-        kink_j = [tau_kink,n_wj,(i,j)]
-        head_kink_j = [tau_h,n_j,(j,j)]
-                
-        # Insert kinks
-        data_struct_tmp[i].insert(k,kink_i) # kink on i
-        data_struct_tmp[j].insert(tau_next_j_idx,kink_j) # kink on j
-        data_struct_tmp[j].insert(tau_next_j_idx,head_kink_j) # head kink on j
-        
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False
-        # if N_check != N: print("BAD: ikah")
-
         
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1573,7 +1554,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,dkah_data):
+def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_check,dkah_data):
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1644,26 +1625,6 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     else: # More than two sites
         p_site = 0.5
     
-    # Check if the update would violate conservation of total particle number
-    if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-        
-        # Delete the kink structure on both sites
-        del data_struct_tmp[j][k+1] # deletes the kink from j
-        del data_struct_tmp[j][k] # deletes the worm head from j
-        del data_struct_tmp[i][tau_prev_i_idx+1] # deletes the kink from i
-    
-        # Build the worm head kink to be moved to i
-        head_kink_i = [tau_h,n_i,(i,i)]
-        
-        # Insert the worm kink on i
-        data_struct_tmp[i].insert(tau_prev_i_idx+1,head_kink_i)
-        
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False
-        # if N_check != N: print("BAD: dkah")
-
-    
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
@@ -1709,7 +1670,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,ikbt_data):
+def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_check,ikbt_data):
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1774,28 +1735,6 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     tau_kink = tau_min + np.random.random()*(tau_t-tau_min)
     if tau_kink == tau_min: return False # very unlikely, but possible
     
-    # Check if the update would violate conservation of total particle number
-    if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-        
-        # Delete the worm end from site i
-        del data_struct_tmp[i][k]
-        
-        # Build the kinks to be inserted to each site
-        kink_i = [tau_kink,n_wi,(j,i)]
-        kink_j = [tau_kink,n_j,(j,i)]
-        tail_kink_j = [tau_t,n_wj,(j,j)]
-                
-        # Insert kinks
-        data_struct_tmp[i].insert(k,kink_i)
-        data_struct_tmp[j].insert(tau_prev_j_idx+1,tail_kink_j)
-        data_struct_tmp[j].insert(tau_prev_j_idx+1,kink_j)
-        
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False   
-        # if N_check != N: print("BAD: ikbt")
-
-    
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
@@ -1842,7 +1781,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     
 '----------------------------------------------------------------------------------'
 
-def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,dkbt_data):
+def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_check,dkbt_data):
     
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1907,26 +1846,6 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     else: # only 2 sites
         p_site = 1
     
-    # Check if the update would violate conservation of total particle number
-    if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-        
-        # Delete the kink structure on both sites
-        del data_struct_tmp[j][k] # deletes the worm tail from j
-        del data_struct_tmp[j][k-1] # deletes the kink from j
-        del data_struct_tmp[i][tau_prev_i_idx+1] # deletes the kink from i
-    
-        # Build the worm tail kink to be moved to i
-        tail_kink_i = [tau_t,n_wi,(i,i)]
-        
-        # Insert the worm kink on i
-        data_struct_tmp[i].insert(tau_prev_i_idx+1,tail_kink_i)
-        
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False
-        # if N_check != N: print("BAD: dkbt")
-
-    
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
@@ -1972,7 +1891,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
         
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,ikat_data):
+def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_check,ikat_data):
     
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -2046,27 +1965,6 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     # Randomly choose the time of the kink
     tau_kink = tau_t + np.random.random()*(tau_max-tau_t)
     if tau_kink == tau_t: return False    
-    
-    # Check if the update would violate conservation of total particle number
-    if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-        
-        # Delete the worm end from site i
-        del data_struct_tmp[i][k]
-        
-        # Build the kinks to be inserted to each site
-        kink_i = [tau_kink,n_wi,(j,i)]
-        kink_j = [tau_kink,n_j,(j,i)]
-        tail_kink_j = [tau_t,n_wj,(j,j)]
-                
-        # Insert kinks
-        data_struct_tmp[i].insert(k,kink_i) # kink on i
-        data_struct_tmp[j].insert(tau_next_j_idx,kink_j) # kink on j
-        data_struct_tmp[j].insert(tau_next_j_idx,tail_kink_j) # tail kink on j
-        
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False
-        # if N_check != N: print("BAD: ikat")
         
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -2114,7 +2012,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,dkat_data):
+def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_check,dkat_data):
 
     # Update only possible if there is worm tail present
     if not(tail_loc): return None
@@ -2184,26 +2082,6 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
         p_site = 1
     else: # More than two sites
         p_site = 0.5
-    
-    # Check if the update would violate conservation of total particle number
-    if canonical: # do the check for Canonical simulation
-        data_struct_tmp = deepcopy(data_struct)
-        
-        # Delete the kink structure on both sites
-        del data_struct_tmp[j][k+1] # deletes the kink from j
-        del data_struct_tmp[j][k] # deletes the worm tail from j
-        del data_struct_tmp[i][tau_prev_i_idx+1] # deletes the kink from i
-    
-        # Build the worm tail kink to be moved to i
-        tail_kink_i = [tau_t,n_wi,(i,i)]
-        
-        # Insert the worm kink on i
-        data_struct_tmp[i].insert(tau_prev_i_idx+1,tail_kink_i)
-        
-        N_check = N_tracker(data_struct_tmp,beta,L)
-        if N_check <= N-1 or N_check >= N+1: return False
-        # if N_check != N: print("BAD: dkat")
-
     
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
