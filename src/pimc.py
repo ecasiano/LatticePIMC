@@ -220,7 +220,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_chec
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
     
     # Build the Metropolis ratio (R)
-    p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities   
+    p_dw,p_iw = 0.33,1       # tunable delete and insert probabilities   
     R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L * N_flats * tau_flat**2
         
     # Metropolis sampling
@@ -342,7 +342,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_chec
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
     
     # Build the Metropolis ratio (R)
-    p_dw,p_iw = 0.5,0.5       # tunable delete and insert probabilities   
+    p_dw,p_iw = 0.33,1      # tunable delete and insert probabilities   
     R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L * N_flats * tau_flat**2
     R = 1/R
     
