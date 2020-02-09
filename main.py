@@ -68,47 +68,15 @@ N_tracker = [N] # Tracks the total number of particle to enforce Canonical simul
 # Set the window at which kinetic energy will count kinks
 dtau = 0.1*beta # i.e count kinks at beta/2 +- dtau
 
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-### CLEAN FROM HERE WHEN YOU COME BACK!!!!!!#####
-
 # Initialize values to be measured
 Z_ctr = 0 # Count Z or diagonal configurations (i.e, no worm ends)
 diagonal_list = []
 kinetic_list = []
-N_list = [] # average total particles 
-occ_list = [] # average particle occupation
-E_N_list = [] # Fixed total particle energies
-E_canonical_list = [] # To save energies only for N space configurations
+N_list = []              # average total particles 
+occ_list = []            # average particle occupation
+E_N_list = []            # Fixed total particle energies
 
-# Counters for acceptance of each move
+# Counters for acceptance and proposal of each move
 insert_worm_data = [0,0] # [accepted,proposed]
 delete_worm_data = [0,0]
 
@@ -146,11 +114,11 @@ ikat_data = [0,0]
 dkat_data = [0,0]
 
 
-# Set the number of times the set of updates will be attempted
+# Randomly propose every update M times
 for m in range(M):
     
     # assign a label to each update
-    labels = list(range(15)) # There 15 functions
+    labels = list(range(15)) # There are 15 update functions
     shuffle(labels)
     
     # At every mc step, try EVERY update in random order
@@ -202,42 +170,95 @@ for m in range(M):
 
         else:
             pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical, N_tracker,dkat_data)
+
+  
+    # Calculate observables when there are no worms present
+    if m%int(L*beta)==0:
+        
+        if not(pimc.check_worm(head_loc,tail_loc)):
+
+            # Add to diagonal configuration counter
+            Z_ctr += 1
+
+            # Energies
+            kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L)
+            diagonal_list.append(diagonal)
+            kinetic_list.append(kinetic)
+
+            # Calculate the average total number of particles
+            N_list.append(pimc.n_pimc(data_struct,beta,L)) # <n>
             
-pimc.view_worldlines(data_struct,beta,figure_name='main_worldline.pdf')
+            # Calculate the average particle occupation
+            # occ_list.append(pimc.n_i_pimc(data_struct,beta,L))
 
+# ---------------- Format data and save to disk ---------------- #
 
-# Set what values to ignore due to equilibration
-#mc_fraction = 0
-start = int(len(diagonal_list)*0.10)
-start = int(len(diagonal_list)*0.10)
-#start = 100
+# Promote lists to arrays so we can use np.savetxt
+diagonal_list = np.array(diagonal_list)            # <H_0>
+kinetic_list = np.array(kinetic_list)              # <H_1>
+total_list = np.array(kinetic_list+diagonal_list)  # <H_0> + <H_1> 
+N_list = np.array(N_list)                          # <N>
 
-diagonal = np.mean(diagonal_list[start:])
-kinetic = np.mean(kinetic_list[start:])
-N_mean = np.mean(N_list[start:])
-occ = np.mean(occ_list,axis=0)
-print(Z_ctr)
-print(len(diagonal_list))
-print(len(diagonal_list)-start)
+# Combine all arrays to a single array
+data_list = [diagonal_list/t,kinetic_list/t,total_list,N_list]
 
+# Create file header
+header = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s}'.format(
+    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,beta=%.4f,M=%i"%(L,N,U,mu,t,eta,beta,M),
+    'H_0/t','H_1/t','E/t', 'N')
+
+# Save to disk
+if canonical:
+    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_can.dat"%(L,N,U,mu,t,eta,beta,M),"w+") as data:
+        np.savetxt(data,np.transpose(data_list),delimiter=" ",fmt="%-20s",header=header) 
+else:
+    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_gcan.dat"%(L,N,U,mu,t,eta,beta,M),"w+") as data:
+        np.savetxt(data,np.transpose(data_list),delimiter=" ",fmt="%-20s",header=header) 
+
+# ---------------- Print acceptance ratios ---------------- #
 
 if canonical:
     print("\nEnsemble: Canonical\n")
 else:
-    print("\nEnsemble: Grand Canonical")
-print("-------- Ground State Energy (E/t) --------")
-print("E/t: %.8f "%((diagonal+kinetic)/t))
-print("-------- Average N --------")
-print("<N>: %.8f"%(N_mean))
-print("-------- Average occupation --------")
-print("<n_i>:",occ)
+    print("\nEnsemble: Grand Canonical\n")
 print("-------- Z-configuration fraction --------")
-print("Z-fraction: %.2f%% (%d/%d) "%(Z_ctr/ M*100,Z_ctr, M))
+print("Z-fraction: %.2f%% (%d/%d) "%(100*Z_ctr/int(M/(L*beta)),Z_ctr,int(M/(L*beta))))
 
-kinetic_list = np.array(kinetic_list)
-with open("kinetic_%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i.dat"%(L,N,U,mu,t,eta,beta, M),"w+") as data:
-    np.savetxt(data,kinetic_list,delimiter=",",fmt="%.16f",header="MC_step <E> // BH Parameters: L=%d,N=%d,U=%.8f,mu=%.8f,t=%.4f,eta=%.8f,beta=%.4f, M=%i"%(L,N,U,mu,t,eta,beta,M))
-    
-diagonal_list = np.array(diagonal_list)
-with open("diagonal_%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i.dat"%(L,N,U,mu,t,eta,beta, M),"w+") as data:
-    np.savetxt(data,diagonal_list,delimiter=",",fmt="%.16f",header="MC_step <E> // BH Parameters: L=%d,N=%d,U=%.8f,mu=%.8f,t=%.4f,eta=%.8f,beta=%.4f, M=%i"%(L,N,U,mu,t,eta,beta,M))    
+# Acceptance ratios
+print("\n-------- Acceptance Ratios --------\n")
+
+print("       Insert worm: (%d/%d)"%(insert_worm_data[0],insert_worm_data[1]))
+print("       Delete worm: (%d/%d)\n"%(delete_worm_data[0],delete_worm_data[1]))
+
+print("       Insert anti: (%d/%d)"%(insert_anti_data[0],insert_anti_data[1]))
+print("       Delete anti: (%d/%d)\n"%(delete_anti_data[0],delete_anti_data[1]))
+
+print("       Advance head: (%d/%d)"%(advance_head_data[0],advance_head_data[1]))
+print("        Recede head: (%d/%d)\n"%(recede_head_data[0],recede_head_data[1]))
+
+print("       Advance tail: (%d/%d)"%(advance_tail_data[0],advance_tail_data[1]))
+print("        Recede tail: (%d/%d)\n"%(recede_tail_data[0],recede_tail_data[1]))
+
+print("   InsertZero worm: (%d/%d)"%(insertZero_worm_data[0],insertZero_worm_data[1]))
+print("   DeleteZero worm: (%d/%d)\n"%(deleteZero_worm_data[0],deleteZero_worm_data[1]))
+
+print("   InsertZero anti: (%d/%d)"%(insertZero_anti_data[0],insertZero_anti_data[1]))
+print("   DeleteZero anti: (%d/%d)\n"%(deleteZero_anti_data[0],deleteZero_anti_data[1]))
+
+print("   InsertBeta worm: (%d/%d)"%(insertBeta_worm_data[0],insertBeta_worm_data[1]))
+print("   DeleteBeta worm: (%d/%d)\n"%(deleteBeta_worm_data[0],deleteBeta_worm_data[1]))
+
+print("   InsertBeta anti: (%d/%d)"%(insertBeta_anti_data[0],insertBeta_anti_data[1]))
+print("   DeleteBeta anti: (%d/%d)\n"%(deleteBeta_anti_data[0],deleteBeta_anti_data[1]))
+
+print("              IKBH: (%d/%d)"%(ikbh_data[0],ikbh_data[1])) 
+print("              DKBH: (%d/%d)\n"%(dkbh_data[0],dkbh_data[1]))
+
+print("              IKAH: (%d/%d)"%(ikah_data[0],ikah_data[1])) 
+print("              DKAH: (%d/%d)\n"%(dkah_data[0],dkah_data[1])) 
+
+print("              IKBT: (%d/%d)"%(ikbt_data[0],ikbt_data[1])) 
+print("              DKBT: (%d/%d)\n"%(dkbt_data[0],dkbt_data[1]))
+
+print("              IKAT: (%d/%d)"%(ikat_data[0],ikat_data[1])) 
+print("              DKAT: (%d/%d)\n"%(dkat_data[0],dkat_data[1])) 
