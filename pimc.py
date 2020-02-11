@@ -80,9 +80,7 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L):
             if tau > 0.5*beta+dtau: break
 
     # Calculate kinetic energy estimator
-    # kinetic = -n_kinks/beta
-    kinetic = -n_kinks/(2*dtau) # the actual time interval being sampled
-
+    kinetic = -t*n_kinks/beta
 
     # Calculate diagonal energy
     diagonal = 0

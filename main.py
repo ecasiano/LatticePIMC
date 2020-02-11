@@ -51,317 +51,213 @@ canonical = False if not(args.canonical) else True
 # Initial eta value (actual value will be obtained in pre-equilibration stage)
 eta = 1/np.sqrt(L*beta)
 
-# ---------------- Pre-Equilibration: Parameter optimization ---------------- #
+# ---------------- Pre-Equilibration and Lattice PIMC ---------------- #
 
-print("\nStarting pre-equilibration stage. Determining eta...")
+# First iteration: Pre-Equilibration (determines eta)
+# Second iteration: Main run
+is_pre_equilibration = True
+for i in range(2):
 
-# Initialize Fock state
-alpha = pimc.random_boson_config(L,N)
-alpha = [1]*L
+    # Print out the stage of the code.
+    if is_pre_equilibration:
+        print("\nStarting pre-equilibration stage. Determining eta...")
+    else:
+        print("LatticePIMC started...")
 
-# Create worldline data structure
-data_struct = pimc.create_data_struct(alpha,L)
+    # Initialize Fock state
+    alpha = pimc.random_boson_config(L,N)
+    alpha = [1]*L
 
-# List that will contain site and kink indices of worm head and tail
-head_loc = []
-tail_loc = []
+    # Create worldline data structure
+    data_struct = pimc.create_data_struct(alpha,L)
 
-# Trackers
-N_tracker = [N]         # Total particles
-N_flats_tracker = [L]   # Total flat regions
+    # List that will contain site and kink indices of worm head and tail
+    head_loc = []
+    tail_loc = []
 
-# Counters for acceptance and proposal of each move
-insert_worm_data = [0,0] # [accepted,proposed]
-delete_worm_data = [0,0]
+    # Trackers
+    N_tracker = [N]         # Total particles
+    N_flats_tracker = [L]   # Total flat regions
 
-insert_anti_data = [0,0]
-delete_anti_data = [0,0]
+    # Set the window at which kinetic energy will count kinks
+    dtau = 0.1*beta # i.e count kinks at beta/2 +- dtau
 
-advance_head_data = [0,0]
-recede_head_data = [0,0]
+    # Initialize values to be measured
+    diagonal_list = []
+    kinetic_list = []
+    N_list = []              # average total particles 
+    occ_list = []            # average particle occupation
+    E_N_list = []            # Fixed total particle energies
 
-advance_tail_data = [0,0]
-recede_tail_data = [0,0]
+    # Counters for acceptance and proposal of each move
+    insert_worm_data = [0,0] # [accepted,proposed]
+    delete_worm_data = [0,0]
 
-insertZero_worm_data = [0,0]
-deleteZero_worm_data = [0,0]
+    insert_anti_data = [0,0]
+    delete_anti_data = [0,0]
 
-insertZero_anti_data = [0,0]
-deleteZero_anti_data = [0,0]
+    advance_head_data = [0,0]
+    recede_head_data = [0,0]
 
-insertBeta_worm_data = [0,0]
-deleteBeta_worm_data = [0,0]
+    advance_tail_data = [0,0]
+    recede_tail_data = [0,0]
 
-insertBeta_anti_data = [0,0]
-deleteBeta_anti_data = [0,0]
+    insertZero_worm_data = [0,0]
+    deleteZero_worm_data = [0,0]
 
-ikbh_data = [0,0]
-dkbh_data = [0,0]
+    insertZero_anti_data = [0,0]
+    deleteZero_anti_data = [0,0]
 
-ikah_data = [0,0]
-dkah_data = [0,0]
+    insertBeta_worm_data = [0,0]
+    deleteBeta_worm_data = [0,0]
 
-ikbt_data = [0,0]
-dkbt_data = [0,0]
+    insertBeta_anti_data = [0,0]
+    deleteBeta_anti_data = [0,0]
 
-ikat_data = [0,0]
-dkat_data = [0,0]
+    ikbh_data = [0,0]
+    dkbh_data = [0,0]
 
-N_flats_mean = 0        # Average number of flats
-N_flats_samples = 0     
-# Randomly propose every update M_equil times
-M_pre = 5.0E+04
-for m in range(int(M_pre)):
-    
-    # assign a label to each update
-    labels = list(range(15)) # There are 15 update functions
-    shuffle(labels)
-    
-    # At every mc step, try EVERY update in random order
-    for label in labels:   
+    ikah_data = [0,0]
+    dkah_data = [0,0]
+
+    ikbt_data = [0,0]
+    dkbt_data = [0,0]
+
+    ikat_data = [0,0]
+    dkat_data = [0,0]
+
+    N_flats_mean = 0        # Average number of flats
+    N_flats_samples = 0     # samples
+
+    # Count measurements and measurement attempts
+    measurements = [0,0] # [made,attempted]
+
+    # Set how many times the set of updates will be attempted based on stage of the code
+    M_pre = 5.0E+04
+    if is_pre_equilibration:
+        iterations = M_pre
+    else: # main run
+        iterations = M
+
+    # Randomly propose every update M times
+    for m in range(int(iterations)):
         
-        # Non-Spaceshift moves
-        if label == 0:
-            pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                insert_worm_data,insert_anti_data,N_flats_tracker)
-
-        elif label == 1:
-            pimc.worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                delete_worm_data,delete_anti_data,N_flats_tracker)
-
-        elif label == 2:
-            pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,N_tracker,
-                advance_head_data,recede_head_data,advance_tail_data,recede_tail_data,N_flats_tracker)
-
-        elif label == 3:
-            pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
-
-        elif label == 4:
-            pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
-
-        elif label == 5:
-            pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
-
-        elif label == 6:
-            pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
-
-        # Spaceshift moves   
-        elif label == 7:
-            pimc.insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                ikbh_data,N_flats_tracker)  
-
-        elif label == 8:
-            pimc.delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                dkbh_data,N_flats_tracker) 
-
-        elif label == 9:
-            pimc.insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                ikah_data,N_flats_tracker)   
-
-        elif label == 10:
-            pimc.delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                dkah_data,N_flats_tracker)
-
-        elif label == 11:
-            pimc.insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                ikbt_data,N_flats_tracker)  
-
-        elif label == 12:
-            pimc.delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                dkbt_data,N_flats_tracker) 
-
-        elif label == 13:
-            pimc.insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                ikat_data,N_flats_tracker)   
-
-        else:
-            pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                dkat_data,N_flats_tracker)
-
-    # Calculate <N_flats> when there are no worms present
-    if m%int(L*beta)==0:
-
-        N_flats_mean += N_flats_tracker[0]
-        N_flats_samples += 1
-
-N_flats_mean /= N_flats_samples
-
-# Set the worm end fugacity to 1/<N_flats> (unless it was user defined)
-eta = 1/N_flats_mean if not(args.eta) else args.eta
-
-
-print("Pre-Equilibration stage complete. eta = %.4f \n"%(1/N_flats_mean))
-
-# ---------------- Lattice PIMC ---------------- #
-
-print("Starting LatticePIMC...")
-
-# Initialize Fock state
-alpha = pimc.random_boson_config(L,N)
-alpha = [1]*L
-
-# Create worldline data structure
-data_struct = pimc.create_data_struct(alpha,L)
-
-# List that will contain site and kink indices of worm head and tail
-head_loc = []
-tail_loc = []
-
-# Trackers
-N_tracker = [N]         # Total particles
-N_flats_tracker = [L]   # Total flat regions
-
-# Set the window at which kinetic energy will count kinks
-dtau = 0.1*beta # i.e count kinks at beta/2 +- dtau
-
-# Initialize values to be measured
-diagonal_list = []
-kinetic_list = []
-N_list = []              # average total particles 
-occ_list = []            # average particle occupation
-E_N_list = []            # Fixed total particle energies
-
-# Counters for acceptance and proposal of each move
-insert_worm_data = [0,0] # [accepted,proposed]
-delete_worm_data = [0,0]
-
-insert_anti_data = [0,0]
-delete_anti_data = [0,0]
-
-advance_head_data = [0,0]
-recede_head_data = [0,0]
-
-advance_tail_data = [0,0]
-recede_tail_data = [0,0]
-
-insertZero_worm_data = [0,0]
-deleteZero_worm_data = [0,0]
-
-insertZero_anti_data = [0,0]
-deleteZero_anti_data = [0,0]
-
-insertBeta_worm_data = [0,0]
-deleteBeta_worm_data = [0,0]
-
-insertBeta_anti_data = [0,0]
-deleteBeta_anti_data = [0,0]
-
-ikbh_data = [0,0]
-dkbh_data = [0,0]
-
-ikah_data = [0,0]
-dkah_data = [0,0]
-
-ikbt_data = [0,0]
-dkbt_data = [0,0]
-
-ikat_data = [0,0]
-dkat_data = [0,0]
-
-# Count measurements and measurement attempts
-measurements = [0,0] # [made,attempted]
-
-# Randomly propose every update M times
-for m in range(M):
-    
-    # assign a label to each update
-    labels = list(range(15)) # There are 15 update functions
-    shuffle(labels)
-    
-    # At every mc step, try EVERY update in random order
-    for label in labels:   
+        # assign a label to each update
+        labels = list(range(15)) # There are 15 update functions
+        shuffle(labels)
         
-        # Non-Spaceshift moves
-        if label == 0:
-            pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                insert_worm_data,insert_anti_data,N_flats_tracker)
-
-        elif label == 1:
-            pimc.worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                delete_worm_data,delete_anti_data,N_flats_tracker)
-
-        elif label == 2:
-            pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,N_tracker,
-                advance_head_data,recede_head_data,advance_tail_data,recede_tail_data,N_flats_tracker)
-
-        elif label == 3:
-            pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
-
-        elif label == 4:
-            pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
-
-        elif label == 5:
-            pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
-
-        elif label == 6:
-            pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-                deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
-
-        # Spaceshift moves   
-        elif label == 7:
-            pimc.insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                ikbh_data,N_flats_tracker)  
-
-        elif label == 8:
-            pimc.delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                dkbh_data,N_flats_tracker) 
-
-        elif label == 9:
-            pimc.insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                ikah_data,N_flats_tracker)   
-
-        elif label == 10:
-            pimc.delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                dkah_data,N_flats_tracker)
-
-        elif label == 11:
-            pimc.insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                ikbt_data,N_flats_tracker)  
-
-        elif label == 12:
-            pimc.delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                dkbt_data,N_flats_tracker) 
-
-        elif label == 13:
-            pimc.insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                ikat_data,N_flats_tracker)   
-
-        else:
-            pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,N_tracker,
-                dkat_data,N_flats_tracker)
-
-  
-    # Calculate observables when there are no worms present
-    if m%int(L*beta)==0:
-        
-        # Add to MEASUREMENTS ATTEMPTS counter
-        measurements[1] += 1
-
-        if not(pimc.check_worm(head_loc,tail_loc)):
-
-            # Add to MEASUREMENTS MADE counter
-            measurements[0] += 1
-
-            # Energies
-            kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L)
-            diagonal_list.append(diagonal)
-            kinetic_list.append(kinetic)
-
-            # Calculate the average total number of particles
-            N_list.append(pimc.n_pimc(data_struct,beta,L)) # <n>
+        # At every mc step, try EVERY update in random order
+        for label in labels:   
             
-            # Calculate the average particle occupation
-            # occ_list.append(pimc.n_i_pimc(data_struct,beta,L))
+            # Non-Spaceshift moves
+            if label == 0:
+                pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                    N_tracker,
+                    insert_worm_data,insert_anti_data,N_flats_tracker)
 
-print("LatticePIMC Complete. Saving data to disk...")
+            elif label == 1:
+                pimc.worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                    N_tracker,delete_worm_data,delete_anti_data,N_flats_tracker)
 
+            elif label == 2:
+                pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,
+                    N_tracker,advance_head_data,recede_head_data,
+                    advance_tail_data,recede_tail_data,N_flats_tracker)
+
+            elif label == 3:
+                pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                    N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
+
+            elif label == 4:
+                pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                    N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
+
+            elif label == 5:
+                pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                    N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
+
+            elif label == 6:
+                pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                    N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
+
+            # Spaceshift moves   
+            elif label == 7:
+                pimc.insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                    N_tracker,ikbh_data,N_flats_tracker)  
+
+            elif label == 8:
+                pimc.delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                    N_tracker,dkbh_data,N_flats_tracker) 
+
+            elif label == 9:
+                pimc.insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                    N_tracker,ikah_data,N_flats_tracker)   
+
+            elif label == 10:
+                pimc.delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                    N_tracker,dkah_data,N_flats_tracker)
+
+            elif label == 11:
+                pimc.insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                    N_tracker,ikbt_data,N_flats_tracker)  
+
+            elif label == 12:
+                pimc.delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                    N_tracker,dkbt_data,N_flats_tracker) 
+
+            elif label == 13:
+                pimc.insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                    N_tracker,ikat_data,N_flats_tracker)   
+
+            else:
+                pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                    N_tracker,dkat_data,N_flats_tracker)
+
+        # Attempt to measure every L*beta steps
+        if m%int(L*beta)==0:
+
+            # Pre-equilibration: Calculate <N_flats> when there are no worms present
+            if is_pre_equilibration:
+                N_flats_mean += N_flats_tracker[0]
+                N_flats_samples += 1
+
+            # Main: Calculate observables when there are no worm ends present
+            else:
+                
+                # Add to MEASUREMENTS ATTEMPTS counter
+                measurements[1] += 1
+
+                if not(pimc.check_worm(head_loc,tail_loc)):
+
+                    # Add to MEASUREMENTS MADE counter
+                    measurements[0] += 1
+
+                    # Energies
+                    kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L)
+                    diagonal_list.append(diagonal)
+                    kinetic_list.append(kinetic)
+
+                    # Calculate the average total number of particles
+                    N_list.append(pimc.n_pimc(data_struct,beta,L)) # <n>
+                    
+                    # Calculate the average particle occupation
+                    # occ_list.append(pimc.n_i_pimc(data_struct,beta,L))
+
+    # Calculate average <N_flats>
+    if is_pre_equilibration:  
+        N_flats_mean /= N_flats_samples
+
+        # Set the worm end fugacity to 1/<N_flats> (unless it was user defined)
+        eta = 1/np.sqrt(2*N_flats_mean) if not(args.eta) else args.eta
+
+    # Print out the value of eta or indicate when the main loop ends.
+    if is_pre_equilibration:
+        print("Pre-Equilibration stage complete. eta = %.4f \n"%(1/N_flats_mean))
+    else:
+        print("Lattice PIMC done. Saving data to disk...")
+
+    # Turn pre-equilibration flag off
+    is_pre_equilibration = False 
 
 # ---------------- Format data and save to disk ---------------- #
 
