@@ -4,6 +4,7 @@ import bisect
 import matplotlib.pyplot as plt
 from copy import deepcopy
 from scipy.stats import truncexpon
+import math
 
 def random_boson_config(L,N):
     '''Generates a random configuration of N bosons in a 1D lattice of size L'''
@@ -66,9 +67,8 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L):
             # Count kinks in [beta/2-dtau,beta/2+dtau] (for kinetic energy)
             tau = data_struct[i][k][0]
             if tau >= 0.5*beta-dtau and tau <= 0.5*beta+dtau:
-                kink_src = data_struct[i][k][2][1] # source site of the kink
+                kink_src = data_struct[i][k][2][0] # source site of the kink
                 if i == kink_src: # This avoids double counting the kinks
-                #if i == i: # This avoids double counting the kinks
                     n_kinks += 1
 
             # Store the Fock state at beta/2 (to calculate diagonal energy)
@@ -76,11 +76,12 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L):
                 n_i = data_struct[i][k][1] # no. particles in the flat
                 alpha[i] = n_i # Get Fock state at beta/2 (for diagonal energy)
 
-            # Exit loop after 0.5*beta+tau
+            # Exit loop after 0.5*beta+dtau
             if tau > 0.5*beta+dtau: break
 
     # Calculate kinetic energy estimator
-    kinetic = -t*n_kinks/beta
+    #kinetic = -t*n_kinks/beta
+    kinetic = -t*n_kinks/(2*dtau)
 
     # Calculate diagonal energy
     diagonal = 0
@@ -497,7 +498,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,N_track
     # Accept
     data_struct[x][k][0] = tau_new
 
-    # For canonical simulation, modify total N tracker
+    # Modify total N tracker
     N_tracker[0] += dN
 
     return True
@@ -601,11 +602,13 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
         if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False # int due to precision
 
     # Build the weigh ratio W'/W
-    C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
+    C = 1 # Ratio of trial wavefn coefficients post/pre update
     if insert_worm:
-        W = eta * np.sqrt(N_after_tail) * C_post/C_pre * np.exp(-dV*tau)
+        #C = np.sqrt((N+1)/math.factorial(n_i+1)) 
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
     else: # antiworm
-        W = eta * np.sqrt(N_after_tail) * C_pre/C_post * np.exp(dV*tau)
+        #C = np.sqrt((N-1)/math.factorial(n_i-1)) 
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
@@ -755,11 +758,13 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
 
     # Build the weigh ratio W'/W
-    C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
+    C = 1 # C_post/C_pre
     if delete_head: # delete worm
-        W = eta * np.sqrt(N_after_tail) * C_post/C_pre * np.exp(-dV*tau)
+        #C = np.sqrt((N+1)/math.factorial(n_i+1)) 
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
     else: # delete antiworm
-        W = eta * np.sqrt(N_after_tail) * C_pre/C_post * np.exp(dV*tau)
+        #C = np.sqrt((N-1)/math.factorial(n_i-1)) 
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
@@ -904,11 +909,13 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
         if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
 
     # Build the weight ratio W'/W
-    C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
+    C = 1  # C_pre/C_post
     if insert_worm:
-        W = eta * np.sqrt(N_after_tail) * C_post/C_pre * np.exp(-dV*(beta-tau))
+        #C = np.sqrt((N+1)/math.factorial(n_i+1)) 
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
     else: # antiworm
-        W = eta * np.sqrt(N_after_tail) * C_pre/C_post * np.exp(-dV*(tau-beta))
+        #C = np.sqrt((N-1)/math.factorial(n_i-1)) 
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5
@@ -1045,11 +1052,13 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
 
     # Build the weight ratio W'/W
-    C_post, C_pre = 0.5,0.5 # (sqrt) Probability amplitudes of trial wavefunction
+    C = 1 # C_post/C_pre
     if not(delete_head): # delete tail (worm)
-        W = eta * np.sqrt(N_after_tail) * C_post/C_pre * np.exp(-dV*(beta-tau))
+        #C = np.sqrt((N+1)/math.factorial(n_i+1)) 
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
     else: # delete head (antiworm)
-        W = eta * np.sqrt(N_after_tail) * C_pre/C_post * np.exp(-dV*(tau-beta))
+        #C = np.sqrt((N-1)/math.factorial(n_i-1)) 
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5

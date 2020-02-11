@@ -53,7 +53,8 @@ eta = 1/np.sqrt(L*beta)
 
 # ---------------- Pre-Equilibration and Lattice PIMC ---------------- #
 
-# First iteration: Pre-Equilibration (determines eta)
+# First iteration: eta optimization
+# Second iteration: mu optimization (canonical simulations only)
 # Second iteration: Main run
 is_pre_equilibration = True
 for i in range(2):
@@ -114,7 +115,7 @@ for i in range(2):
     insertBeta_anti_data = [0,0]
     deleteBeta_anti_data = [0,0]
 
-    ikbh_data = [0,0]
+    ikbh_data = [0,0] 
     dkbh_data = [0,0]
 
     ikah_data = [0,0]
@@ -223,7 +224,7 @@ for i in range(2):
 
             # Main: Calculate observables when there are no worm ends present
             else:
-                
+
                 # Add to MEASUREMENTS ATTEMPTS counter
                 measurements[1] += 1
 
@@ -232,27 +233,28 @@ for i in range(2):
                     # Add to MEASUREMENTS MADE counter
                     measurements[0] += 1
 
-                    # Energies
-                    kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L)
-                    diagonal_list.append(diagonal)
-                    kinetic_list.append(kinetic)
-
                     # Calculate the average total number of particles
                     N_list.append(pimc.n_pimc(data_struct,beta,L)) # <n>
                     
-                    # Calculate the average particle occupation
-                    # occ_list.append(pimc.n_i_pimc(data_struct,beta,L))
+                    # Energies
+                    kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L)
+                    kinetic_list.append(kinetic)
+
+                    # Diagonal energy should be corrected for canonical simulations
+                    if not(canonical):
+                        diagonal_list.append(diagonal)
+                    else:
+                        diagonal_list.append(diagonal+mu*N)
 
     # Calculate average <N_flats>
     if is_pre_equilibration:  
         N_flats_mean /= N_flats_samples
-
         # Set the worm end fugacity to 1/<N_flats> (unless it was user defined)
         eta = 1/np.sqrt(2*N_flats_mean) if not(args.eta) else args.eta
 
     # Print out the value of eta or indicate when the main loop ends.
     if is_pre_equilibration:
-        print("Pre-Equilibration stage complete. eta = %.4f \n"%(1/N_flats_mean))
+        print("Pre-Equilibration stage complete. eta = %.4f \n"%(eta))
     else:
         print("Lattice PIMC done. Saving data to disk...")
 
