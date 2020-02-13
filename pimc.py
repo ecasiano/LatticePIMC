@@ -601,13 +601,22 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
         # Reject the update if the total number is outside of (N-1,N+1)
         if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False # int due to precision
 
+    # Count the TOTAL number of particles at tau=0
+    N_pre = 0
+    for f in range(L):
+        N_pre += data_struct[f][0][1] # add particles at first flat of each site
+
+    # Extract the wavefunction coefficient ratio
+    if N_pre == N:
+        C = 1/np.sqrt(L)   # C_post/C_pre (MOTT)
+    else: # N_pre != N
+        C = np.sqrt(L)     # C_post/C_pre (MOTT)
+
     # Build the weigh ratio W'/W
-    C = 1 # Ratio of trial wavefn coefficients post/pre update
+    # C = 1 # Ratio of trial wavefn coefficients post/pre update
     if insert_worm:
-        #C = np.sqrt((N+1)/math.factorial(n_i+1)) 
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
     else: # antiworm
-        #C = np.sqrt((N-1)/math.factorial(n_i-1)) 
         W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
 
     # Build the Metropolis Ratio  (R)
@@ -757,14 +766,24 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
 
+# Count the TOTAL number of particles at tau=0
+    N_post = 0
+    for f in range(L):
+        N_post += data_struct[f][0][1] # add particles at first flat of each site
+
+    # Extract the wavefunction coefficient ratio
+    if N_post != N:
+        C = 1/np.sqrt(L)   # C_post/C_pre (MOTT)
+    else: # N_post == N
+        C = np.sqrt(L)     # C_post/C_pre (MOTT)
+
     # Build the weigh ratio W'/W
-    C = 1 # C_post/C_pre
+    # C = 1 # C_post/C_pre
     if delete_head: # delete worm
-        #C = np.sqrt((N+1)/math.factorial(n_i+1)) 
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
     else: # delete antiworm
-        #C = np.sqrt((N-1)/math.factorial(n_i-1)) 
         W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
+
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
@@ -908,13 +927,22 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
         # Reject the update if the total number is outside of (N-1,N+1)
         if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
 
+# Count the TOTAL number of particles at tau=beta
+    N_pre = 0
+    for f in range(L):
+        N_pre += data_struct[f][-1][1] # add particles at last flat of each site
+
+    # Extract the wavefunction coefficient ratio
+    if N_pre == N:
+        C = 1/np.sqrt(L)   # C_post/C_pre (MOTT)
+    else: # N_pre != N
+        C = np.sqrt(L)     # C_post/C_pre (MOTT)
+
     # Build the weight ratio W'/W
-    C = 1  # C_pre/C_post
+    # C = 1  # C_pre/C_post
     if insert_worm:
-        #C = np.sqrt((N+1)/math.factorial(n_i+1)) 
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
     else: # antiworm
-        #C = np.sqrt((N-1)/math.factorial(n_i-1)) 
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
@@ -1051,13 +1079,22 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
 
+# Count the TOTAL number of particles at tau=beta
+    N_post = 0
+    for f in range(L):
+        N_post += data_struct[f][-1][1] # add particles at last flat of each site
+
+    # Extract the wavefunction coefficient ratio
+    if N_post != N:
+        C = 1/np.sqrt(L)   # C_post/C_pre (MOTT)
+    else: # N_post == N
+        C = np.sqrt(L)     # C_post/C_pre (MOTT)
+
     # Build the weight ratio W'/W
-    C = 1 # C_post/C_pre
+    # C = 1 # C_post/C_pre
     if not(delete_head): # delete tail (worm)
-        #C = np.sqrt((N+1)/math.factorial(n_i+1)) 
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
     else: # delete head (antiworm)
-        #C = np.sqrt((N-1)/math.factorial(n_i-1)) 
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
@@ -2128,5 +2165,32 @@ def view_worldlines(data_struct,beta,figure_name=None):
     #plt.close()
 
     return None
+
+'----------------------------------------------------------------------------------'
+
+def get_std_error(mc_data):
+    '''Input array and calculate standard error'''
+    N_bins = np.shape(mc_data)[0]
+    std_error = np.std(mc_data)/np.sqrt(N_bins)
+    
+    return std_error
+
+'----------------------------------------------------------------------------------'
+
+def get_binned_data(mc_data):
+    '''Return neighbor averaged data.'''
+    N_bins = np.shape(mc_data)[0]
+    start_bin = N_bins % 2
+    binned_mc_data = 0.5*(mc_data[start_bin::2]+mc_data[start_bin+1::2]) #Averages (A0,A1), (A2,A3), + ... A0 ignored if odd data
+
+    return binned_mc_data
+
+'----------------------------------------------------------------------------------'
+
+def get_autocorrelation_time(error_data):
+    '''Given an array of standard errors, calculates autocorrelation time'''
+    print(error_data[0],error_data[-2])
+    autocorr_time = 0.5*((error_data[-2]/error_data[0])**2 - 1)
+    return autocorr_time
 
 '----------------------------------------------------------------------------------'

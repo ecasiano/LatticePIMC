@@ -82,6 +82,7 @@ for i in range(2):
 
     # Set the window at which kinetic energy will count kinks
     dtau = 0.1*beta # i.e count kinks at beta/2 +- dtau
+    #dtau = 0.49999*beta
 
     # Initialize values to be measured
     diagonal_list = []
@@ -134,7 +135,7 @@ for i in range(2):
     measurements = [0,0] # [made,attempted]
 
     # Set how many times the set of updates will be attempted based on stage of the code
-    M_pre = 5.0E+04
+    M_pre = 1.0E+05
     if is_pre_equilibration:
         iterations = M_pre
     else: # main run
@@ -166,10 +167,12 @@ for i in range(2):
                     advance_tail_data,recede_tail_data,N_flats_tracker)
 
             elif label == 3:
+                #pass
                 pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
                     N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
 
             elif label == 4:
+                #pass
                 pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
                     N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
 
@@ -230,21 +233,37 @@ for i in range(2):
 
                 if not(pimc.check_worm(head_loc,tail_loc)):
 
-                    # Add to MEASUREMENTS MADE counter
-                    measurements[0] += 1
-
-                    # Calculate the average total number of particles
-                    N_list.append(pimc.n_pimc(data_struct,beta,L)) # <n>
-                    
-                    # Energies
-                    kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L)
-                    kinetic_list.append(kinetic)
-
-                    # Diagonal energy should be corrected for canonical simulations
                     if not(canonical):
+
+                        # Add to MEASUREMENTS MADE counter
+                        measurements[0] += 1
+
+                        # Calculate the average total number of particles
+                        N_list.append(pimc.n_pimc(data_struct,beta,L)) # <n>
+                        
+                        # Energies
+                        kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L)
+                        kinetic_list.append(kinetic)
                         diagonal_list.append(diagonal)
-                    else:
-                        diagonal_list.append(diagonal+mu*N)
+
+                    else: # canonical
+                        if round(N_tracker[0])==N:
+
+                             # Add to MEASUREMENTS MADE counter
+                            measurements[0] += 1
+
+                            # Calculate the average total number of particles
+                            N_list.append(pimc.n_pimc(data_struct,beta,L)) # <n>
+                            
+                            # Energies
+                            kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L)
+                            kinetic_list.append(kinetic)
+                       
+                            diagonal_list.append(diagonal+mu*N_tracker[0])
+
+                        else:
+                            pass
+
 
     # Calculate average <N_flats>
     if is_pre_equilibration:  
