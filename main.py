@@ -28,6 +28,8 @@ parser.add_argument("--eta",help="Worm end fugacity (default: 1/sqrt(<N_flats>)"
                     type=float,metavar='\b')
 parser.add_argument("--beta",help="Thermodynamic beta 1/(K_B*T) (default: 1.0)",
                     type=float,metavar='\b')
+parser.add_argument("--tau-slice",help="Im. time slice at which to measure (default: beta/2)",
+                    type=float,metavar='\b')
 parser.add_argument("--M",help="Number of Monte Carlo steps (default: 1E+05)",
                     type=int,metavar='\b') 
 parser.add_argument("--canonical",help="Statistical ensemble (Default: Grand Canonical)",
@@ -47,6 +49,7 @@ t = 1.0 if not(args.t) else args.t
 beta = 1.0 if not(args.beta) else args.beta
 M = int(1E+05) if not(args.M) else args.M
 canonical = False if not(args.canonical) else True
+tau_slice = beta/2 if not(args.tau_slice) else args.tau_slice
 
 # Initial eta value (actual value will be obtained in pre-equilibration stage)
 eta = 1/np.sqrt(L*beta)
@@ -217,6 +220,11 @@ for i in range(2):
                 pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
                     N_tracker,dkat_data,N_flats_tracker)
 
+
+        # In pre-equilibration, keep track of total N. Needed to optimize mu in canonical simulations.
+        # if is_pre_equilibration:
+        #     N_equil.append(N_tracker[0])
+
         # Attempt to measure every L*beta steps
         if m%int(L*beta)==0:
 
@@ -233,36 +241,37 @@ for i in range(2):
 
                 if not(pimc.check_worm(head_loc,tail_loc)):
 
-                    if not(canonical):
+                    # Add to MEASUREMENTS MADE counter
+                    measurements[0] += 1
 
-                        # Add to MEASUREMENTS MADE counter
-                        measurements[0] += 1
-
-                        # Calculate the average total number of particles
-                        N_list.append(pimc.n_pimc(data_struct,beta,L)) # <n>
+                    if not(canonical): # grand canonical
                         
                         # Energies
-                        kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L)
+                        kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice)
                         kinetic_list.append(kinetic)
                         diagonal_list.append(diagonal)
 
+                        # Total number of particles in worldline configuration
+                        N_list.append(N_tracker[0])
+
                     else: # canonical
-                        if round(N_tracker[0])==N:
 
-                             # Add to MEASUREMENTS MADE counter
-                            measurements[0] += 1
+                        #if round(N_tracker[0])==N:
+                        if round(N_tracker[0],14)==N:
 
-                            # Calculate the average total number of particles
-                            N_list.append(pimc.n_pimc(data_struct,beta,L)) # <n>
-                            
+                            print(N_tracker[0])
                             # Energies
-                            kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L)
+                            kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice)
                             kinetic_list.append(kinetic)
-                       
-                            diagonal_list.append(diagonal+mu*N_tracker[0])
+                            diagonal_list.append(diagonal+mu*N)    
 
-                        else:
-                            pass
+                            # Total number of particles in worldline configuration
+                            N_list.append(N_tracker[0])                        
+
+
+                        else: # Worldline doesn't have target particle number
+                            measurements[0] -= 1 # Disregard measurement
+                            #pass
 
 
     # Calculate average <N_flats>
@@ -277,7 +286,10 @@ for i in range(2):
     else:
         print("Lattice PIMC done. Saving data to disk...")
 
-    # Turn pre-equilibration flag off
+    # Turn pre-equilibratiolsn flag off if N_equil is good
+    #N_equil_mean = pldata 
+    #if N_equil_mean != N:
+
     is_pre_equilibration = False 
 
 # ---------------- Format data and save to disk ---------------- #
@@ -293,15 +305,15 @@ data_list = [diagonal_list/t,kinetic_list/t,total_list,N_list]
 
 # Create file header
 header = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s}'.format(
-    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,beta=%.4f,M=%i"%(L,N,U,mu,t,eta,beta,M),
+    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,beta=%.4f,tau_slice=%.4f,M=%i"%(L,N,U,mu,t,eta,beta,tau_slice,M),
     'H_0/t','H_1/t','E/t', 'N')
 
 # Save to disk
 if canonical:
-    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_can.dat"%(L,N,U,mu,t,eta,beta,M),"w+") as data:
+    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%.4f_%i_can.dat"%(L,N,U,mu,t,eta,beta,tau_slice,M),"w+") as data:
         np.savetxt(data,np.transpose(data_list),delimiter=" ",fmt="%-20s",header=header) 
 else:
-    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_gcan.dat"%(L,N,U,mu,t,eta,beta,M),"w+") as data:
+    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%.4f_%i_gcan.dat"%(L,N,U,mu,t,eta,beta,tau_slice,M),"w+") as data:
         np.savetxt(data,np.transpose(data_list),delimiter=" ",fmt="%-20s",header=header) 
 
 # ---------------- Print acceptance ratios ---------------- #

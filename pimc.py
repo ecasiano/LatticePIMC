@@ -52,39 +52,41 @@ def N_tracker(data_struct,beta,L):
 
 '----------------------------------------------------------------------------------'
 
-def bh_egs(data_struct,beta,dtau,U,mu,t,L):
-    ''''Count the kinks in the interval [0.4*beta,0.6*beta]'''
+def bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice):
 
-    # Store the configuration at beta/2 (need for diagonal energy)
+    '''Calculates the kinetic and diagonal energies'''
+
+    # Stores the configuration at tau_slice (need for diagonal energy)
     alpha = [0]*L
 
-    # Iterate over every site to get Fock state at beta/2 and kinks near it.
-    n_kinks = 0 # number of kinks
+    # Iterate over every site to get Fock state at tau_slice and kinks near it.
+    N_kinks = 0 # number of kinks
     for i in range(L):
         N_flats = len(data_struct[i]) # Number of flats on site i
-        for k in range(N_flats): # Ignore the initial values (known)
+        for k in range(N_flats):
 
-            # Count kinks in [beta/2-dtau,beta/2+dtau] (for kinetic energy)
+            # Count the kinks in the interval: [tau_slice-dtau,tau_slice]
             tau = data_struct[i][k][0]
-            if tau >= 0.5*beta-dtau and tau <= 0.5*beta+dtau:
+            if tau >= tau_slice-dtau and tau <= tau_slice+dtau:
                 kink_src = data_struct[i][k][2][0] # source site of the kink
-                if i == kink_src: # This avoids double counting the kinks
-                    n_kinks += 1
+                if i == kink_src and k!=0: # Avoids double counting kinks and initial value
+                    N_kinks += 1
 
-            # Store the Fock state at beta/2 (to calculate diagonal energy)
-            if tau <= 0.5*beta:
-                n_i = data_struct[i][k][1] # no. particles in the flat
-                alpha[i] = n_i # Get Fock state at beta/2 (for diagonal energy)
+            # Store the Fock state at tau_slice (to calculate diagonal energy)
+            if tau <= tau_slice:
+                n_i = data_struct[i][k][1] # no. of particles in the flat
+                alpha[i] = n_i
 
-            # Exit loop after 0.5*beta+dtau
-            if tau > 0.5*beta+dtau: break
+            # Exit inner loop after tau_slice+dtau
+            if tau > tau_slice+dtau: break
 
     # Calculate kinetic energy estimator
-    #kinetic = -t*n_kinks/beta
-    kinetic = -t*n_kinks/(2*dtau)
+    kinetic = -t*N_kinks/(2*dtau)
 
     # Calculate diagonal energy
+    #print(alpha)
     diagonal = 0
+    N = sum(alpha) # Total particles at tau_slice
     for i in range(L):
         n_i = alpha[i]
         diagonal += ( (U/2)*n_i*(n_i-1)-mu*n_i )
@@ -93,16 +95,17 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L):
 
 '----------------------------------------------------------------------------------'
 
-def n_pimc(data_struct,beta,L):
-    '''Calculates total particle number at time slice tau=beta/2'''
+def n_pimc(data_struct,beta,L,tau_slice):
 
-    # Average particle number at slice beta/2 (for no hopping)
+    '''Calculates total particle number at tau_slice'''
+
+    # Particle number at tau_slice
     n = 0
     for i in range(L):
         N_flats = len(data_struct[i]) # Number of flats on site i
         for k in range(N_flats):
-            if data_struct[i][k][0] <= beta/2:
-                n_i = data_struct[i][k][1] # particles on i at beta/2
+            if data_struct[i][k][0] <= tau_slice:
+                n_i = data_struct[i][k][1] # particles on i at tau_slice
             else: break
         n += n_i
 
