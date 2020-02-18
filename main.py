@@ -10,6 +10,9 @@ from scipy.integrate import quad, simps
 import importlib
 import argparse
 importlib.reload(pimc)
+import pickle
+
+is_pickled = False
 
 # -------- Set command line arguments -------- #
 
@@ -74,7 +77,6 @@ for i in range(2):
     # Initialize Fock state
     alpha = pimc.random_boson_config(L,N)
     alpha = [1]*L
-    alpha = [4,0,0,0]
 
     # Create worldline data structure
     data_struct = pimc.create_data_struct(alpha,L)
@@ -282,9 +284,16 @@ for i in range(2):
                             tr_diagonal_list.append(np.array(diagonal))
 
                             # Total number of particles in worldline configuration
-                            N_list.append(N_tracker[0])                        
-
-
+                            N_list.append(N_tracker[0])     
+                            
+                            if not(is_pickled) and m > int(m/2):
+                                kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
+                                print(kinetic,diagonal)
+                                with open('pickled_config.pickle', 'wb') as pfile:
+                                    pickle.dump(data_struct,pfile,pickle.HIGHEST_PROTOCOL)
+                                
+                                is_pickled = True
+                            
                         else: # Worldline doesn't have target particle number
                             measurements[0] -= 1 # Disregard measurement
                             #pass

@@ -202,11 +202,12 @@ def C_SF(N,L,alpha):
     
     '''Return coefficient of flat state of N bosons on L sites'''
     
-    den = 1
+    den = 1 # denominator
     for n_i in alpha:
         den *= math.factorial(n_i)
         
-    return np.sqrt(math.factorial(N)/den)
+#     return np.sqrt(math.factorial(N)/den)
+    return 1
 
 '----------------------------------------------------------------------------------'
 
@@ -700,10 +701,10 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
         alpha_post[i] -= 1
     
 #     # Superfluid coefficient ratio (C_post/C_pre)
-#     C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+    C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre) 
 
     #######
-    C = 1
+    #C = 1
     
     # Build the weigh ratio W'/W
     # C = 1 # Ratio of trial wavefn coefficients post/pre update
@@ -858,11 +859,7 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
-
-    # Count the TOTAL number of particles at tau=0
-    N_post = 0
-    for f in range(L):
-        N_post += data_struct[f][0][1] # add particles at first flat of each site
+    
         
     # Count the TOTAL number of particles at tau=0
     N_post = 0
@@ -885,11 +882,11 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
         alpha_pre = np.copy(alpha_post)
         alpha_pre[x] += 1
     
-#     # Superfluid coefficient ratio (C_post/C_pre)
-#     C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+    # Superfluid coefficient ratio (C_post/C_pre)
+    C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
-    #######
-    C = 1
+#     #######
+#     C = 1
     
     # Build the weigh ratio W'/W
     # C = 1 # C_post/C_pre
@@ -1062,11 +1059,11 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
         alpha_post = np.copy(alpha_pre)
         alpha_post[i] -= 1
     
-#     # Superfluid coefficient ratio (C_post/C_pre)
-#     C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+    # Superfluid coefficient ratio (C_post/C_pre)
+    C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
-    #######
-    C = 1
+#     #######
+#     C = 1
     
     # Build the weight ratio W'/W
     # C = 1  # C_pre/C_post
@@ -1230,11 +1227,11 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
         alpha_pre = np.copy(alpha_post)
         alpha_pre[x] -= 1
     
-#     # Superfluid coefficient ratio (C_post/C_pre)
-#     C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+    # Superfluid coefficient ratio (C_post/C_pre)
+    C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
-    #######
-    C = 1
+#     #######
+#     C = 1
     
     # Build the weight ratio W'/W
     # C = 1 # C_post/C_pre
@@ -1293,21 +1290,16 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     k = head_loc[1]
 
     # Randomly choose destination site (j) of the head
-    if L == 2: # Only two sites
-        j = i-1 # Hop head to the left
-        if j==-1: # PBC's
+    if np.random.random() < 0.5:
+        j = i+1 # Hop head to the right
+        if j == L:
+            j = 0
+    else: # Head hops to the left
+        j = i-1
+        if j==-1:
             j = L-1 # head hops to last site
-        p_site = 1 # probability of hopping to site j
-    else: # 3 sites or more
-        if np.random.random() < 0.5:
-            j = i+1 # Hop head to the right
-            if j == L:
-                j = 0
-        else: # Head hops to the left
-            j = i-1
-            if j==-1:
-                j = L-1 # head hops to last site
-        p_site = 0.5
+    p_site = 0.5
+    
 
     # Retrieve the time of the worm head (and tail if present)
     tau_h = data_struct[i][k][0]
@@ -1447,12 +1439,8 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
 
     # Determine the lowest time at which the kink could've been inserted
     tau_min = max(tau_prev_i,tau_prev_j)
-
-    # Determine the probability that the inverse move had of hopping the head to site j
-    if L == 2: # only 2 sites
-        p_site = 1
-    else: # more than 2 sites
-        p_site = 0.5
+        
+    p_site = 0.5
 
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1517,23 +1505,18 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     # Retrieve worm head indices (i:site,k:kink)
     i = head_loc[0]
     k = head_loc[1]
-
+        
     # Randomly choose destination site (j) of the head
-    if len(data_struct) == 2: # Only two sites
+    if np.random.random() < 0.5:
+        j = i+1 # Hop head to the right
+        if j == L:
+            j = 0
+    else: # Head hops to the left
         j = i-1
-        p_site = 1 # probability of hopping to site j
-    else: # 3 sites or more
-        if np.random.random() < 0.5:
-            j = i+1 # Head hops to the right
-            if j == L: # PBC's
-                j = 0
-        else: # Head hops to the left
-            j = i-1
-        p_site = 0.5
+        if j==-1:
+            j = L-1 # head hops to last site
+    p_site = 0.5
 
-    # Need to make the j exclusively positive for plotting purposes
-    if j==-1:
-        j = L-1 # head hops to last site
 
     # Retrieve the time of the worm head (and tail if present)
     tau_h = data_struct[i][k][0]
@@ -1694,11 +1677,8 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     # Determine the highest time at which the kink could've been inserted
     tau_max = min(tau_next_i,tau_next_j)
 
-    # The inverse move (IKAH), had to choose which site head would hop to
-    if L == 2: # only two sites
-        p_site = 1
-    else: # More than two sites
-        p_site = 0.5
+    p_site = 0.5
+
 
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1763,23 +1743,18 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     # Retrieve worm tail indices (i:site,k:kink)
     i = tail_loc[0]
     k = tail_loc[1]
-
+        
     # Randomly choose destination site (j) of the head
-    if L == 2: # Only two sites
-        j = i-1 # hop tail to the left
-        if j==-1: # PBC's
-            j = L-1 # tail hops to last site
-        p_site = 1 # probability of hopping to site j
-    else: # 3 sites or more
-        if np.random.random() < 0.5:
-            j = i+1 # hop tail to the right
-            if j == L: # PBC's
-                j = 0
-        else: # hop tail to the left
-            j = i-1
-            if j==-1: # PBC's
-                j = L-1 # tail hops to last site
-        p_site = 0.5
+    if np.random.random() < 0.5:
+        j = i+1 # Hop head to the right
+        if j == L:
+            j = 0
+    else: # Head hops to the left
+        j = i-1
+        if j==-1:
+            j = L-1 # head hops to last site
+    p_site = 0.5
+
 
     # Retrieve the time of the worm tail (and head if present)
     tau_t = data_struct[i][k][0]
@@ -1923,11 +1898,8 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     # Determine the lowest time at which the kink could've been inserted
     tau_min = max(tau_prev_i,tau_prev_j)
 
-    # Determine probability of particle hopping left or right
-    if L > 2: # 3 or more lattice sites
-        p_site = 0.5
-    else: # only 2 sites
-        p_site = 1
+    p_site = 0.5
+
 
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1991,24 +1963,18 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
 
     # Retrieve worm tail indices (i:site,k:kink)
     i = tail_loc[0]
-    k = tail_loc[1]
-
+    k = tail_loc[1] 
+        
     # Randomly choose destination site (j) of the head
-    if L == 2: # Only two sites
-        j = i-1 # hop tail to the left
-        if j==-1: # PBC's
-            j = L-1 # tail hops to last site
-        p_site = 1 # probability of hopping to site j
-    else: # 3 sites or more
-        if np.random.random() < 0.5:
-            j = i+1 # hop tail to the right
-            if j == L: # PBC's
-                j = 0
-        else: # hop tail to the left
-            j = i-1
-            if j==-1: # PBC's
-                j = L-1 # tail hops to last site
-        p_site = 0.5
+    if np.random.random() < 0.5:
+        j = i+1 # Hop head to the right
+        if j == L:
+            j = 0
+    else: # Head hops to the left
+        j = i-1
+        if j==-1:
+            j = L-1 # head hops to last site
+    p_site = 0.5
 
     # Retrieve the time of the worm tail (and head if present)
     tau_t = data_struct[i][k][0]
@@ -2168,11 +2134,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     # Determine the highest time at which the kink could've been inserted
     tau_max = min(tau_next_i,tau_next_j)
 
-    # The inverse move (IKAT), had to choose which site tail would hop to
-    if L == 2: # only two sites
-        p_site = 1
-    else: # More than two sites
-        p_site = 0.5
+    p_site = 0.5
 
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -2307,8 +2269,8 @@ def view_worldlines(data_struct,beta,figure_name=None):
     plt.ylabel(r"$\tau/\beta$")
     if figure_name != None:
         plt.savefig(figure_name)
-    #plt.show()
-    plt.close()
+    plt.show()
+    #plt.close()
 
     return None
 
