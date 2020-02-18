@@ -6,6 +6,7 @@ from copy import deepcopy
 from scipy.stats import truncexpon
 import math
 from scipy.special import binom
+import sys
 
 def random_boson_config(L,N):
     '''Generates a random configuration of N bosons in a 1D lattice of size L'''
@@ -94,6 +95,63 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice):
 
 '----------------------------------------------------------------------------------'
 
+def tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L):
+    
+    '''Calculates the kinetic and diagonal energies'''
+
+
+    start = dtau
+    tau_slices = []
+    #print(int(beta/(2*dtau)),beta,dtau)
+    for i in range(int(beta/(2*dtau))):
+        tau_slices.append(start)
+        start += 2*dtau
+        
+    diagonal = np.zeros_like(tau_slices)
+    kinetic = np.zeros_like(tau_slices)
+
+    #print("tau_slices: ",tau_slices)
+    for idx,tau_slice in enumerate(tau_slices):
+        
+        # Stores the configuration at tau_slice (need for diagonal energy)
+        alpha = [0]*L
+
+        # Iterate over every site to get Fock state at tau_slice and kinks near it.
+        N_kinks = 0 # number of kinks
+        for i in range(L):
+            N_flats = len(data_struct[i]) # Number of flats on site i
+            for k in range(N_flats): # Ignore the initial value "kinks"
+
+                # Count the kinks in the interval: [tau_slice-dtau,tau_slice]
+                tau = data_struct[i][k][0] # time of the kink
+                if tau >= tau_slice-dtau and tau <= tau_slice+dtau:
+                    if k!=0: # Don't add the initial value kink of each site
+                        N_kinks += 1
+
+                # Store the Fock state at tau_slice (to calculate diagonal energy)
+                if tau <= tau_slice:
+                    n_i = data_struct[i][k][1] # no. of particles in the flat
+                    alpha[i] = n_i
+
+                # Exit inner loop after tau_slice+dtau. Go to next site's loop.
+                if tau > tau_slice+dtau: break
+
+        # Calculate kinetic energy estimator
+        N_kinks /= 2 # Kinks counted at source and destination site. This corrects.
+        kinetic[idx] = -N_kinks/(2*dtau)
+
+        # Calculate diagonal energy
+        for i in range(L):
+            n_i = alpha[i]
+            diagonal[idx] += ( (U/2)*n_i*(n_i-1)-mu*n_i )
+
+    #print(kinetic)
+    ##sys.exit()
+    
+    return kinetic,diagonal
+
+'----------------------------------------------------------------------------------'
+
 def n_pimc(data_struct,beta,L,tau_slice):
 
     '''Calculates total particle number at tau_slice'''
@@ -140,13 +198,14 @@ def check_worm(head_loc,tail_loc):
 
 '----------------------------------------------------------------------------------'
 
-def C_SF(N,L):
+def C_SF(N,L,alpha):
     
     '''Return coefficient of flat state of N bosons on L sites'''
     
-    M = binom(N+L-1,N)
-    
-    return 1/np.sqrt(M)
+    for n_i in alpha:
+        den *= math.factorial(n_i)
+        
+    return np.sqrt(math.factorial(N)/den)
 
 '----------------------------------------------------------------------------------'
 
@@ -622,7 +681,19 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     N_pre = 0
     for f in range(L):
         N_pre += data_struct[f][0][1] # add particles at first flat of each site
-
+        
+    # Fock states pre and post worm insertion
+    alpha_pre = []
+    alpha_post = []
+    for i in range(L):
+        alpha_pre.append(data_struct[i][0][1])
+        if insert_worm:
+            alpha_post = np.copy(alpha_pre)
+            alpha_post[i] += 1
+        else: # insert antiworm
+            alpha_post = np.copy(alpha_pre)
+            alpha_post[i] -= 1
+    
     # Extract the wavefunction coefficient ratio
     mott = False
     if mott:
@@ -632,12 +703,12 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
             C = np.sqrt(L)     # C_post/C_pre (MOTT)
     else: # Superfluid
         if insert_worm:
-            C = C_SF(N_pre+1,L)/C_SF(N_pre,L)
+            C = C_SF(N_pre+1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
         else: # insert antiworm
-            C = C_SF(N_pre-1,L)/C_SF(N_pre,L)
+            C = C_SF(N_pre-1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
     ########
-    C = 1
+    # C = 1
     
     # Build the weigh ratio W'/W
     # C = 1 # Ratio of trial wavefn coefficients post/pre update
@@ -793,11 +864,23 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
 
-# Count the TOTAL number of particles at tau=0
+    # Count the TOTAL number of particles at tau=0
     N_post = 0
     for f in range(L):
         N_post += data_struct[f][0][1] # add particles at first flat of each site
-
+        
+    # Fock states pre and post worm insertion
+    alpha_pre = []
+    alpha_post = []
+    for i in range(L):
+        alpha_post.append(data_struct[i][0][1])
+        if delete_head: # delete worm
+            alpha_pre = np.copy(alpha_post)
+            alpha_pre[i] += -1
+        else: # insert antiworm
+            alpha_pre = np.copy(alpha_post)
+            alpha_pre[i] += 1
+    
     # Extract the wavefunction coefficient ratio
     mott = False
     if mott:
@@ -807,12 +890,9 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
             C = np.sqrt(L)     # C_post/C_pre (MOTT)
     else: # Superfluid
         if delete_head: # delete worm
-            C = C_SF(N_post,L)/C_SF(N_post-1,L)
-        else: # delete anti
-            C = C_SF(N_post,L)/C_SF(N_post+1,L)
-
-    ########
-    C = 1
+            C = C_SF(N_post,L,alpha_post)/C_SF(N_post-1,L,alpha_pre)
+        else: # insert antiworm
+            C = C_SF(N_post,L,alpha_post)/C_SF(N_post+1,L,alpha_pre)
     
     # Build the weigh ratio W'/W
     # C = 1 # C_post/C_pre
@@ -964,11 +1044,23 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
         # Reject the update if the total number is outside of (N-1,N+1)
         if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
 
-    # Count the TOTAL number of particles at tau=beta
+    # Count the TOTAL number of particles at tau=0
     N_pre = 0
     for f in range(L):
-        N_pre += data_struct[f][-1][1] # add particles at last flat of each site
-
+        N_pre += data_struct[f][-1][1] # add particles at first flat of each site
+        
+    # Fock states pre and post worm insertion
+    alpha_pre = []
+    alpha_post = []
+    for i in range(L):
+        alpha_pre.append(data_struct[i][-1][1])
+        if insert_worm:
+            alpha_post = np.copy(alpha_pre)
+            alpha_post[i] += 1
+        else: # insert antiworm
+            alpha_post = np.copy(alpha_pre)
+            alpha_post[i] -= 1
+    
     # Extract the wavefunction coefficient ratio
     mott = False
     if mott:
@@ -978,12 +1070,12 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
             C = np.sqrt(L)     # C_post/C_pre (MOTT)
     else: # Superfluid
         if insert_worm:
-            C = C_SF(N_pre+1,L)/C_SF(N_pre,L)
+            C = C_SF(N_pre+1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
         else: # insert antiworm
-            C = C_SF(N_pre-1,L)/C_SF(N_pre,L)
+            C = C_SF(N_pre-1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
     ########
-    C = 1
+    # C = 1
     
     # Build the weight ratio W'/W
     # C = 1  # C_pre/C_post
@@ -1126,11 +1218,23 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
 
-    # Count the TOTAL number of particles at tau=beta
+    # Count the TOTAL number of particles at tau=0
     N_post = 0
     for f in range(L):
-        N_post += data_struct[f][-1][1] # add particles at last flat of each site
-
+        N_post += data_struct[f][-1][1] # add particles at first flat of each site
+        
+    # Fock states pre and post worm insertion
+    alpha_pre = []
+    alpha_post = []
+    for i in range(L):
+        alpha_post.append(data_struct[i][-1][1])
+        if delete_head: # delete antiworm
+            alpha_pre = np.copy(alpha_post)
+            alpha_pre[i] += 1
+        else: # delete worm
+            alpha_pre = np.copy(alpha_post)
+            alpha_pre[i] -= 1
+    
     # Extract the wavefunction coefficient ratio
     mott = False
     if mott:
@@ -1139,13 +1243,10 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
         else: # N_pre != N
             C = np.sqrt(L)     # C_post/C_pre (MOTT)
     else: # Superfluid
-        if not(delete_head): # delete worm
-            C = C_SF(N_post,L)/C_SF(N_post-1,L)
-        else: # delete anti
-            C = C_SF(N_post,L)/C_SF(N_post+1,L)
-            
-    ########
-    C = 1
+        if delete_head: # delete antiworm
+            C = C_SF(N_post+1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+        else: # insert antiworm
+            C = C_SF(N_post-1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
     # Build the weight ratio W'/W
     # C = 1 # C_post/C_pre

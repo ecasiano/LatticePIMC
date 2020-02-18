@@ -30,6 +30,8 @@ parser.add_argument("--beta",help="Thermodynamic beta 1/(K_B*T) (default: 1.0)",
                     type=float,metavar='\b')
 parser.add_argument("--tau-slice",help="Im. time slice at which to measure (default: beta/2)",
                     type=float,metavar='\b')
+parser.add_argument("--dtau",help="Measurement window)",
+                    type=float,metavar='\b')
 parser.add_argument("--M",help="Number of Monte Carlo steps (default: 1E+05)",
                     type=int,metavar='\b') 
 parser.add_argument("--canonical",help="Statistical ensemble (Default: Grand Canonical)",
@@ -50,6 +52,7 @@ beta = 1.0 if not(args.beta) else args.beta
 M = int(1E+05) if not(args.M) else args.M
 canonical = False if not(args.canonical) else True
 tau_slice = beta/2 if not(args.tau_slice) else args.tau_slice
+dtau = 0.5 if not(args.dtau) else args.dtau
 
 # Initial eta value (actual value will be obtained in pre-equilibration stage)
 eta = 1/np.sqrt(L*beta)
@@ -85,12 +88,14 @@ for i in range(2):
     N_flats_tracker = [L]   # Total flat regions
 
     # Set the window at which kinetic energy will count kinks
-    dtau = 0.25*beta # i.e count kinks at beta/2 +- dtau
+    #dtau = 0.25*beta # i.e count kinks at beta/2 +- dtau
     #dtau = 0.49999*beta
 
     # Initialize values to be measured
     diagonal_list = []
     kinetic_list = []
+    tr_diagonal_list = []
+    tr_kinetic_list = []
     N_list = []              # average total particles 
     occ_list = []            # average particle occupation
     E_N_list = []            # Fixed total particle energies
@@ -140,6 +145,7 @@ for i in range(2):
 
     # Set how many times the set of updates will be attempted based on stage of the code
     M_pre = 1.0E+05
+    M_pre = 10000
     if is_pre_equilibration:
         iterations = M_pre
     else: # main run
@@ -262,11 +268,16 @@ for i in range(2):
                         #if round(N_tracker[0])==N:
                         if round(N_tracker[0],8)==N:
 
-                            #ßprint(N_tracker[0])
+                            #print(N_tracker[0])
                             # Energies
-                            kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice)
+                            kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L,beta/2)
                             kinetic_list.append(kinetic)
-                            diagonal_list.append(diagonal+mu*N_tracker[0])    
+                            diagonal_list.append(diagonal+mu*N)    
+                            
+                            kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
+                            tr_kinetic_list.append(np.array(kinetic))
+                            #diagonal_list.append(diagonal+mu*N)   
+                            tr_diagonal_list.append(np.array(diagonal))
 
                             # Total number of particles in worldline configuration
                             N_list.append(N_tracker[0])                        
@@ -311,12 +322,21 @@ header = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s}'.format(
     'H_0/t','H_1/t','E/t', 'N')
 
 # Save to disk
+# if canonical:
+#     with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%.4f_%i_can.dat"%(L,N,U,mu,t,eta,beta,tau_slice,M),"w+") as data:
+#         np.savetxt(data,np.transpose(data_list),delimiter=" ",fmt="%-20s",header=header) 
+# else:
+#     with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%.4f_%i_gcan.dat"%(L,N,U,mu,t,eta,beta,tau_slice,M),"w+") as data:
+#         np.savetxt(data,np.transpose(data_list),delimiter=" ",fmt="%-20s",header=header) 
+
+        
+# Save to disk
 if canonical:
-    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%.4f_%i_can.dat"%(L,N,U,mu,t,eta,beta,tau_slice,M),"w+") as data:
-        np.savetxt(data,np.transpose(data_list),delimiter=" ",fmt="%-20s",header=header) 
-else:
-    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%.4f_%i_gcan.dat"%(L,N,U,mu,t,eta,beta,tau_slice,M),"w+") as data:
-        np.savetxt(data,np.transpose(data_list),delimiter=" ",fmt="%-20s",header=header) 
+    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canK.dat"%(L,N,U,mu,t,eta,beta,tau_slice,M),"w+") as data:
+        np.savetxt(data,tr_kinetic_list,delimiter=" ",fmt="%-20s",header=header) 
+if canonical:
+    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canV.dat"%(L,N,U,mu,t,eta,beta,tau_slice,M),"w+") as data:
+        np.savetxt(data,tr_diagonal_list,delimiter=" ",fmt="%-20s",header=header) 
 
 # ---------------- Print acceptance ratios ---------------- #
 
