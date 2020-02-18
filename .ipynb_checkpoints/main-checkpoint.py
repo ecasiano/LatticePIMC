@@ -187,10 +187,12 @@ for i in range(2):
                     N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
 
             elif label == 5:
+                #pass
                 pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
                     N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
 
             elif label == 6:
+               # pass
                 pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
                     N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
 

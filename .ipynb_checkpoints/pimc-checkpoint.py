@@ -202,6 +202,7 @@ def C_SF(N,L,alpha):
     
     '''Return coefficient of flat state of N bosons on L sites'''
     
+    den = 1
     for n_i in alpha:
         den *= math.factorial(n_i)
         
@@ -681,34 +682,28 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     N_pre = 0
     for f in range(L):
         N_pre += data_struct[f][0][1] # add particles at first flat of each site
+    if insert_worm:
+        N_post = N_pre+1
+    else: # insert antiworm
+        N_post= N_pre-1
         
     # Fock states pre and post worm insertion
     alpha_pre = []
     alpha_post = []
-    for i in range(L):
-        alpha_pre.append(data_struct[i][0][1])
-        if insert_worm:
-            alpha_post = np.copy(alpha_pre)
-            alpha_post[i] += 1
-        else: # insert antiworm
-            alpha_post = np.copy(alpha_pre)
-            alpha_post[i] -= 1
+    for g in range(L):
+        alpha_pre.append(data_struct[g][0][1])
+    if insert_worm:
+        alpha_post = np.copy(alpha_pre)
+        alpha_post[i] += 1
+    else: # insert antiworm
+        alpha_post = np.copy(alpha_pre)
+        alpha_post[i] -= 1
     
-    # Extract the wavefunction coefficient ratio
-    mott = False
-    if mott:
-        if N_pre == N:
-            C = 1/np.sqrt(L)   # C_post/C_pre (MOTT)
-        else: # N_pre != N
-            C = np.sqrt(L)     # C_post/C_pre (MOTT)
-    else: # Superfluid
-        if insert_worm:
-            C = C_SF(N_pre+1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
-        else: # insert antiworm
-            C = C_SF(N_pre-1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+#     # Superfluid coefficient ratio (C_post/C_pre)
+#     C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
-    ########
-    # C = 1
+    #######
+    C = 1
     
     # Build the weigh ratio W'/W
     # C = 1 # Ratio of trial wavefn coefficients post/pre update
@@ -869,30 +864,32 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     for f in range(L):
         N_post += data_struct[f][0][1] # add particles at first flat of each site
         
+    # Count the TOTAL number of particles at tau=0
+    N_post = 0
+    for f in range(L):
+        N_post += data_struct[f][0][1] # add particles at first flat of each site
+    if delete_head: # delete worm
+        N_pre = N_post-1
+    else: # delete anti
+        N_pre= N_post+1
+        
     # Fock states pre and post worm insertion
     alpha_pre = []
     alpha_post = []
-    for i in range(L):
-        alpha_post.append(data_struct[i][0][1])
-        if delete_head: # delete worm
-            alpha_pre = np.copy(alpha_post)
-            alpha_pre[i] += -1
-        else: # insert antiworm
-            alpha_pre = np.copy(alpha_post)
-            alpha_pre[i] += 1
+    for g in range(L):
+        alpha_post.append(data_struct[g][0][1])
+    if delete_head: # delete worm
+        alpha_pre = np.copy(alpha_post)
+        alpha_pre[x] -= 1
+    else: # insert antiworm
+        alpha_pre = np.copy(alpha_post)
+        alpha_pre[x] += 1
     
-    # Extract the wavefunction coefficient ratio
-    mott = False
-    if mott:
-        if N_pre == N:
-            C = 1/np.sqrt(L)   # C_post/C_pre (MOTT)
-        else: # N_pre != N
-            C = np.sqrt(L)     # C_post/C_pre (MOTT)
-    else: # Superfluid
-        if delete_head: # delete worm
-            C = C_SF(N_post,L,alpha_post)/C_SF(N_post-1,L,alpha_pre)
-        else: # insert antiworm
-            C = C_SF(N_post,L,alpha_post)/C_SF(N_post+1,L,alpha_pre)
+#     # Superfluid coefficient ratio (C_post/C_pre)
+#     C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+
+    #######
+    C = 1
     
     # Build the weigh ratio W'/W
     # C = 1 # C_post/C_pre
@@ -1043,39 +1040,33 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
         if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
-
+    
     # Count the TOTAL number of particles at tau=0
     N_pre = 0
     for f in range(L):
         N_pre += data_struct[f][-1][1] # add particles at first flat of each site
+    if insert_worm:
+        N_post = N_pre+1
+    else: # insert antiworm
+        N_post= N_pre-1
         
     # Fock states pre and post worm insertion
     alpha_pre = []
     alpha_post = []
-    for i in range(L):
-        alpha_pre.append(data_struct[i][-1][1])
-        if insert_worm:
-            alpha_post = np.copy(alpha_pre)
-            alpha_post[i] += 1
-        else: # insert antiworm
-            alpha_post = np.copy(alpha_pre)
-            alpha_post[i] -= 1
+    for g in range(L):
+        alpha_pre.append(data_struct[g][-1][1])
+    if insert_worm:
+        alpha_post = np.copy(alpha_pre)
+        alpha_post[i] += 1
+    else: # insert antiworm
+        alpha_post = np.copy(alpha_pre)
+        alpha_post[i] -= 1
     
-    # Extract the wavefunction coefficient ratio
-    mott = False
-    if mott:
-        if N_pre == N:
-            C = 1/np.sqrt(L)   # C_post/C_pre (MOTT)
-        else: # N_pre != N
-            C = np.sqrt(L)     # C_post/C_pre (MOTT)
-    else: # Superfluid
-        if insert_worm:
-            C = C_SF(N_pre+1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
-        else: # insert antiworm
-            C = C_SF(N_pre-1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+#     # Superfluid coefficient ratio (C_post/C_pre)
+#     C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
-    ########
-    # C = 1
+    #######
+    C = 1
     
     # Build the weight ratio W'/W
     # C = 1  # C_pre/C_post
@@ -1222,32 +1213,29 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     N_post = 0
     for f in range(L):
         N_post += data_struct[f][-1][1] # add particles at first flat of each site
+    if delete_head: # delete anti
+        N_pre = N_post+1
+    else: # delete worm
+        N_pre= N_post-1
         
     # Fock states pre and post worm insertion
     alpha_pre = []
     alpha_post = []
-    for i in range(L):
-        alpha_post.append(data_struct[i][-1][1])
-        if delete_head: # delete antiworm
-            alpha_pre = np.copy(alpha_post)
-            alpha_pre[i] += 1
-        else: # delete worm
-            alpha_pre = np.copy(alpha_post)
-            alpha_pre[i] -= 1
+    for g in range(L):
+        alpha_post.append(data_struct[g][-1][1])
+    if delete_head: # delete anti
+        alpha_pre = np.copy(alpha_post)
+        alpha_pre[x] += 1
+    else: # delete worm
+        alpha_pre = np.copy(alpha_post)
+        alpha_pre[x] -= 1
     
-    # Extract the wavefunction coefficient ratio
-    mott = False
-    if mott:
-        if N_pre == N:
-            C = 1/np.sqrt(L)   # C_post/C_pre (MOTT)
-        else: # N_pre != N
-            C = np.sqrt(L)     # C_post/C_pre (MOTT)
-    else: # Superfluid
-        if delete_head: # delete antiworm
-            C = C_SF(N_post+1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
-        else: # insert antiworm
-            C = C_SF(N_post-1,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+#     # Superfluid coefficient ratio (C_post/C_pre)
+#     C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
+    #######
+    C = 1
+    
     # Build the weight ratio W'/W
     # C = 1 # C_post/C_pre
     if not(delete_head): # delete tail (worm)
