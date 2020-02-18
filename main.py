@@ -71,6 +71,7 @@ for i in range(2):
     # Initialize Fock state
     alpha = pimc.random_boson_config(L,N)
     alpha = [1]*L
+    alpha = [4,0,0,0]
 
     # Create worldline data structure
     data_struct = pimc.create_data_struct(alpha,L)
@@ -84,7 +85,7 @@ for i in range(2):
     N_flats_tracker = [L]   # Total flat regions
 
     # Set the window at which kinetic energy will count kinks
-    dtau = 0.1*beta # i.e count kinks at beta/2 +- dtau
+    dtau = 0.25*beta # i.e count kinks at beta/2 +- dtau
     #dtau = 0.49999*beta
 
     # Initialize values to be measured
@@ -240,6 +241,8 @@ for i in range(2):
                 measurements[1] += 1
 
                 if not(pimc.check_worm(head_loc,tail_loc)):
+                    
+                    #print(N_tracker[0])
 
                     # Add to MEASUREMENTS MADE counter
                     measurements[0] += 1
@@ -253,7 +256,7 @@ for i in range(2):
 
                         # Total number of particles in worldline configuration
                         N_list.append(N_tracker[0])
-
+                        
                     else: # canonical
 
                         #if round(N_tracker[0])==N:
@@ -272,7 +275,6 @@ for i in range(2):
                         else: # Worldline doesn't have target particle number
                             measurements[0] -= 1 # Disregard measurement
                             #pass
-
 
     # Calculate average <N_flats>
     if is_pre_equilibration:  
