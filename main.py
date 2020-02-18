@@ -260,13 +260,13 @@ for i in range(2):
                     else: # canonical
 
                         #if round(N_tracker[0])==N:
-                        if round(N_tracker[0],14)==N:
+                        if round(N_tracker[0],8)==N:
 
-                            print(N_tracker[0])
+                            #ßprint(N_tracker[0])
                             # Energies
                             kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice)
                             kinetic_list.append(kinetic)
-                            diagonal_list.append(diagonal+mu*N)    
+                            diagonal_list.append(diagonal+mu*N_tracker[0])    
 
                             # Total number of particles in worldline configuration
                             N_list.append(N_tracker[0])                        
