@@ -60,11 +60,27 @@ dtau = 0.5 if not(args.dtau) else args.dtau
 # Initial eta value (actual value will be obtained in pre-equilibration stage)
 eta = 1/np.sqrt(L*beta)
 
+# Initialize Fock state
+alpha = pimc.random_boson_config(L,N)
+alpha = [1]*L
+
+# Create worldline data structure
+data_struct = pimc.create_data_struct(alpha,L)
+
+# List that will contain site and kink indices of worm head and tail
+head_loc = []
+tail_loc = []
+
+# Trackers
+N_tracker = [N]         # Total particles
+N_flats_tracker = [L]   # Total flat regions
+    
 # ---------------- Pre-Equilibration and Lattice PIMC ---------------- #
 
 # First iteration: eta optimization
 # Second iteration: mu optimization (canonical simulations only)
 # Second iteration: Main run
+    
 is_pre_equilibration = True
 for i in range(2):
 
@@ -73,25 +89,6 @@ for i in range(2):
         print("\nStarting pre-equilibration stage. Determining eta...")
     else:
         print("LatticePIMC started...")
-
-    # Initialize Fock state
-    alpha = pimc.random_boson_config(L,N)
-    alpha = [1]*L
-
-    # Create worldline data structure
-    data_struct = pimc.create_data_struct(alpha,L)
-
-    # List that will contain site and kink indices of worm head and tail
-    head_loc = []
-    tail_loc = []
-
-    # Trackers
-    N_tracker = [N]         # Total particles
-    N_flats_tracker = [L]   # Total flat regions
-
-    # Set the window at which kinetic energy will count kinks
-    #dtau = 0.25*beta # i.e count kinks at beta/2 +- dtau
-    #dtau = 0.49999*beta
 
     # Initialize values to be measured
     diagonal_list = []
@@ -146,8 +143,8 @@ for i in range(2):
     measurements = [0,0] # [made,attempted]
 
     # Set how many times the set of updates will be attempted based on stage of the code
+    M_pre = 2.5E+05
     M_pre = 1.0E+05
-    M_pre = 10000
     if is_pre_equilibration:
         iterations = M_pre
     else: # main run
@@ -174,27 +171,28 @@ for i in range(2):
                     N_tracker,delete_worm_data,delete_anti_data,N_flats_tracker)
 
             elif label == 2:
+                #pass
                 pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,
                     N_tracker,advance_head_data,recede_head_data,
                     advance_tail_data,recede_tail_data,N_flats_tracker)
 
             elif label == 3:
-                #pass
+#                 pass
                 pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
                     N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
 
             elif label == 4:
-                #pass
+#                pass
                 pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
                     N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
 
             elif label == 5:
-                #pass
+#                pass
                 pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
                     N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
 
             elif label == 6:
-               # pass
+#                pass
                 pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
                     N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
 
@@ -230,14 +228,9 @@ for i in range(2):
             else:
                 pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
                     N_tracker,dkat_data,N_flats_tracker)
-
-
-        # In pre-equilibration, keep track of total N. Needed to optimize mu in canonical simulations.
-        # if is_pre_equilibration:
-        #     N_equil.append(N_tracker[0])
-
+        
         # Attempt to measure every L*beta steps
-        if m%int(L*beta)==0:
+        if m%int(L)==0:
 
             # Pre-equilibration: Calculate <N_flats> when there are no worms present
             if is_pre_equilibration:
@@ -251,8 +244,6 @@ for i in range(2):
                 measurements[1] += 1
 
                 if not(pimc.check_worm(head_loc,tail_loc)):
-                    
-                    #print(N_tracker[0])
 
                     # Add to MEASUREMENTS MADE counter
                     measurements[0] += 1
@@ -266,21 +257,16 @@ for i in range(2):
 
                         # Total number of particles in worldline configuration
                         N_list.append(N_tracker[0])
-                        
+                                               
                     else: # canonical
+
+                        #print(N_tracker[0])
 
                         #if round(N_tracker[0])==N:
                         if round(N_tracker[0],8)==N:
-
-                            #print(N_tracker[0])
-                            # Energies
-                            kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L,beta/2)
-                            kinetic_list.append(kinetic)
-                            diagonal_list.append(diagonal+mu*N)    
                             
                             kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
                             tr_kinetic_list.append(np.array(kinetic))
-                            #diagonal_list.append(diagonal+mu*N)   
                             tr_diagonal_list.append(np.array(diagonal))
 
                             # Total number of particles in worldline configuration
@@ -301,18 +287,16 @@ for i in range(2):
     # Calculate average <N_flats>
     if is_pre_equilibration:  
         N_flats_mean /= N_flats_samples
-        # Set the worm end fugacity to 1/<N_flats> (unless it was user defined)
-        eta = 1/np.sqrt(2*N_flats_mean) if not(args.eta) else args.eta
+        # Set the worm end fugacity to 1/sqrt(2*<N_flats>) (unless it was user defined)
+        eta = 1/(96.5*np.sqrt(N_flats_mean)) if not(args.eta) else args.eta  # beta=1,mu=1
+        eta = 1/(96.5*np.sqrt(N_flats_mean))/11 if not(args.eta) else args.eta  # beta=2,mu=0.2
+
 
     # Print out the value of eta or indicate when the main loop ends.
     if is_pre_equilibration:
         print("Pre-Equilibration stage complete. eta = %.4f \n"%(eta))
     else:
         print("Lattice PIMC done. Saving data to disk...")
-
-    # Turn pre-equilibratiolsn flag off if N_equil is good
-    #N_equil_mean = pldata 
-    #if N_equil_mean != N:
 
     is_pre_equilibration = False 
 
@@ -328,7 +312,10 @@ N_list = np.array(N_list)                          # <N>
 data_list = [diagonal_list/t,kinetic_list/t,total_list,N_list]
 
 # Create file header
-header = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s}'.format(
+header_K = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s}'.format(
+    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,beta=%.4f,tau_slice=%.4f,M=%i"%(L,N,U,mu,t,eta,beta,tau_slice,M),
+    'H_0/t','H_1/t','E/t', 'N')
+header_V = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s}'.format(
     "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,beta=%.4f,tau_slice=%.4f,M=%i"%(L,N,U,mu,t,eta,beta,tau_slice,M),
     'H_0/t','H_1/t','E/t', 'N')
 
@@ -340,14 +327,16 @@ header = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s}'.format(
 #     with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%.4f_%i_gcan.dat"%(L,N,U,mu,t,eta,beta,tau_slice,M),"w+") as data:
 #         np.savetxt(data,np.transpose(data_list),delimiter=" ",fmt="%-20s",header=header) 
 
-        
 # Save to disk
+if canonical: # kinetic
+    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_canK.dat"%(L,N,U,mu,t,beta,M),"w+") as data:
+        np.savetxt(data,tr_kinetic_list,delimiter=" ",fmt="%-20s",header=header_K) 
+if canonical: # diagonal
+    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_canV.dat"%(L,N,U,mu,t,beta,M),"w+") as data:
+        np.savetxt(data,tr_diagonal_list,delimiter=" ",fmt="%-20s",header=header_V)
 if canonical:
-    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canK.dat"%(L,N,U,mu,t,eta,beta,tau_slice,M),"w+") as data:
-        np.savetxt(data,tr_kinetic_list,delimiter=" ",fmt="%-20s",header=header) 
-if canonical:
-    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canV.dat"%(L,N,U,mu,t,eta,beta,tau_slice,M),"w+") as data:
-        np.savetxt(data,tr_diagonal_list,delimiter=" ",fmt="%-20s",header=header) 
+    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_canN.dat"%(L,N,U,mu,t,beta,M),"w+") as data:
+        np.savetxt(data,np.transpose(N_list),delimiter=" ",fmt="%-20s",header=header_K) 
 
 # ---------------- Print acceptance ratios ---------------- #
 

@@ -1,0 +1,51 @@
+
+Starting pre-equilibration stage. Determining eta...
+Pre-Equilibration stage complete. eta = 0.2010 
+
+LatticePIMC started...
+[-0. -0. -0. -0. -5.] [-1. -1. -1. -1. -2.]
+Lattice PIMC done. Saving data to disk...
+
+Ensemble: Canonical
+
+-------- Z-configuration fraction --------
+Z-fraction: 4.05% (20256/500000) 
+
+-------- Acceptance Ratios --------
+
+       Insert worm: (1230/359235)
+       Delete worm: (957/976)
+
+       Insert anti: (12286/359059)
+       Delete anti: (9608/11524)
+
+       Advance head: (70822/70822)
+        Recede head: (68835/68835)
+
+       Advance tail: (72865/72865)
+        Recede tail: (74275/74275)
+
+   InsertZero worm: (14032/540778)
+   DeleteZero worm: (15515/15856)
+
+   InsertZero anti: (69668/421837)
+   DeleteZero anti: (71152/89512)
+
+   InsertBeta worm: (13870/534067)
+   DeleteBeta worm: (15337/15645)
+
+   InsertBeta anti: (67100/428267)
+   DeleteBeta anti: (68568/84457)
+
+              IKBH: (92231/160255)
+              DKBH: (92176/111851)
+
+              IKAH: (47293/158374)
+              DKAH: (47172/53330)
+
+              IKBT: (49184/165337)
+              DKBT: (49357/55517)
+
+              IKAT: (96629/167335)
+              DKAT: (96627/117491)
+
