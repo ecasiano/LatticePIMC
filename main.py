@@ -74,6 +74,15 @@ tail_loc = []
 # Trackers
 N_tracker = [N]         # Total particles
 N_flats_tracker = [L]   # Total flat regions
+
+# Initialize values to be measured
+diagonal_list = []
+kinetic_list = []
+tr_diagonal_list = []
+tr_kinetic_list = []
+N_list = []              # average total particles 
+occ_list = []            # average particle occupation
+E_N_list = []            # Fixed total particle energies
     
 # ---------------- Pre-Equilibration and Lattice PIMC ---------------- #
 
@@ -82,22 +91,14 @@ N_flats_tracker = [L]   # Total flat regions
 # Second iteration: Main run
     
 is_pre_equilibration = True
-for i in range(2):
+need_main = True
+if is-:
 
     # Print out the stage of the code.
     if is_pre_equilibration:
         print("\nStarting pre-equilibration stage. Determining eta...")
     else:
         print("LatticePIMC started...")
-
-    # Initialize values to be measured
-    diagonal_list = []
-    kinetic_list = []
-    tr_diagonal_list = []
-    tr_kinetic_list = []
-    N_list = []              # average total particles 
-    occ_list = []            # average particle occupation
-    E_N_list = []            # Fixed total particle energies
 
     # Counters for acceptance and proposal of each move
     insert_worm_data = [0,0] # [accepted,proposed]
@@ -136,14 +137,15 @@ for i in range(2):
     ikat_data = [0,0]
     dkat_data = [0,0]
 
-    N_flats_mean = 0        # Average number of flats
-    N_flats_samples = 0     # samples
+    N_flats_calibration = 0     # Average number of flats
+    N_calibration = 0           # Store total N to check mu is good
+    calibration_samples = 0     # Pre-equilibration samples
+    
 
     # Count measurements and measurement attempts
     measurements = [0,0] # [made,attempted]
 
     # Set how many times the set of updates will be attempted based on stage of the code
-    M_pre = 2.5E+05
     M_pre = 1.0E+05
     if is_pre_equilibration:
         iterations = M_pre
@@ -229,27 +231,55 @@ for i in range(2):
                 pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
                     N_tracker,dkat_data,N_flats_tracker)
         
-        # Attempt to measure every L*beta steps
-        if m%int(L)==0:
+        
+        # Count <N_flats> and <N>
+        if is_pre_equilibration:
+                if m >= M_pre/2: # Only count after half of pre-equilibration steps
+                    N_flats_calibration += N_flats_tracker[0]
+                    N_calibration += N_tracker[0]
+                    calibration_samples += 1
+           
+        else: # Main loop
 
-            # Pre-equilibration: Calculate <N_flats> when there are no worms present
-            if is_pre_equilibration:
-                N_flats_mean += N_flats_tracker[0]
-                N_flats_samples += 1
-
-            # Main: Calculate observables when there are no worm ends present
-            else:
-
+            # Attempt to measure every L*beta steps
+            if m%int(L*beta)==0:
+                
                 # Add to MEASUREMENTS ATTEMPTS counter
                 measurements[1] += 1
 
+                # Make measurement if no worm ends present
                 if not(pimc.check_worm(head_loc,tail_loc)):
 
                     # Add to MEASUREMENTS MADE counter
                     measurements[0] += 1
-
-                    if not(canonical): # grand canonical
+                    
+                    if canonical:
                         
+                     #print(N_tracker[0])
+
+                        #if round(N_tracker[0])==N:
+                        if round(N_tracker[0],12)==N:
+
+                            kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
+                            tr_kinetic_list.append(np.array(kinetic))
+                            tr_diagonal_list.append(np.array(diagonal))
+
+                            # Total number of particles in worldline configuration
+                            N_list.append(N_tracker[0])     
+
+                            if not(is_pickled) and m > int(m/2):
+                                kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
+                                print(kinetic,diagonal)
+                                with open('pickled_config.pickle', 'wb') as pfile:
+                                    pickle.dump(data_struct,pfile,pickle.HIGHEST_PROTOCOL)
+
+                                is_pickled = True
+
+                        else: # Worldline doesn't have target particle number
+                            measurements[0] -= 1 # Disregard measurement
+
+                    else: # Grand canonical
+
                         # Energies
                         kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice)
                         kinetic_list.append(kinetic)
@@ -257,48 +287,39 @@ for i in range(2):
 
                         # Total number of particles in worldline configuration
                         N_list.append(N_tracker[0])
-                                               
-                    else: # canonical
 
-                        #print(N_tracker[0])
+   
 
-                        #if round(N_tracker[0])==N:
-                        if round(N_tracker[0],8)==N:
-                            
-                            kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
-                            tr_kinetic_list.append(np.array(kinetic))
-                            tr_diagonal_list.append(np.array(diagonal))
-
-                            # Total number of particles in worldline configuration
-                            N_list.append(N_tracker[0])     
-                            
-                            if not(is_pickled) and m > int(m/2):
-                                kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
-                                print(kinetic,diagonal)
-                                with open('pickled_config.pickle', 'wb') as pfile:
-                                    pickle.dump(data_struct,pfile,pickle.HIGHEST_PROTOCOL)
-                                
-                                is_pickled = True
-                            
-                        else: # Worldline doesn't have target particle number
-                            measurements[0] -= 1 # Disregard measurement
-                            #pass
-
-    # Calculate average <N_flats>
+    # Calculate average pre-equilibration <N_flats> and N
     if is_pre_equilibration:  
-        N_flats_mean /= N_flats_samples
+        N_flats_calibration /= calibration_samples
+        N_calibration /= calibration_samples
+        
         # Set the worm end fugacity to 1/sqrt(2*<N_flats>) (unless it was user defined)
-        eta = 1/(96.5*np.sqrt(N_flats_mean)) if not(args.eta) else args.eta  # beta=1,mu=1
-        eta = 1/(96.5*np.sqrt(N_flats_mean))/11 if not(args.eta) else args.eta  # beta=2,mu=0.2
+        eta = 1/(np.sqrt(N_flats_calibration)) if not(args.eta) else args.eta  # beta=1,mu=1
 
+        if round(N_calibration,4) != N:
+            
+            # Stay in pre_equilibration
+            is_pre_equilibration = True
+            
+            # Tweak mu based on total particles measured
+            if round(N_calibration,4) >= N:
+                mu -= 0.01
+            else:
+                mu += 0.01
+        
+        else: # N is good
+            
+            # Turn pre-equilibration off
+            is_pre_equilibration = False
 
     # Print out the value of eta or indicate when the main loop ends.
     if is_pre_equilibration:
-        print("Pre-Equilibration stage complete. eta = %.4f \n"%(eta))
+        print("Pre-Equilibration stage complete.")
+        print("eta = %.4f and mu = %.4f "%(eta,mu))
     else:
         print("Lattice PIMC done. Saving data to disk...")
-
-    is_pre_equilibration = False 
 
 # ---------------- Format data and save to disk ---------------- #
 
