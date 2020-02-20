@@ -287,7 +287,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-0.4 or (N_tracker[0]+dN) >= N+0.4: return False
+        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
 
     # Calculate the difference in diagonal energy dV = \epsilon_w - \epsilon
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -408,7 +408,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-0.4 or (N_tracker[0]+dN) >= N+0.4: return False
+        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
 
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -571,7 +571,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,N_track
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-0.4 or (N_tracker[0]+dN) >= N+0.4: return False
+        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
 
     # Accept
     data_struct[x][k][0] = tau_new
@@ -677,7 +677,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-0.4 or (N_tracker[0]+dN) >= N+0.4: return False # int due to precision
+        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False # int due to precision
 
     # Count the TOTAL number of particles at tau=0
     N_pre = 0
@@ -855,7 +855,7 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     if canonical:
 	    # Reject the update if the total number is outside of (N-1,N+1)
-	    if (N_tracker[0]+dN) <= N-0.4 or (N_tracker[0]+dN) >= N+0.4: return False
+	    if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
 
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -1036,7 +1036,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-0.4 or (N_tracker[0]+dN) >= N+0.4: return False
+        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
     
     # Count the TOTAL number of particles at tau=0
     N_pre = 0
@@ -1201,7 +1201,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-0.4 or (N_tracker[0]+dN) >= N+0.4: return False
+        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
 
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)

@@ -84,21 +84,15 @@ N_list = []              # average total particles
 occ_list = []            # average particle occupation
 E_N_list = []            # Fixed total particle energies
     
-# ---------------- Pre-Equilibration and Lattice PIMC ---------------- #
+# ---------------- Pre-Equilibration ---------------- #
 
-# First iteration: eta optimization
-# Second iteration: mu optimization (canonical simulations only)
-# Second iteration: Main run
-    
+print("\nStarting pre-equilibration stage. Determining eta and mu...\n")
+
+print("  eta  |   mu   | N_calibration | N_target | Z_calibration")
+
 is_pre_equilibration = True
-need_main = True
-if is-:
-
-    # Print out the stage of the code.
-    if is_pre_equilibration:
-        print("\nStarting pre-equilibration stage. Determining eta...")
-    else:
-        print("LatticePIMC started...")
+need_eta = True
+while(is_pre_equilibration):
 
     # Counters for acceptance and proposal of each move
     insert_worm_data = [0,0] # [accepted,proposed]
@@ -139,21 +133,15 @@ if is-:
 
     N_flats_calibration = 0     # Average number of flats
     N_calibration = 0           # Store total N to check mu is good
-    calibration_samples = 0     # Pre-equilibration samples
-    
-
-    # Count measurements and measurement attempts
-    measurements = [0,0] # [made,attempted]
+    Z_calibration = 0           # Count diagonal fraction in pre-equil stage
+    Z = 0.5                     # Minimum diagonal fraction desired
+    calibration_samples = 0     # Pre-equilibration samples    
 
     # Set how many times the set of updates will be attempted based on stage of the code
-    M_pre = 1.0E+05
-    if is_pre_equilibration:
-        iterations = M_pre
-    else: # main run
-        iterations = M
+    M_pre = 5.0E+04
 
-    # Randomly propose every update M times
-    for m in range(int(iterations)):
+    # Randomly propose every update M_pre times
+    for m in range(int(M_pre)):
         
         # assign a label to each update
         labels = list(range(15)) # There are 15 update functions
@@ -233,93 +221,229 @@ if is-:
         
         
         # Count <N_flats> and <N>
-        if is_pre_equilibration:
-                if m >= M_pre/2: # Only count after half of pre-equilibration steps
-                    N_flats_calibration += N_flats_tracker[0]
-                    N_calibration += N_tracker[0]
-                    calibration_samples += 1
-           
-        else: # Main loop
+        trash_percent = 0.5
+        if m >= int(M_pre*trash_percent): # Only count after half of pre-equilibration steps
+            N_flats_calibration += N_flats_tracker[0]
+            N_calibration += N_tracker[0]
+            calibration_samples += 1
+            
+        # Count diagonal configurations
+        if not(pimc.check_worm(head_loc,tail_loc)) and m >= int(M_pre*trash_percent):
+            Z_calibration += 1
+   
+    # Calculate average pre-equilibration <N_flats>, N, and Z fraction
+    N_flats_calibration /= calibration_samples
+    N_calibration /= calibration_samples
+    N_calibration = round(N_calibration,1)
+    Z_calibration /= int(M_pre*trash_percent)
 
-            # Attempt to measure every L*beta steps
-            if m%int(L*beta)==0:
-                
-                # Add to MEASUREMENTS ATTEMPTS counter
-                measurements[1] += 1
+    # Set the worm end fugacity to 1/sqrt(2*<N_flats>) (unless it was user defined)
+    if need_eta:
+        eta = 1/(np.sqrt(N_flats_calibration)) if not(args.eta) else args.eta  # beta=1,mu=1
+        need_eta = False
 
-                # Make measurement if no worm ends present
-                if not(pimc.check_worm(head_loc,tail_loc)):
+    # Print the current set of parameters
+    print("%.4f | %.4f | %.1f | %i | %.2f"%(eta,mu,N_calibration,N,Z_calibration))
+    
+    if N_calibration != N or (Z_calibration <= Z or Z_calibration >= 1.1*Z):
+        
+        # Stay in pre_equilibration stage
+        is_pre_equilibration = True
+
+        # Tweak mu based on total particles measured
+        if N_calibration >= N:
+            mu -= 0.1
+        else:
+            mu += 0.1
+            
+        # Tweak eta based on diagonal fraction obtained
+        if Z_calibration <= Z:
+            eta -= (eta*0.1)
+        else:
+            eta += (eta*0.1)                        
+
+    else: # N is good
+
+        # Turn pre-equilibration off
+        is_pre_equilibration = False
+        
+print("Pre-Equilibration done.\n")
+
+# ---------------- Lattice PIMC ---------------- #
+
+print("LatticePIMC started...\n")
+
+# Counters for acceptance and proposal of each move
+insert_worm_data = [0,0] # [accepted,proposed]
+delete_worm_data = [0,0]
+
+insert_anti_data = [0,0]
+delete_anti_data = [0,0]
+
+advance_head_data = [0,0]
+recede_head_data = [0,0]
+
+advance_tail_data = [0,0]
+recede_tail_data = [0,0]
+
+insertZero_worm_data = [0,0]
+deleteZero_worm_data = [0,0]
+
+insertZero_anti_data = [0,0]
+deleteZero_anti_data = [0,0]
+
+insertBeta_worm_data = [0,0]
+deleteBeta_worm_data = [0,0]
+
+insertBeta_anti_data = [0,0]
+deleteBeta_anti_data = [0,0]
+
+ikbh_data = [0,0] 
+dkbh_data = [0,0]
+
+ikah_data = [0,0]
+dkah_data = [0,0]
+
+ikbt_data = [0,0]
+dkbt_data = [0,0]
+
+ikat_data = [0,0]
+dkat_data = [0,0]
+
+# Count measurements and measurement attempts
+measurements = [0,0] # [made,attempted]
+
+# Randomly propose every update M times
+for m in range(int(M)):
+
+    # assign a label to each update
+    labels = list(range(15)) # There are 15 update functions
+    shuffle(labels)
+
+    # At every mc step, try EVERY update in random order
+    for label in labels:   
+
+        # Non-Spaceshift moves
+        if label == 0:
+            pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,
+                insert_worm_data,insert_anti_data,N_flats_tracker)
+
+        elif label == 1:
+            pimc.worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,delete_worm_data,delete_anti_data,N_flats_tracker)
+
+        elif label == 2:
+            #pass
+            pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,
+                N_tracker,advance_head_data,recede_head_data,
+                advance_tail_data,recede_tail_data,N_flats_tracker)
+
+        elif label == 3:
+#                 pass
+            pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
+
+        elif label == 4:
+#                pass
+            pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
+
+        elif label == 5:
+#                pass
+            pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
+
+        elif label == 6:
+#                pass
+            pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
+
+        # Spaceshift moves   
+        elif label == 7:
+            pimc.insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,ikbh_data,N_flats_tracker)  
+
+        elif label == 8:
+            pimc.delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,dkbh_data,N_flats_tracker) 
+
+        elif label == 9:
+            pimc.insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,ikah_data,N_flats_tracker)   
+
+        elif label == 10:
+            pimc.delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,dkah_data,N_flats_tracker)
+
+        elif label == 11:
+            pimc.insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,ikbt_data,N_flats_tracker)  
+
+        elif label == 12:
+            pimc.delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,dkbt_data,N_flats_tracker) 
+
+        elif label == 13:
+            pimc.insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,ikat_data,N_flats_tracker)   
+
+        else:
+            pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,dkat_data,N_flats_tracker)
+    
+    # Print completion percent
+    if m%(int(M/10))==0:        
+        print("%.2f%%"%(100*m/M))
+        
+    # Attempt to measure every L*beta steps
+    if m%int(L*beta)==0:
+
+        # Add to MEASUREMENTS ATTEMPTS counter
+        measurements[1] += 1
+
+        # Make measurement if no worm ends present
+        if not(pimc.check_worm(head_loc,tail_loc)):
+    
+            #print(N_tracker[0])
+
+            if canonical: # Canonical simulation
+
+                if round(N_tracker[0],12)==N:
 
                     # Add to MEASUREMENTS MADE counter
                     measurements[0] += 1
-                    
-                    if canonical:
-                        
-                     #print(N_tracker[0])
 
-                        #if round(N_tracker[0])==N:
-                        if round(N_tracker[0],12)==N:
+                    kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
+                    tr_kinetic_list.append(np.array(kinetic))
+                    tr_diagonal_list.append(np.array(diagonal))
 
-                            kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
-                            tr_kinetic_list.append(np.array(kinetic))
-                            tr_diagonal_list.append(np.array(diagonal))
+                    # Total number of particles in worldline configuration
+                    N_list.append(N_tracker[0])     
 
-                            # Total number of particles in worldline configuration
-                            N_list.append(N_tracker[0])     
+                    if not(is_pickled) and m > int(m/2):
+                        kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
+                        #print(kinetic,diagonal)
+                        with open('pickled_config.pickle', 'wb') as pfile:
+                            pickle.dump(data_struct,pfile,pickle.HIGHEST_PROTOCOL)
 
-                            if not(is_pickled) and m > int(m/2):
-                                kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
-                                print(kinetic,diagonal)
-                                with open('pickled_config.pickle', 'wb') as pfile:
-                                    pickle.dump(data_struct,pfile,pickle.HIGHEST_PROTOCOL)
+                        is_pickled = True
 
-                                is_pickled = True
+                else: # Worldline doesn't have target particle number
+                    pass
+                
+            else: # Grand canonical
 
-                        else: # Worldline doesn't have target particle number
-                            measurements[0] -= 1 # Disregard measurement
+                # Energies
+                kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice)
+                kinetic_list.append(kinetic)
+                diagonal_list.append(diagonal)
 
-                    else: # Grand canonical
+                # Total number of particles in worldline configuration
+                N_list.append(N_tracker[0])
 
-                        # Energies
-                        kinetic,diagonal = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice)
-                        kinetic_list.append(kinetic)
-                        diagonal_list.append(diagonal)
-
-                        # Total number of particles in worldline configuration
-                        N_list.append(N_tracker[0])
-
-   
-
-    # Calculate average pre-equilibration <N_flats> and N
-    if is_pre_equilibration:  
-        N_flats_calibration /= calibration_samples
-        N_calibration /= calibration_samples
-        
-        # Set the worm end fugacity to 1/sqrt(2*<N_flats>) (unless it was user defined)
-        eta = 1/(np.sqrt(N_flats_calibration)) if not(args.eta) else args.eta  # beta=1,mu=1
-
-        if round(N_calibration,4) != N:
-            
-            # Stay in pre_equilibration
-            is_pre_equilibration = True
-            
-            # Tweak mu based on total particles measured
-            if round(N_calibration,4) >= N:
-                mu -= 0.01
-            else:
-                mu += 0.01
-        
-        else: # N is good
-            
-            # Turn pre-equilibration off
-            is_pre_equilibration = False
-
-    # Print out the value of eta or indicate when the main loop ends.
-    if is_pre_equilibration:
-        print("Pre-Equilibration stage complete.")
-        print("eta = %.4f and mu = %.4f "%(eta,mu))
-    else:
-        print("Lattice PIMC done. Saving data to disk...")
+print("100%%")
+print("\nLattice PIMC done. Saving data to disk...")
 
 # ---------------- Format data and save to disk ---------------- #
 
