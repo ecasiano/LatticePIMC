@@ -83,7 +83,7 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice):
 
     # Calculate kinetic energy estimator
     N_kinks /= 2 # Kinks counted at source and destination site. This corrects.
-    kinetic = -t*N_kinks/(2*dtau)
+    kinetic = -1*N_kinks/(2*dtau)
 
     # Calculate diagonal energy
     diagonal = 0
@@ -100,29 +100,42 @@ def tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L):
     '''Calculates the kinetic and diagonal energies'''
 
 
-    start = dtau
-    tau_slices = []
-    #print(int(beta/(2*dtau)),beta,dtau)
-    for i in range(int(beta/(2*dtau))):
-        tau_slices.append(start)
-        start += 2*dtau
+#     # Generate tau_slices 
+#     start = dtau
+#     tau_slices = []
+#     window_size = 2*dtau
+#     for i in range(int(beta/window_size)):
+#         tau_slices.append(start)
+#         start += window_size
+
+    # Generate tau slices
+    tau_slices = np.linspace(0,beta,11) # [0*beta,0.1*beta,...,1*beta]
+    tau_slices = tau_slices[1:-1] # do not measure at end points
+    
+    # Check that measurement window doesn't overlap w/ adjacent slices
+    if dtau > tau_slices[1]-tau_slices[0]:
+        print("WARNING: dtau overlaps adjacent time slices. Decrease dtau.")
+    
+    # Define the size of measurement window
+    window_size = 2*dtau 
         
+    # Initialize arrays that will save energies measured wrt tau slices
     diagonal = np.zeros_like(tau_slices)
     kinetic = np.zeros_like(tau_slices)
 
-    #print("tau_slices: ",tau_slices)
+    # Iterate over all tau slices to measue energies (throw away first and last)
     for idx,tau_slice in enumerate(tau_slices):
-        
-        # Stores the configuration at tau_slice (need for diagonal energy)
-        alpha = [0]*L
+                
+        # Stores Fock state at tau_slice (need for diagonal energy)
+        alpha = np.zeros(L)
 
         # Iterate over every site to get Fock state at tau_slice and kinks near it.
-        N_kinks = 0 # number of kinks
+        N_kinks = 0 # number of kinks inside measurement window
         for i in range(L):
-            N_flats = len(data_struct[i]) # Number of flats on site i
-            for k in range(N_flats): # Ignore the initial value "kinks"
+            N_flats = len(data_struct[i]) # Number of total flat regions on site
+            for k in range(N_flats):
 
-                # Count the kinks in the interval: [tau_slice-dtau,tau_slice]
+                # Count the kinks inside the window: [tau_slice +- dtau]
                 tau = data_struct[i][k][0] # time of the kink
                 if tau >= tau_slice-dtau and tau <= tau_slice+dtau:
                     if k!=0: # Don't add the initial value kink of each site
@@ -138,7 +151,7 @@ def tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L):
 
         # Calculate kinetic energy estimator
         N_kinks /= 2 # Kinks counted at source and destination site. This corrects.
-        kinetic[idx] = -N_kinks/(2*dtau)
+        kinetic[idx] = -1*N_kinks/window_size
 
         # Calculate diagonal energy
         for i in range(L):
@@ -349,7 +362,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
     if not(head_loc) or not(tail_loc) : return None
 
     # Only delete if worm ends are on the same site and on the same flat interval
-    if head_loc[0] != tail_loc[0] or abs(head_loc[1]-tail_loc[1]) != 1: return None
+    if head_loc[0] != tail_loc[0] or int(abs(head_loc[1]-tail_loc[1])) != 1: return None
 
     # Retrieve the site and tau indices of where ira and masha are located
     # head_loc = [site_idx,tau_idx]
@@ -1300,7 +1313,6 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
             j = L-1 # head hops to last site
     p_site = 0.5
     
-
     # Retrieve the time of the worm head (and tail if present)
     tau_h = data_struct[i][k][0]
     if tail_loc:
@@ -1336,7 +1348,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1431,7 +1443,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     else:
         tau_next_i = data_struct[i][tau_prev_i_idx+2][0]
 
-    # Deletion cannnot interfere w/ kinks on other site
+    # Deletion cannot interfere w/ kinks on other site
     if tau_h >= tau_next_i: return None
 
     # Add to PROPOSAL counter
@@ -1447,7 +1459,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1567,7 +1579,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
 
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1685,7 +1697,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
 
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1794,7 +1806,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1906,7 +1918,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -2024,7 +2036,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
 
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
@@ -2141,7 +2153,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
 
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5

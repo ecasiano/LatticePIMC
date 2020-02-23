@@ -75,15 +75,7 @@ tail_loc = []
 N_tracker = [N]         # Total particles
 N_flats_tracker = [L]   # Total flat regions
 
-# Initialize values to be measured
-diagonal_list = []
-kinetic_list = []
-tr_diagonal_list = []
-tr_kinetic_list = []
-N_list = []              # average total particles 
-occ_list = []            # average particle occupation
-E_N_list = []            # Fixed total particle energies
-    
+  
 # ---------------- Pre-Equilibration ---------------- #
 
 print("\nStarting pre-equilibration stage. Determining eta and mu...\n")
@@ -273,6 +265,20 @@ print("Pre-Equilibration done.\n")
 
 print("LatticePIMC started...\n")
 
+
+# Initialize values to be measured
+diagonal_list = []
+kinetic_list = []
+tr_diagonal_list = []
+tr_kinetic_list = []
+N_list = []              # average total particles 
+occ_list = []            # average particle occupation
+E_N_list = []            # Fixed total particle energies
+
+# Energies using original method
+kinetic_og_list = []
+diagonal_og_list = []
+
 # Counters for acceptance and proposal of each move
 insert_worm_data = [0,0] # [accepted,proposed]
 delete_worm_data = [0,0]
@@ -396,8 +402,8 @@ for m in range(int(M)):
     if m%(int(M/10))==0:        
         print("%.2f%%"%(100*m/M))
         
-    # Attempt to measure every L*beta steps
-    if m%int(L*beta)==0:
+    # Attempt to measure every L*beta steps, and after equilibration
+    if m%int(L*beta)==0 and m > 0.25*M:
 
         # Add to MEASUREMENTS ATTEMPTS counter
         measurements[1] += 1
@@ -414,12 +420,19 @@ for m in range(int(M)):
                     # Add to MEASUREMENTS MADE counter
                     measurements[0] += 1
 
+                    # Energies, but measured at different tau slices
                     kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
                     tr_kinetic_list.append(np.array(kinetic))
                     tr_diagonal_list.append(np.array(diagonal))
 
                     # Total number of particles in worldline configuration
                     N_list.append(N_tracker[0])     
+                    
+#                     # Energies using original method
+#                     tau_slice=beta/2
+#                     kinetic_og,diagonal_og = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice)
+#                     kinetic_og_list.append(kinetic_og)
+#                     diagonal_og_list.append(diagonal_og)
 
                     if not(is_pickled) and m > int(m/2):
                         kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
@@ -460,26 +473,35 @@ data_list = [diagonal_list/t,kinetic_list/t,total_list,N_list]
 
 # Create file headers
 header_K = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s} {5:^10s}'.format(
-    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,beta=%.4f,dtau=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,beta,dtau,M,Z_frac),
+    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,dtau=%.2f,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,dtau,beta,M,Z_frac),
     '0.1*tau/b','0.3*tau/b','0.5*tau/b','0.7*tau/b','1.0*tau/b')
 header_V = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s} {5:^10s}'.format(
-    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,beta=%.4f,dtau=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,beta,dtau,M,Z_frac),
+    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,dtau=%.2f,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,dtau,beta,M,Z_frac),
     '0.1*tau/b','0.3*tau/b','0.5*tau/b','0.7*tau/b','1.0*tau/b')
 header_N = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s} {5:^10s}'.format(
-    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,beta=%.4f,dtau=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,beta,dtau,M,Z_frac),
+    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,dtau=%.2f,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,dtau,beta,M,Z_frac),
     '0.1*tau/b','0.3*tau/b','0.5*tau/b','0.7*tau/b','1.0*tau/b')
 
 
-# Save to disk
+# Save time resolved energies to disk
 if canonical: # kinetic
-    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canK.dat"%(L,N,U,mu,t,beta,dtau,M),"w+") as data:
+    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canK.dat"%(L,N,U,mu,t,dtau,beta,M),"w+") as data:
         np.savetxt(data,tr_kinetic_list,delimiter=" ",fmt="%-20s",header=header_K) 
 if canonical: # diagonal
-    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canV.dat"%(L,N,U,mu,t,beta,dtau,M),"w+") as data:
+    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canV.dat"%(L,N,U,mu,t,dtau,beta,M),"w+") as data:
         np.savetxt(data,tr_diagonal_list,delimiter=" ",fmt="%-20s",header=header_V)
-if canonical:
-    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canN.dat"%(L,N,U,mu,t,beta,dtau,M),"w+") as data:
-        np.savetxt(data,np.transpose(N_list),delimiter=" ",fmt="%-20s",header=header_K) 
+# if canonical:
+#     with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canN.dat"%(L,N,U,mu,t,dtau,beta,M),"w+") as data:
+#         np.savetxt(data,np.transpose(N_list),delimiter=" ",fmt="%-20s",header=header_K) 
+        
+# # Save energies using original method to disk
+# header_og = '{0:^67s}\n{1:^6s} {2:^29s}'.format(
+#     "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,dtau=%.2f,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,dtau,beta,M,Z_frac),
+# 'H_0/t','H_1/t')
+# if canonical: # kinetic
+#     with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canK_og.dat"%(L,N,U,mu,t,dtau,beta,M),"w+") as data:
+#         np.savetxt(data,np.transpose([diagonal_og_list,kinetic_og_list]),delimiter=" ",fmt="%-20s",header=header_og) 
+
 
 # ---------------- Print acceptance ratios ---------------- #
 
