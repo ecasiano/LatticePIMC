@@ -1,79 +1,76 @@
 Unable to init server: Could not connect: Connection refused
 Unable to init server: Could not connect: Connection refused
 
-(main.py:5649): Gdk-CRITICAL **: 22:33:01.039: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+(main.py:21686): Gdk-CRITICAL **: 10:03:57.993: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
 Unable to init server: Could not connect: Connection refused
 Unable to init server: Could not connect: Connection refused
 
-(main.py:6540): Gdk-CRITICAL **: 22:33:38.160: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+(main.py:22130): Gdk-CRITICAL **: 10:04:13.415: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
 Unable to init server: Could not connect: Connection refused
 Unable to init server: Could not connect: Connection refused
 
-(main.py:10326): Gdk-CRITICAL **: 22:36:22.680: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+(main.py:23464): Gdk-CRITICAL **: 10:05:10.662: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
 Unable to init server: Could not connect: Connection refused
 Unable to init server: Could not connect: Connection refused
 
-(main.py:10675): Gdk-CRITICAL **: 22:36:35.743: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:10961): Gdk-CRITICAL **: 22:36:46.366: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:11366): Gdk-CRITICAL **: 22:37:02.059: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:11649): Gdk-CRITICAL **: 22:37:12.270: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:11942): Gdk-CRITICAL **: 22:37:23.535: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:12691): Gdk-CRITICAL **: 22:37:54.482: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:13421): Gdk-CRITICAL **: 22:38:25.015: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:13707): Gdk-CRITICAL **: 22:38:36.069: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:14329): Gdk-CRITICAL **: 22:39:01.234: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+(main.py:24148): Gdk-CRITICAL **: 10:05:37.269: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.2882 | 0.5000 | 2.6 | 2 | 0.10
-0.2593 | 0.4000 | 2.6 | 2 | 0.35
-0.2334 | 0.3000 | 2.8 | 2 | 0.69
-0.2568 | 0.2000 | 2.8 | 2 | 0.67
-0.2824 | 0.1000 | 2.7 | 2 | 0.60
-0.3107 | 0.0000 | 2.7 | 2 | 0.56
-0.3417 | -0.1000 | 2.7 | 2 | 0.51
-0.3759 | -0.2000 | 2.6 | 2 | 0.45
-0.3383 | -0.3000 | 2.7 | 2 | 0.53
-0.3721 | -0.4000 | 2.6 | 2 | 0.47
-0.3349 | -0.5000 | 2.6 | 2 | 0.48
-0.3014 | -0.6000 | 2.6 | 2 | 0.52
-0.3316 | -0.7000 | 2.3 | 2 | 0.28
-0.2984 | -0.8000 | 2.2 | 2 | 0.28
-0.2686 | -0.9000 | 2.2 | 2 | 0.32
-0.2417 | -1.0000 | 2.1 | 2 | 0.37
-0.2176 | -1.1000 | 2.1 | 2 | 0.42
-0.1958 | -1.2000 | 2.0 | 2 | 0.48
-0.1762 | -1.3000 | 1.9 | 2 | 0.57
-0.1938 | -1.2000 | 1.9 | 2 | 0.48
-0.1745 | -1.1000 | 1.9 | 2 | 0.48
-0.1570 | -1.0000 | 2.0 | 2 | 0.47
-0.1413 | -1.1000 | 2.0 | 2 | 0.60
-0.1554 | -1.2000 | 2.0 | 2 | 0.53
+0.4910 | -1.0000 | 1.5 | 2 | 0.07
+0.4419 | -0.9000 | 1.7 | 2 | 0.05
+0.3977 | -0.8000 | 1.8 | 2 | 0.07
+0.3579 | -0.7000 | 2.0 | 2 | 0.12
+0.3221 | -0.8000 | 2.0 | 2 | 0.14
+0.2899 | -0.9000 | 2.0 | 2 | 0.17
+0.2609 | -1.0000 | 2.0 | 2 | 0.20
+0.2348 | -1.1000 | 2.0 | 2 | 0.23
+0.2113 | -1.2000 | 2.0 | 2 | 0.23
+0.1902 | -1.3000 | 1.8 | 2 | 0.28
+0.1712 | -1.2000 | 1.7 | 2 | 0.43
+0.1541 | -1.1000 | 1.9 | 2 | 0.39
+0.1387 | -1.0000 | 2.0 | 2 | 0.38
+0.1248 | -1.1000 | 2.1 | 2 | 0.46
+0.1123 | -1.2000 | 2.5 | 2 | 0.57
+0.1011 | -1.3000 | 2.2 | 2 | 0.49
+0.0910 | -1.4000 | 2.2 | 2 | 0.50
+0.0819 | -1.5000 | 2.2 | 2 | 0.58
+0.0737 | -1.6000 | 2.0 | 2 | 0.57
+0.0663 | -1.7000 | 2.2 | 2 | 0.68
+0.0597 | -1.8000 | 2.0 | 2 | 0.61
+0.0537 | -1.9000 | 2.0 | 2 | 0.60
+0.0483 | -2.0000 | 1.8 | 2 | 0.62
+0.0435 | -1.9000 | 2.1 | 2 | 0.66
+0.0392 | -2.0000 | 2.0 | 2 | 0.58
+0.0352 | -2.1000 | 1.2 | 2 | 0.90
+0.0388 | -2.0000 | 1.5 | 2 | 0.83
+0.0426 | -1.9000 | 1.2 | 2 | 0.87
+0.0469 | -1.8000 | 1.4 | 2 | 0.81
+0.0516 | -1.7000 | 1.8 | 2 | 0.83
+0.0568 | -1.6000 | 2.2 | 2 | 0.66
+0.0511 | -1.7000 | 1.5 | 2 | 0.76
+0.0460 | -1.6000 | 2.4 | 2 | 0.74
+0.0414 | -1.7000 | 2.2 | 2 | 0.81
+0.0455 | -1.8000 | 2.1 | 2 | 0.69
+0.0410 | -1.9000 | 1.9 | 2 | 0.65
+0.0369 | -1.8000 | 2.3 | 2 | 0.74
+0.0332 | -1.9000 | 1.9 | 2 | 0.69
+0.0299 | -1.8000 | 2.1 | 2 | 0.79
+0.0269 | -1.9000 | 2.3 | 2 | 0.86
+0.0296 | -2.0000 | 2.4 | 2 | 0.76
+0.0266 | -2.1000 | 2.0 | 2 | 0.72
+0.0239 | -2.2000 | 2.5 | 2 | 0.77
+0.0216 | -2.3000 | 1.8 | 2 | 0.72
+0.0194 | -2.2000 | 2.2 | 2 | 0.75
+0.0175 | -2.3000 | 2.2 | 2 | 0.78
+0.0157 | -2.4000 | 1.9 | 2 | 0.79
+0.0141 | -2.3000 | 1.1 | 2 | 0.96
+0.0156 | -2.2000 | 1.5 | 2 | 0.95
+0.0171 | -2.1000 | 1.6 | 2 | 0.88
+0.0188 | -2.0000 | 2.4 | 2 | 0.86
+0.0207 | -2.1000 | 1.9 | 2 | 0.78
+0.0186 | -2.0000 | 2.0 | 2 | 0.88
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -95,82 +92,121 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 32.78% (1639059/5000000) 
+Z-fraction: 56.37% (2113841/3749999) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (56217/3050355)
-       Delete worm: (40311/44167)
+       Insert worm: (5610/8504770)
+       Delete worm: (4507/7767)
 
-       Insert anti: (71689/3053794)
-       Delete anti: (52650/66654)
+       Insert anti: (8556/8504647)
+       Delete anti: (6843/6917)
 
-       Advance head: (977322/977322)
-        Recede head: (991709/991709)
+       Advance head: (744078/744078)
+        Recede head: (757732/757732)
 
-       Advance tail: (994402/994402)
-        Recede tail: (978979/978979)
+       Advance tail: (754182/754182)
+        Recede tail: (739199/739199)
 
-   InsertZero worm: (445043/5684569)
-   DeleteZero worm: (462607/519346)
+   InsertZero worm: (137841/12610084)
+   DeleteZero worm: (139275/299547)
 
-   InsertZero anti: (632774/3968773)
-   DeleteZero anti: (650339/868413)
+   InsertZero anti: (278355/7320728)
+   DeleteZero anti: (279789/299653)
 
-   InsertBeta worm: (441701/5678705)
-   DeleteBeta worm: (459082/516381)
+   InsertBeta worm: (138890/12602142)
+   DeleteBeta worm: (140272/299146)
 
-   InsertBeta anti: (635153/3973915)
-   DeleteBeta anti: (652534/869596)
+   InsertBeta anti: (277154/7328969)
+   DeleteBeta anti: (278536/298452)
 
-              IKBH: (1174378/2143201)
-              DKBH: (1177428/1398570)
+              IKBH: (855460/1531908)
+              DKBH: (858309/1045235)
 
-              IKAH: (730792/2149317)
-              DKAH: (727366/854824)
+              IKAH: (559250/1526671)
+              DKAH: (556793/723334)
 
-              IKBT: (734658/2152921)
-              DKBT: (730425/859425)
+              IKBT: (556248/1517672)
+              DKBT: (553628/718714)
 
-              IKAT: (1178059/2147068)
-              DKAT: (1182669/1405135)
+              IKAT: (850148/1523526)
+              DKAT: (852374/1038388)
 
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:3412): Gdk-CRITICAL **: 11:17:38.767: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:4019): Gdk-CRITICAL **: 11:17:54.118: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:31747): Gdk-CRITICAL **: 12:06:21.147: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:32050): Gdk-CRITICAL **: 12:06:30.669: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:32330): Gdk-CRITICAL **: 12:06:40.754: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:32554): Gdk-CRITICAL **: 12:06:48.955: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:32765): Gdk-CRITICAL **: 12:06:56.878: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:33010): Gdk-CRITICAL **: 12:07:05.029: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:33268): Gdk-CRITICAL **: 12:07:14.299: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:33478): Gdk-CRITICAL **: 12:07:21.647: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:33687): Gdk-CRITICAL **: 12:07:29.439: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.1993 | 0.5000 | 2.8 | 2 | 0.00
-0.1794 | 0.4000 | 2.8 | 2 | 0.00
-0.1615 | 0.3000 | 2.8 | 2 | 0.36
-0.1453 | 0.2000 | 2.9 | 2 | 0.50
-0.1599 | 0.1000 | 2.9 | 2 | 0.68
-0.1758 | 0.0000 | 2.9 | 2 | 0.63
-0.1934 | -0.1000 | 2.7 | 2 | 0.05
-0.1741 | -0.2000 | 2.7 | 2 | 0.05
-0.1567 | -0.3000 | 2.7 | 2 | 0.44
-0.1410 | -0.4000 | 2.8 | 2 | 0.51
-0.1551 | -0.5000 | 2.8 | 2 | 0.61
-0.1706 | -0.6000 | 2.8 | 2 | 0.57
-0.1877 | -0.7000 | 2.7 | 2 | 0.54
-0.2064 | -0.8000 | 2.7 | 2 | 0.45
-0.1858 | -0.9000 | 2.5 | 2 | 0.14
-0.1672 | -1.0000 | 2.5 | 2 | 0.13
-0.1505 | -1.1000 | 2.3 | 2 | 0.21
-0.1354 | -1.2000 | 2.3 | 2 | 0.26
-0.1219 | -1.3000 | 2.3 | 2 | 0.54
-0.1341 | -1.4000 | 2.3 | 2 | 0.40
-0.1207 | -1.5000 | 2.2 | 2 | 0.44
-0.1086 | -1.6000 | 2.4 | 2 | 0.56
-0.1195 | -1.7000 | 1.8 | 2 | 0.46
-0.1075 | -1.6000 | 2.0 | 2 | 0.47
-0.0968 | -1.7000 | 1.8 | 2 | 0.58
-0.1065 | -1.6000 | 1.8 | 2 | 0.53
-0.1171 | -1.5000 | 2.0 | 2 | 0.40
-0.1054 | -1.6000 | 1.9 | 2 | 0.42
-0.0948 | -1.5000 | 1.9 | 2 | 0.55
-0.1043 | -1.4000 | 2.0 | 2 | 0.47
-0.0939 | -1.5000 | 1.9 | 2 | 0.59
-0.1033 | -1.4000 | 2.0 | 2 | 0.53
+0.1331 | -1.0000 | 2.9 | 2 | 0.36
+0.1198 | -1.1000 | 2.9 | 2 | 0.67
+0.1078 | -1.2000 | 2.6 | 2 | 0.07
+0.0970 | -1.3000 | 2.5 | 2 | 0.37
+0.0873 | -1.4000 | 2.6 | 2 | 0.62
+0.0786 | -1.5000 | 2.5 | 2 | 0.45
+0.0707 | -1.6000 | 2.3 | 2 | 0.34
+0.0637 | -1.7000 | 2.2 | 2 | 0.59
+0.0573 | -1.8000 | 2.3 | 2 | 0.62
+0.0516 | -1.9000 | 1.9 | 2 | 0.41
+0.0464 | -1.8000 | 2.2 | 2 | 0.67
+0.0418 | -1.9000 | 2.2 | 2 | 0.65
+0.0376 | -2.0000 | 2.3 | 2 | 0.70
+0.0338 | -2.1000 | 1.9 | 2 | 0.70
+0.0305 | -2.0000 | 1.9 | 2 | 0.68
+0.0274 | -1.9000 | 1.9 | 2 | 0.62
+0.0247 | -1.8000 | 2.1 | 2 | 0.72
+0.0222 | -1.9000 | 2.3 | 2 | 0.82
+0.0244 | -2.0000 | 2.0 | 2 | 0.66
+0.0220 | -2.1000 | 1.9 | 2 | 0.66
+0.0198 | -2.0000 | 2.4 | 2 | 0.68
+0.0178 | -2.1000 | 2.6 | 2 | 0.89
+0.0196 | -2.2000 | 1.9 | 2 | 0.72
+0.0176 | -2.1000 | 1.7 | 2 | 0.79
+0.0159 | -2.0000 | 1.0 | 2 | 0.94
+0.0174 | -1.9000 | 2.3 | 2 | 0.75
+0.0157 | -2.0000 | 2.0 | 2 | 0.81
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -192,93 +228,67 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 30.93% (1546384/5000000) 
+Z-fraction: 25.36% (2536021/10000000) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (104982/4816339)
-       Delete worm: (87884/90491)
+       Insert worm: (30132/36438444)
+       Delete worm: (25562/26326)
 
-       Insert anti: (107362/4814800)
-       Delete anti: (91232/137619)
+       Insert anti: (13928/36432768)
+       Delete anti: (12122/12998)
 
-       Advance head: (2579877/2579877)
-        Recede head: (2639949/2639949)
+       Advance head: (1748478/1748478)
+        Recede head: (1800294/1800294)
 
-       Advance tail: (2642694/2642694)
-        Recede tail: (2584808/2584808)
+       Advance tail: (1824645/1824645)
+        Recede tail: (1772133/1772133)
 
-   InsertZero worm: (635130/10864351)
-   DeleteZero worm: (651683/676513)
+   InsertZero worm: (596885/55894001)
+   DeleteZero worm: (600006/628848)
 
-   InsertZero anti: (801244/7767974)
-   DeleteZero anti: (817797/1181588)
+   InsertZero anti: (360563/23872426)
+   DeleteZero anti: (363683/400843)
 
-   InsertBeta worm: (636404/10853262)
-   DeleteBeta worm: (653079/676467)
+   InsertBeta worm: (600433/55855664)
+   DeleteBeta worm: (603689/631639)
 
-   InsertBeta anti: (800456/7778581)
-   DeleteBeta anti: (817131/1180650)
+   InsertBeta anti: (362609/23911460)
+   DeleteBeta anti: (365864/398557)
 
-              IKBH: (3416813/5926029)
-              DKBH: (3423898/4192496)
+              IKBH: (2095148/3632408)
+              DKBH: (2098968/2607489)
 
-              IKAH: (2240857/5939493)
-              DKAH: (2233546/2774143)
+              IKAH: (1355905/3657992)
+              DKAH: (1352426/1806042)
 
-              IKBT: (2244359/5946149)
-              DKBT: (2236748/2777252)
+              IKBT: (1376816/3704484)
+              DKBT: (1372094/1830372)
 
-              IKAT: (3420953/5934533)
-              DKAT: (3428794/4198107)
+              IKAT: (2121815/3678685)
+              DKAT: (2126204/2642579)
 
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.1667 | 0.5000 | 2.9 | 2 | 0.14
-0.1500 | 0.4000 | 2.9 | 2 | 0.65
-0.1651 | 0.3000 | 2.9 | 2 | 0.00
-0.1485 | 0.2000 | 2.9 | 2 | 0.00
-0.1337 | 0.1000 | 2.8 | 2 | 0.00
-0.1203 | 0.0000 | 2.8 | 2 | 0.00
-0.1083 | -0.1000 | 2.8 | 2 | 0.00
-0.0975 | -0.2000 | 2.9 | 2 | 0.49
-0.0877 | -0.3000 | 2.9 | 2 | 0.79
-0.0965 | -0.4000 | 2.9 | 2 | 0.75
-0.1061 | -0.5000 | 2.9 | 2 | 0.69
-0.1168 | -0.6000 | 2.9 | 2 | 0.68
-0.1284 | -0.7000 | 2.9 | 2 | 0.61
-0.1413 | -0.8000 | 2.7 | 2 | 0.44
-0.1271 | -0.9000 | 2.7 | 2 | 0.33
-0.1144 | -1.0000 | 2.6 | 2 | 0.17
-0.1030 | -1.1000 | 2.7 | 2 | 0.55
-0.1133 | -1.2000 | 2.7 | 2 | 0.49
-0.1020 | -1.3000 | 2.4 | 2 | 0.42
-0.0918 | -1.4000 | 2.7 | 2 | 0.65
-0.1009 | -1.5000 | 2.2 | 2 | 0.49
-0.0908 | -1.6000 | 2.3 | 2 | 0.48
-0.0818 | -1.7000 | 1.9 | 2 | 0.30
-0.0736 | -1.6000 | 2.2 | 2 | 0.49
-0.0662 | -1.7000 | 2.1 | 2 | 0.43
-0.0596 | -1.8000 | 2.2 | 2 | 0.52
-0.0656 | -1.9000 | 2.0 | 2 | 0.48
-0.0590 | -2.0000 | 1.9 | 2 | 0.45
-0.0531 | -1.9000 | 1.8 | 2 | 0.44
-0.0478 | -1.8000 | 2.1 | 2 | 0.49
-0.0430 | -1.9000 | 2.2 | 2 | 0.57
-0.0473 | -2.0000 | 1.7 | 2 | 0.46
-0.0426 | -1.9000 | 1.7 | 2 | 0.45
-0.0383 | -1.8000 | 2.1 | 2 | 0.61
-0.0422 | -1.9000 | 1.4 | 2 | 0.81
-0.0464 | -1.8000 | 1.6 | 2 | 0.69
-0.0510 | -1.7000 | 1.6 | 2 | 0.69
-0.0561 | -1.6000 | 2.1 | 2 | 0.50
-0.0505 | -1.7000 | 2.1 | 2 | 0.63
-0.0556 | -1.8000 | 1.9 | 2 | 0.51
-0.0611 | -1.7000 | 2.4 | 2 | 0.54
-0.0672 | -1.8000 | 1.9 | 2 | 0.36
-0.0605 | -1.7000 | 2.0 | 2 | 0.54
+0.2058 | -1.0000 | 2.8 | 2 | 0.39
+0.1852 | -1.1000 | 2.7 | 2 | 0.70
+0.1667 | -1.2000 | 2.4 | 2 | 0.52
+0.1500 | -1.3000 | 2.2 | 2 | 0.53
+0.1350 | -1.4000 | 2.0 | 2 | 0.56
+0.1215 | -1.5000 | 2.1 | 2 | 0.56
+0.1094 | -1.6000 | 1.8 | 2 | 0.67
+0.0984 | -1.5000 | 1.8 | 2 | 0.69
+0.0886 | -1.4000 | 1.8 | 2 | 0.74
+0.0797 | -1.3000 | 1.7 | 2 | 0.76
+0.0718 | -1.2000 | 1.9 | 2 | 0.71
+0.0646 | -1.1000 | 1.8 | 2 | 0.79
+0.0581 | -1.0000 | 1.9 | 2 | 0.76
+0.0523 | -0.9000 | 1.9 | 2 | 0.76
+0.0471 | -0.8000 | 1.9 | 2 | 0.80
+0.0424 | -0.7000 | 2.0 | 2 | 0.73
+0.0381 | -0.8000 | 2.0 | 2 | 0.81
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -300,105 +310,77 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 37.19% (1859496/5000000) 
+Z-fraction: 26.87% (8060095/29999999) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (71481/8052290)
-       Delete worm: (63696/90813)
+       Insert worm: (26839/35693834)
+       Delete worm: (18734/19576)
 
-       Insert anti: (133931/8049044)
-       Delete anti: (119976/124145)
+       Insert anti: (50808/35681812)
+       Delete anti: (36465/46649)
 
-       Advance head: (3458122/3458122)
-        Recede head: (3537857/3537857)
+       Advance head: (2149239/2149239)
+        Recede head: (2178733/2178733)
 
-       Advance tail: (3530807/3530807)
-        Recede tail: (3449757/3449757)
+       Advance tail: (2178316/2178316)
+        Recede tail: (2150208/2150208)
 
-   InsertZero worm: (485912/16186096)
-   DeleteZero worm: (496767/728908)
+   InsertZero worm: (681304/48192471)
+   DeleteZero worm: (692615/754025)
 
-   InsertZero anti: (978792/12122925)
-   DeleteZero anti: (989648/1071146)
+   InsertZero anti: (1468916/31591214)
+   DeleteZero anti: (1480228/1947884)
 
-   InsertBeta worm: (487207/16211806)
-   DeleteBeta worm: (498091/724939)
+   InsertBeta worm: (683524/48195824)
+   DeleteBeta worm: (694661/754529)
 
-   InsertBeta anti: (980196/12097085)
-   DeleteBeta anti: (991081/1072763)
+   InsertBeta anti: (1478259/31587399)
+   DeleteBeta anti: (1489396/1950734)
 
-              IKBH: (4579941/7872186)
-              DKBH: (4588222/5669602)
+              IKBH: (2494237/4402769)
+              DKBH: (2498768/3028089)
 
-              IKAH: (2989715/7857077)
-              DKAH: (2979925/3844681)
+              IKAH: (1520538/4388643)
+              DKAH: (1515263/1789080)
 
-              IKBT: (2987934/7839509)
-              DKBT: (2978963/3841248)
+              IKBT: (1519326/4389556)
+              DKBT: (1516488/1791254)
 
-              IKAT: (4567248/7853104)
-              DKAT: (4577720/5658602)
+              IKAT: (2492215/4402955)
+              DKAT: (2495797/3025068)
 
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:12502): Gdk-CRITICAL **: 00:29:34.650: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:12836): Gdk-CRITICAL **: 00:29:47.630: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:13288): Gdk-CRITICAL **: 00:30:05.063: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:15256): Gdk-CRITICAL **: 00:31:28.657: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:16114): Gdk-CRITICAL **: 00:32:04.119: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:16486): Gdk-CRITICAL **: 00:32:17.561: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-Unable to init server: Could not connect: Connection refused
-Unable to init server: Could not connect: Connection refused
-
-(main.py:16785): Gdk-CRITICAL **: 00:32:28.522: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.1515 | 0.5000 | 2.9 | 2 | 0.36
-0.1364 | 0.4000 | 3.0 | 2 | 0.73
-0.1500 | 0.3000 | 3.0 | 2 | 0.71
-0.1650 | 0.2000 | 3.0 | 2 | 0.63
-0.1815 | 0.1000 | 3.0 | 2 | 0.60
-0.1996 | 0.0000 | 2.9 | 2 | 0.54
-0.2196 | -0.1000 | 2.9 | 2 | 0.46
-0.1977 | -0.2000 | 2.9 | 2 | 0.48
-0.1779 | -0.3000 | 2.9 | 2 | 0.55
-0.1957 | -0.4000 | 2.9 | 2 | 0.49
-0.1761 | -0.5000 | 2.9 | 2 | 0.51
-0.1937 | -0.6000 | 2.8 | 2 | 0.44
-0.1743 | -0.7000 | 2.8 | 2 | 0.40
-0.1569 | -0.8000 | 2.8 | 2 | 0.44
-0.1412 | -0.9000 | 2.8 | 2 | 0.45
-0.1271 | -1.0000 | 2.8 | 2 | 0.45
-0.1144 | -1.1000 | 2.6 | 2 | 0.39
-0.1030 | -1.2000 | 2.6 | 2 | 0.49
-0.0927 | -1.3000 | 2.4 | 2 | 0.40
-0.0834 | -1.4000 | 2.5 | 2 | 0.41
-0.0751 | -1.5000 | 2.1 | 2 | 0.46
-0.0675 | -1.6000 | 2.4 | 2 | 0.47
-0.0608 | -1.7000 | 2.2 | 2 | 0.44
-0.0547 | -1.8000 | 1.8 | 2 | 0.33
-0.0492 | -1.7000 | 1.9 | 2 | 0.42
-0.0443 | -1.6000 | 2.2 | 2 | 0.55
-0.0487 | -1.7000 | 2.0 | 2 | 0.51
+0.1336 | -1.0000 | 2.9 | 2 | 0.31
+0.1202 | -1.1000 | 2.7 | 2 | 0.23
+0.1082 | -1.2000 | 2.7 | 2 | 0.14
+0.0974 | -1.3000 | 2.5 | 2 | 0.19
+0.0876 | -1.4000 | 2.5 | 2 | 0.20
+0.0789 | -1.5000 | 2.6 | 2 | 0.66
+0.0710 | -1.6000 | 2.7 | 2 | 0.63
+0.0639 | -1.7000 | 2.4 | 2 | 0.58
+0.0575 | -1.8000 | 2.2 | 2 | 0.59
+0.0517 | -1.9000 | 2.0 | 2 | 0.57
+0.0466 | -2.0000 | 2.1 | 2 | 0.59
+0.0419 | -2.1000 | 1.9 | 2 | 0.52
+0.0377 | -2.0000 | 2.1 | 2 | 0.53
+0.0340 | -2.1000 | 1.9 | 2 | 0.54
+0.0306 | -2.0000 | 2.1 | 2 | 0.73
+0.0275 | -2.1000 | 2.1 | 2 | 0.74
+0.0247 | -2.2000 | 2.1 | 2 | 0.75
+0.0223 | -2.3000 | 1.6 | 2 | 0.42
+0.0200 | -2.2000 | 1.7 | 2 | 0.50
+0.0180 | -2.1000 | 1.9 | 2 | 0.69
+0.0162 | -2.0000 | 1.9 | 2 | 0.71
+0.0146 | -1.9000 | 1.9 | 2 | 0.80
+0.0161 | -1.8000 | 2.5 | 2 | 0.88
+0.0177 | -1.9000 | 1.9 | 2 | 0.80
+0.0159 | -1.8000 | 2.6 | 2 | 0.89
+0.0175 | -1.9000 | 1.9 | 2 | 0.82
+0.0193 | -1.8000 | 2.0 | 2 | 0.85
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -420,153 +402,78 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 33.47% (1673274/5000000) 
+Z-fraction: 48.58% (4858283/10000000) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (98501/10749530)
-       Delete worm: (89501/112167)
+       Insert worm: (36961/33273599)
+       Delete worm: (32071/37222)
 
-       Insert anti: (133801/10750403)
-       Delete anti: (122790/133001)
+       Insert anti: (41382/33270114)
+       Delete anti: (36474/39450)
 
-       Advance head: (4563849/4563849)
-        Recede head: (4682330/4682330)
+       Advance head: (3335735/3335735)
+        Recede head: (3415199/3415199)
 
-       Advance tail: (4729059/4729059)
-        Recede tail: (4612734/4612734)
+       Advance tail: (3408381/3408381)
+        Recede tail: (3327028/3327028)
 
-   InsertZero worm: (605047/22049750)
-   DeleteZero worm: (615059/775058)
+   InsertZero worm: (591972/50976313)
+   DeleteZero worm: (596679/735110)
 
-   InsertZero anti: (962714/15437722)
-   DeleteZero anti: (972727/1068187)
+   InsertZero anti: (828988/28457084)
+   DeleteZero anti: (833693/913963)
 
-   InsertBeta worm: (602637/21946323)
-   DeleteBeta worm: (612635/770308)
+   InsertBeta worm: (599138/50971109)
+   DeleteBeta worm: (604231/747427)
 
-   InsertBeta anti: (961758/15541077)
-   DeleteBeta anti: (971756/1064449)
+   InsertBeta anti: (839978/28461958)
+   DeleteBeta anti: (845069/928625)
 
-              IKBH: (6194627/10528818)
-              DKBH: (6206287/7708689)
+              IKBH: (4084107/7011373)
+              DKBH: (4093468/5090312)
 
-              IKAH: (4054813/10525469)
-              DKAH: (4043363/5264420)
+              IKAH: (2678351/7013074)
+              DKAH: (2669515/3472941)
 
-              IKBT: (4096410/10623092)
-              DKBT: (4086633/5320492)
+              IKBT: (2674566/7000077)
+              DKBT: (2664983/3470770)
 
-              IKAT: (6255843/10625966)
-              DKAT: (6265409/7785904)
+              IKAT: (4074248/6996048)
+              DKAT: (4083311/5075980)
 
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.1299 | 0.5000 | 2.9 | 2 | 0.17
-0.1169 | 0.4000 | 3.0 | 2 | 0.70
-0.1286 | 0.3000 | 2.9 | 2 | 0.00
-0.1158 | 0.2000 | 2.9 | 2 | 0.00
-0.1042 | 0.1000 | 2.9 | 2 | 0.00
-0.0938 | 0.0000 | 2.9 | 2 | 0.00
-0.0844 | -0.1000 | 2.9 | 2 | 0.00
-0.0760 | -0.2000 | 2.9 | 2 | 0.01
-0.0684 | -0.3000 | 2.9 | 2 | 0.00
-0.0615 | -0.4000 | 2.9 | 2 | 0.00
-0.0554 | -0.5000 | 2.9 | 2 | 0.29
-0.0498 | -0.6000 | 2.8 | 2 | 0.00
-0.0449 | -0.7000 | 2.8 | 2 | 0.01
-0.0404 | -0.8000 | 2.8 | 2 | 0.04
-0.0363 | -0.9000 | 2.7 | 2 | 0.09
-0.0327 | -1.0000 | 2.8 | 2 | 0.00
-0.0294 | -1.1000 | 2.5 | 2 | 0.20
-0.0265 | -1.2000 | 2.5 | 2 | 0.25
-0.0238 | -1.3000 | 2.5 | 2 | 0.26
-0.0215 | -1.4000 | 2.2 | 2 | 0.57
-0.0236 | -1.5000 | 2.1 | 2 | 0.62
-0.0260 | -1.6000 | 1.5 | 2 | 0.72
-0.0286 | -1.5000 | 2.3 | 2 | 0.29
-0.0257 | -1.6000 | 1.4 | 2 | 0.85
-0.0283 | -1.5000 | 2.2 | 2 | 0.45
-0.0254 | -1.6000 | 1.9 | 2 | 0.50
-0.0280 | -1.5000 | 1.7 | 2 | 0.80
-0.0308 | -1.4000 | 2.2 | 2 | 0.50
-0.0277 | -1.5000 | 2.3 | 2 | 0.26
-0.0249 | -1.6000 | 2.1 | 2 | 0.62
-0.0274 | -1.7000 | 1.7 | 2 | 0.65
-0.0302 | -1.6000 | 1.9 | 2 | 0.62
-0.0332 | -1.5000 | 2.3 | 2 | 0.47
-0.0299 | -1.6000 | 2.1 | 2 | 0.62
-0.0329 | -1.7000 | 1.3 | 2 | 0.74
-0.0361 | -1.6000 | 1.5 | 2 | 0.79
-0.0398 | -1.5000 | 2.2 | 2 | 0.28
-0.0358 | -1.6000 | 2.0 | 2 | 0.45
-0.0322 | -1.7000 | 2.1 | 2 | 0.54
-0.0354 | -1.8000 | 1.9 | 2 | 0.53
-0.0390 | -1.7000 | 1.6 | 2 | 0.61
-0.0429 | -1.6000 | 1.9 | 2 | 0.59
-0.0471 | -1.5000 | 2.4 | 2 | 0.31
-0.0424 | -1.6000 | 1.9 | 2 | 0.48
-0.0382 | -1.5000 | 2.0 | 2 | 0.47
-0.0344 | -1.6000 | 1.6 | 2 | 0.62
-0.0378 | -1.5000 | 1.9 | 2 | 0.57
-0.0416 | -1.4000 | 2.4 | 2 | 0.31
-0.0374 | -1.5000 | 2.2 | 2 | 0.45
-0.0337 | -1.6000 | 1.5 | 2 | 0.72
-0.0371 | -1.5000 | 1.9 | 2 | 0.58
-0.0408 | -1.4000 | 2.4 | 2 | 0.31
-0.0367 | -1.5000 | 2.0 | 2 | 0.44
-0.0330 | -1.6000 | 1.8 | 2 | 0.62
-0.0363 | -1.5000 | 2.0 | 2 | 0.48
-0.0327 | -1.6000 | 2.0 | 2 | 0.64
-0.0360 | -1.7000 | 2.2 | 2 | 0.41
-0.0324 | -1.8000 | 1.2 | 2 | 0.71
-0.0356 | -1.7000 | 1.5 | 2 | 0.64
-0.0392 | -1.6000 | 2.0 | 2 | 0.40
-0.0352 | -1.7000 | 2.0 | 2 | 0.62
-0.0388 | -1.8000 | 2.0 | 2 | 0.44
-0.0349 | -1.9000 | 1.7 | 2 | 0.42
-0.0314 | -1.8000 | 1.6 | 2 | 0.72
-0.0345 | -1.7000 | 2.5 | 2 | 0.66
-0.0380 | -1.8000 | 1.8 | 2 | 0.48
-0.0342 | -1.7000 | 2.0 | 2 | 0.65
-0.0376 | -1.8000 | 1.7 | 2 | 0.34
-0.0339 | -1.7000 | 1.9 | 2 | 0.64
-0.0372 | -1.6000 | 1.9 | 2 | 0.58
-0.0410 | -1.5000 | 2.3 | 2 | 0.59
-0.0451 | -1.6000 | 2.1 | 2 | 0.59
-0.0496 | -1.7000 | 1.8 | 2 | 0.41
-0.0446 | -1.6000 | 2.1 | 2 | 0.48
-0.0401 | -1.7000 | 1.8 | 2 | 0.46
-0.0361 | -1.6000 | 2.0 | 2 | 0.49
-0.0325 | -1.7000 | 2.1 | 2 | 0.60
-0.0358 | -1.8000 | 1.8 | 2 | 0.43
-0.0322 | -1.7000 | 2.8 | 2 | 0.77
-0.0354 | -1.8000 | 1.9 | 2 | 0.45
-0.0319 | -1.7000 | 1.5 | 2 | 0.69
-0.0351 | -1.6000 | 1.8 | 2 | 0.45
-0.0316 | -1.5000 | 2.6 | 2 | 0.62
-0.0347 | -1.6000 | 2.4 | 2 | 0.70
-0.0382 | -1.7000 | 2.1 | 2 | 0.48
-0.0344 | -1.8000 | 2.2 | 2 | 0.61
-0.0378 | -1.9000 | 1.4 | 2 | 0.74
-0.0416 | -1.8000 | 1.9 | 2 | 0.51
-0.0457 | -1.7000 | 2.2 | 2 | 0.51
-0.0503 | -1.8000 | 1.9 | 2 | 0.44
-0.0453 | -1.7000 | 1.9 | 2 | 0.55
-0.0498 | -1.6000 | 2.5 | 2 | 0.57
-0.0548 | -1.7000 | 1.7 | 2 | 0.46
-0.0493 | -1.6000 | 2.4 | 2 | 0.53
-0.0542 | -1.7000 | 1.8 | 2 | 0.56
-0.0597 | -1.6000 | 2.1 | 2 | 0.53
-0.0656 | -1.7000 | 1.6 | 2 | 0.32
-0.0591 | -1.6000 | 2.3 | 2 | 0.42
-0.0532 | -1.7000 | 2.2 | 2 | 0.51
-0.0585 | -1.8000 | 2.2 | 2 | 0.36
-0.0526 | -1.9000 | 1.8 | 2 | 0.44
-0.0474 | -1.8000 | 1.8 | 2 | 0.30
-0.0426 | -1.7000 | 2.0 | 2 | 0.52
+0.1024 | -1.0000 | 2.9 | 2 | 0.07
+0.0922 | -1.1000 | 3.0 | 2 | 0.78
+0.0829 | -1.2000 | 2.7 | 2 | 0.05
+0.0746 | -1.3000 | 2.8 | 2 | 0.42
+0.0672 | -1.4000 | 2.8 | 2 | 0.31
+0.0605 | -1.5000 | 2.7 | 2 | 0.01
+0.0544 | -1.6000 | 2.4 | 2 | 0.27
+0.0490 | -1.7000 | 2.0 | 2 | 0.54
+0.0441 | -1.8000 | 1.7 | 2 | 0.53
+0.0397 | -1.7000 | 2.2 | 2 | 0.48
+0.0357 | -1.8000 | 2.1 | 2 | 0.52
+0.0321 | -1.9000 | 1.7 | 2 | 0.62
+0.0289 | -1.8000 | 1.6 | 2 | 0.74
+0.0260 | -1.7000 | 1.9 | 2 | 0.62
+0.0234 | -1.6000 | 1.7 | 2 | 0.73
+0.0211 | -1.5000 | 2.2 | 2 | 0.53
+0.0190 | -1.6000 | 2.4 | 2 | 0.21
+0.0171 | -1.7000 | 1.9 | 2 | 0.77
+0.0154 | -1.6000 | 1.9 | 2 | 0.87
+0.0169 | -1.5000 | 2.4 | 2 | 0.40
+0.0152 | -1.6000 | 2.1 | 2 | 0.78
+0.0137 | -1.7000 | 1.9 | 2 | 0.86
+0.0151 | -1.6000 | 1.9 | 2 | 0.74
+0.0136 | -1.5000 | 2.4 | 2 | 0.35
+0.0122 | -1.6000 | 3.0 | 2 | 0.85
+0.0134 | -1.7000 | 2.5 | 2 | 0.85
+0.0148 | -1.8000 | 1.8 | 2 | 0.68
+0.0133 | -1.7000 | 2.0 | 2 | 0.89
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -588,89 +495,75 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 32.15% (1607618/5000000) 
+Z-fraction: 53.64% (3218594/5999999) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (146604/14069685)
-       Delete worm: (134458/141052)
+       Insert worm: (29931/32525775)
+       Delete worm: (27497/29613)
 
-       Insert anti: (127040/14067686)
-       Delete anti: (119096/138469)
+       Insert anti: (34769/32513607)
+       Delete anti: (32127/36175)
 
-       Advance head: (5424282/5424282)
-        Recede head: (5578546/5578546)
+       Advance head: (3664348/3664348)
+        Recede head: (3758479/3758479)
 
-       Advance tail: (5558755/5558755)
-        Recede tail: (5402326/5402326)
+       Advance tail: (3828191/3828191)
+        Recede tail: (3737193/3737193)
 
-   InsertZero worm: (778322/28486431)
-   DeleteZero worm: (788384/834681)
+   InsertZero worm: (420962/50402688)
+   DeleteZero worm: (423546/467087)
 
-   InsertZero anti: (894440/18174656)
-   DeleteZero anti: (904501/1019921)
+   InsertZero anti: (618949/28800264)
+   DeleteZero anti: (621532/683286)
 
-   InsertBeta worm: (776191/28550941)
-   DeleteBeta worm: (786219/832904)
+   InsertBeta worm: (422848/50234241)
+   DeleteBeta worm: (425341/472002)
 
-   InsertBeta anti: (894693/18111274)
-   DeleteBeta anti: (904722/1023678)
+   InsertBeta anti: (615451/28968156)
+   DeleteBeta anti: (617943/680044)
 
-              IKBH: (7517649/12686536)
-              DKBH: (7528840/9387736)
+              IKBH: (4620106/7805421)
+              DKBH: (4629310/5791835)
 
-              IKAH: (4908449/12704735)
-              DKAH: (4897180/6412912)
+              IKAH: (3058223/7806986)
+              DKAH: (3049442/3983699)
 
-              IKBT: (4887252/12660074)
-              DKBT: (4876020/6391092)
+              IKBT: (3119103/7950678)
+              DKBT: (3111698/4062258)
 
-              IKAT: (7492847/12644840)
-              DKAT: (7504160/9356341)
+              IKAT: (4704335/7950472)
+              DKAT: (4711326/5894220)
 
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.1212 | 0.6000 | 3.0 | 2 | 0.41
-0.1091 | 0.5000 | 3.0 | 2 | 0.76
-0.1200 | 0.4000 | 3.0 | 2 | 0.72
-0.1320 | 0.3000 | 3.0 | 2 | 0.69
-0.1452 | 0.2000 | 3.0 | 2 | 0.68
-0.1597 | 0.1000 | 3.0 | 2 | 0.61
-0.1757 | 0.0000 | 3.0 | 2 | 0.51
-0.1933 | -0.1000 | 2.9 | 2 | 0.46
-0.1739 | -0.2000 | 2.9 | 2 | 0.50
-0.1566 | -0.3000 | 3.0 | 2 | 0.56
-0.1722 | -0.4000 | 2.9 | 2 | 0.45
-0.1550 | -0.5000 | 2.9 | 2 | 0.48
-0.1395 | -0.6000 | 2.9 | 2 | 0.53
-0.1534 | -0.7000 | 2.9 | 2 | 0.46
-0.1381 | -0.8000 | 2.9 | 2 | 0.45
-0.1243 | -0.9000 | 2.9 | 2 | 0.39
-0.1119 | -1.0000 | 2.9 | 2 | 0.43
-0.1007 | -1.1000 | 2.8 | 2 | 0.42
-0.0906 | -1.2000 | 2.9 | 2 | 0.58
-0.0997 | -1.3000 | 2.7 | 2 | 0.37
-0.0897 | -1.4000 | 2.7 | 2 | 0.44
-0.0807 | -1.5000 | 2.5 | 2 | 0.39
-0.0727 | -1.6000 | 2.1 | 2 | 0.37
-0.0654 | -1.7000 | 2.3 | 2 | 0.31
-0.0589 | -1.8000 | 2.0 | 2 | 0.45
-0.0530 | -1.9000 | 1.7 | 2 | 0.21
-0.0477 | -1.8000 | 1.8 | 2 | 0.44
-0.0429 | -1.7000 | 2.1 | 2 | 0.39
-0.0386 | -1.8000 | 1.8 | 2 | 0.43
-0.0348 | -1.7000 | 2.4 | 2 | 0.31
-0.0313 | -1.8000 | 1.8 | 2 | 0.40
-0.0281 | -1.7000 | 1.9 | 2 | 0.62
-0.0310 | -1.6000 | 1.8 | 2 | 0.55
-0.0341 | -1.5000 | 2.9 | 2 | 0.69
-0.0375 | -1.6000 | 2.7 | 2 | 0.45
-0.0337 | -1.7000 | 1.9 | 2 | 0.44
-0.0303 | -1.6000 | 2.0 | 2 | 0.62
-0.0334 | -1.7000 | 1.9 | 2 | 0.25
-0.0300 | -1.6000 | 2.0 | 2 | 0.52
+0.1115 | -1.0000 | 2.9 | 2 | 0.00
+0.1004 | -1.1000 | 2.7 | 2 | 0.08
+0.0903 | -1.2000 | 2.9 | 2 | 0.66
+0.0813 | -1.3000 | 2.5 | 2 | 0.16
+0.0732 | -1.4000 | 2.2 | 2 | 0.32
+0.0659 | -1.5000 | 2.4 | 2 | 0.17
+0.0593 | -1.6000 | 2.2 | 2 | 0.40
+0.0533 | -1.7000 | 1.6 | 2 | 0.60
+0.0480 | -1.6000 | 2.4 | 2 | 0.23
+0.0432 | -1.7000 | 1.9 | 2 | 0.55
+0.0389 | -1.6000 | 2.0 | 2 | 0.58
+0.0350 | -1.7000 | 1.3 | 2 | 0.77
+0.0315 | -1.6000 | 1.9 | 2 | 0.58
+0.0284 | -1.5000 | 2.1 | 2 | 0.64
+0.0255 | -1.6000 | 1.9 | 2 | 0.64
+0.0230 | -1.5000 | 2.0 | 2 | 0.74
+0.0207 | -1.6000 | 2.1 | 2 | 0.69
+0.0186 | -1.7000 | 1.4 | 2 | 0.89
+0.0205 | -1.6000 | 2.2 | 2 | 0.60
+0.0184 | -1.7000 | 2.1 | 2 | 0.65
+0.0166 | -1.8000 | 1.6 | 2 | 0.79
+0.0149 | -1.7000 | 1.7 | 2 | 0.86
+0.0164 | -1.6000 | 2.1 | 2 | 0.76
+0.0148 | -1.7000 | 1.7 | 2 | 0.86
+0.0162 | -1.6000 | 2.0 | 2 | 0.83
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -692,88 +585,71 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 40.28% (2014159/5000000) 
+Z-fraction: 53.04% (3978100/7499999) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (92397/17207623)
-       Delete worm: (86257/92835)
+       Insert worm: (32906/31806317)
+       Delete worm: (29647/30727)
 
-       Insert anti: (129669/17200954)
-       Delete anti: (122584/137713)
+       Insert anti: (42018/31805574)
+       Delete anti: (38354/47835)
 
-       Advance head: (6341004/6341004)
-        Recede head: (6501980/6501980)
+       Advance head: (4051432/4051432)
+        Recede head: (4140960/4140960)
 
-       Advance tail: (6497635/6497635)
-        Recede tail: (6335782/6335782)
+       Advance tail: (4160980/4160980)
+        Recede tail: (4065755/4065755)
 
-   InsertZero worm: (573618/33257481)
-   DeleteZero worm: (580178/622187)
+   InsertZero worm: (470494/49318654)
+   DeleteZero worm: (473887/500191)
 
-   InsertZero anti: (969499/23153289)
-   DeleteZero anti: (976059/1090713)
+   InsertZero anti: (755582/29815503)
+   DeleteZero anti: (758975/922196)
 
-   InsertBeta worm: (569890/33289649)
-   DeleteBeta worm: (576556/621868)
+   InsertBeta worm: (469766/49255068)
+   DeleteBeta worm: (473295/497668)
 
-   InsertBeta anti: (962297/23121197)
-   DeleteBeta anti: (968962/1083383)
+   InsertBeta anti: (751856/29878792)
+   DeleteBeta anti: (755387/917025)
 
-              IKBH: (8708576/14656417)
-              DKBH: (8720189/10852335)
+              IKBH: (5073331/8612263)
+              DKBH: (5080556/6326870)
 
-              IKAH: (5842356/14650566)
-              DKAH: (5831129/7545755)
+              IKAH: (3421869/8610517)
+              DKAH: (3413284/4380189)
 
-              IKBT: (5832000/14641864)
-              DKBT: (5820046/7534895)
+              IKBT: (3434677/8643821)
+              DKBT: (3426200/4399634)
 
-              IKAT: (8703736/14647785)
-              DKAT: (8715295/10852586)
+              IKAT: (5097184/8646475)
+              DKAT: (5107017/6356834)
 
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.1088 | 0.5000 | 3.0 | 2 | 0.23
-0.0979 | 0.4000 | 3.0 | 2 | 0.77
-0.1077 | 0.3000 | 3.0 | 2 | 0.75
-0.1185 | 0.2000 | 3.0 | 2 | 0.72
-0.1304 | 0.1000 | 3.0 | 2 | 0.66
-0.1434 | 0.0000 | 3.0 | 2 | 0.54
-0.1577 | -0.1000 | 2.9 | 2 | 0.18
-0.1420 | -0.2000 | 2.9 | 2 | 0.19
-0.1278 | -0.3000 | 2.9 | 2 | 0.00
-0.1150 | -0.4000 | 2.9 | 2 | 0.00
-0.1035 | -0.5000 | 2.9 | 2 | 0.00
-0.0931 | -0.6000 | 2.9 | 2 | 0.00
-0.0838 | -0.7000 | 2.9 | 2 | 0.00
-0.0754 | -0.8000 | 2.9 | 2 | 0.00
-0.0679 | -0.9000 | 2.9 | 2 | 0.00
-0.0611 | -1.0000 | 2.8 | 2 | 0.00
-0.0550 | -1.1000 | 2.8 | 2 | 0.00
-0.0495 | -1.2000 | 2.7 | 2 | 0.07
-0.0445 | -1.3000 | 2.5 | 2 | 0.08
-0.0401 | -1.4000 | 2.3 | 2 | 0.35
-0.0361 | -1.5000 | 2.3 | 2 | 0.29
-0.0325 | -1.6000 | 2.1 | 2 | 0.54
-0.0357 | -1.7000 | 1.8 | 2 | 0.46
-0.0321 | -1.6000 | 1.9 | 2 | 0.51
-0.0354 | -1.5000 | 2.5 | 2 | 0.19
-0.0318 | -1.6000 | 2.2 | 2 | 0.31
-0.0286 | -1.7000 | 1.7 | 2 | 0.56
-0.0315 | -1.6000 | 2.0 | 2 | 0.67
-0.0347 | -1.7000 | 1.5 | 2 | 0.70
-0.0381 | -1.6000 | 1.8 | 2 | 0.55
-0.0419 | -1.5000 | 2.4 | 2 | 0.15
-0.0377 | -1.6000 | 2.0 | 2 | 0.48
-0.0340 | -1.7000 | 1.5 | 2 | 0.67
-0.0374 | -1.6000 | 2.4 | 2 | 0.14
-0.0336 | -1.7000 | 1.8 | 2 | 0.55
-0.0370 | -1.6000 | 2.1 | 2 | 0.48
-0.0333 | -1.7000 | 1.4 | 2 | 0.64
-0.0366 | -1.6000 | 2.0 | 2 | 0.54
+0.1095 | -1.0000 | 2.9 | 2 | 0.30
+0.0985 | -1.1000 | 2.9 | 2 | 0.60
+0.0887 | -1.2000 | 2.8 | 2 | 0.06
+0.0798 | -1.3000 | 2.6 | 2 | 0.11
+0.0718 | -1.4000 | 2.7 | 2 | 0.27
+0.0646 | -1.5000 | 2.9 | 2 | 0.54
+0.0582 | -1.6000 | 2.4 | 2 | 0.48
+0.0524 | -1.7000 | 1.9 | 2 | 0.43
+0.0471 | -1.6000 | 2.3 | 2 | 0.51
+0.0424 | -1.7000 | 2.4 | 2 | 0.59
+0.0382 | -1.8000 | 2.2 | 2 | 0.41
+0.0343 | -1.9000 | 1.6 | 2 | 0.30
+0.0309 | -1.8000 | 2.1 | 2 | 0.56
+0.0278 | -1.9000 | 1.8 | 2 | 0.56
+0.0250 | -1.8000 | 2.2 | 2 | 0.59
+0.0225 | -1.9000 | 2.0 | 2 | 0.56
+0.0203 | -2.0000 | 1.6 | 2 | 0.43
+0.0183 | -1.9000 | 1.7 | 2 | 0.41
+0.0164 | -1.8000 | 1.9 | 2 | 0.73
+0.0148 | -1.7000 | 2.5 | 2 | 0.73
+0.0133 | -1.8000 | 2.0 | 2 | 0.90
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -795,86 +671,95 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 23.95% (1197367/5000000) 
+Z-fraction: 54.89% (3293178/5999999) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (138243/16862852)
-       Delete worm: (130528/144827)
+       Insert worm: (25855/30344541)
+       Delete worm: (23781/35932)
 
-       Insert anti: (239837/16871668)
-       Delete anti: (229662/245704)
+       Insert anti: (43803/30347162)
+       Delete anti: (40700/40867)
 
-       Advance head: (8987166/8987166)
-        Recede head: (9218064/9218064)
+       Advance head: (4832488/4832488)
+        Recede head: (4956037/4956037)
 
-       Advance tail: (9218852/9218852)
-        Recede tail: (8985563/8985563)
+       Advance tail: (4832067/4832067)
+        Recede tail: (4713424/4713424)
 
-   InsertZero worm: (680958/35898337)
-   DeleteZero worm: (689896/753899)
+   InsertZero worm: (365263/47752262)
+   DeleteZero worm: (367814/663680)
 
-   InsertZero anti: (1320781/27105168)
-   DeleteZero anti: (1329721/1411140)
+   InsertZero anti: (775128/31313327)
+   DeleteZero anti: (777680/796122)
 
-   InsertBeta worm: (678776/35928107)
-   DeleteBeta worm: (687725/755371)
+   InsertBeta worm: (364290/47978638)
+   DeleteBeta worm: (366916/656322)
 
-   InsertBeta anti: (1323200/27076360)
-   DeleteBeta anti: (1332151/1414333)
+   InsertBeta anti: (777885/31086222)
+   DeleteBeta anti: (780511/799063)
 
-              IKBH: (12962524/21755484)
-              DKBH: (12980517/16142842)
+              IKBH: (6072534/10256313)
+              DKBH: (6082113/7634296)
 
-              IKAH: (8709876/21738823)
-              DKAH: (8693670/11245964)
+              IKAH: (3904648/10241928)
+              DKAH: (3895795/5181152)
 
-              IKBT: (8708563/21733642)
-              DKBT: (8695042/11242051)
+              IKBT: (3805128/9996607)
+              DKBT: (3795229/5047157)
 
-              IKAT: (12956992/21751093)
-              DKAT: (12968705/16131401)
+              IKAT: (5922894/10010438)
+              DKAT: (5932075/7445886)
 
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.1073 | 0.5000 | 3.0 | 2 | 0.39
-0.0966 | 0.4000 | 3.0 | 2 | 0.79
-0.1062 | 0.3000 | 3.0 | 2 | 0.72
-0.1168 | 0.2000 | 3.0 | 2 | 0.71
-0.1285 | 0.1000 | 3.0 | 2 | 0.62
-0.1414 | 0.0000 | 3.0 | 2 | 0.57
-0.1555 | -0.1000 | 3.0 | 2 | 0.53
-0.1710 | -0.2000 | 2.9 | 2 | 0.43
-0.1539 | -0.3000 | 2.9 | 2 | 0.44
-0.1385 | -0.4000 | 2.9 | 2 | 0.47
-0.1247 | -0.5000 | 3.0 | 2 | 0.53
-0.1372 | -0.6000 | 2.9 | 2 | 0.42
-0.1234 | -0.7000 | 2.9 | 2 | 0.50
-0.1358 | -0.8000 | 2.9 | 2 | 0.41
-0.1222 | -0.9000 | 2.9 | 2 | 0.37
-0.1100 | -1.0000 | 2.9 | 2 | 0.39
-0.0990 | -1.1000 | 2.8 | 2 | 0.36
-0.0891 | -1.2000 | 2.9 | 2 | 0.39
-0.0802 | -1.3000 | 2.8 | 2 | 0.29
-0.0722 | -1.4000 | 2.7 | 2 | 0.33
-0.0649 | -1.5000 | 2.4 | 2 | 0.31
-0.0585 | -1.6000 | 2.8 | 2 | 0.52
-0.0643 | -1.7000 | 2.1 | 2 | 0.27
-0.0579 | -1.8000 | 1.6 | 2 | 0.16
-0.0521 | -1.7000 | 1.7 | 2 | 0.25
-0.0469 | -1.6000 | 2.4 | 2 | 0.32
-0.0422 | -1.7000 | 1.9 | 2 | 0.55
-0.0464 | -1.6000 | 2.2 | 2 | 0.33
-0.0418 | -1.7000 | 1.9 | 2 | 0.19
-0.0376 | -1.6000 | 2.8 | 2 | 0.60
-0.0413 | -1.7000 | 1.7 | 2 | 0.26
-0.0372 | -1.6000 | 2.4 | 2 | 0.48
-0.0335 | -1.7000 | 1.9 | 2 | 0.57
-0.0368 | -1.6000 | 2.2 | 2 | 0.24
-0.0332 | -1.7000 | 1.9 | 2 | 0.52
-0.0365 | -1.6000 | 2.0 | 2 | 0.51
+0.1599 | -1.0000 | 2.8 | 2 | 0.29
+0.1439 | -1.1000 | 2.8 | 2 | 0.59
+0.1296 | -1.2000 | 2.7 | 2 | 0.62
+0.1166 | -1.3000 | 2.6 | 2 | 0.55
+0.1049 | -1.4000 | 2.8 | 2 | 0.66
+0.0944 | -1.5000 | 2.8 | 2 | 0.75
+0.0850 | -1.6000 | 2.5 | 2 | 0.63
+0.0765 | -1.7000 | 2.3 | 2 | 0.64
+0.0688 | -1.8000 | 1.9 | 2 | 0.63
+0.0620 | -1.7000 | 2.2 | 2 | 0.65
+0.0558 | -1.8000 | 2.2 | 2 | 0.67
+0.0502 | -1.9000 | 2.0 | 2 | 0.66
+0.0452 | -2.0000 | 2.0 | 2 | 0.68
+0.0407 | -2.1000 | 2.1 | 2 | 0.74
+0.0366 | -2.2000 | 1.9 | 2 | 0.66
+0.0329 | -2.1000 | 2.0 | 2 | 0.74
+0.0296 | -2.2000 | 2.0 | 2 | 0.75
+0.0267 | -2.3000 | 1.1 | 2 | 0.95
+0.0293 | -2.2000 | 1.2 | 2 | 0.91
+0.0323 | -2.1000 | 1.5 | 2 | 0.87
+0.0355 | -2.0000 | 1.5 | 2 | 0.88
+0.0391 | -1.9000 | 1.6 | 2 | 0.79
+0.0351 | -1.8000 | 1.5 | 2 | 0.87
+0.0387 | -1.7000 | 2.3 | 2 | 0.72
+0.0348 | -1.8000 | 1.6 | 2 | 0.86
+0.0383 | -1.7000 | 2.0 | 2 | 0.74
+0.0344 | -1.8000 | 2.2 | 2 | 0.80
+0.0379 | -1.9000 | 2.3 | 2 | 0.75
+0.0341 | -2.0000 | 2.1 | 2 | 0.73
+0.0307 | -2.1000 | 1.9 | 2 | 0.75
+0.0276 | -2.0000 | 2.2 | 2 | 0.86
+0.0304 | -2.1000 | 1.8 | 2 | 0.55
+0.0273 | -2.0000 | 2.1 | 2 | 0.76
+0.0246 | -2.1000 | 1.9 | 2 | 0.66
+0.0222 | -2.0000 | 2.3 | 2 | 0.81
+0.0244 | -2.1000 | 1.9 | 2 | 0.75
+0.0219 | -2.0000 | 2.2 | 2 | 0.81
+0.0241 | -2.1000 | 2.0 | 2 | 0.75
+0.0217 | -2.2000 | 2.0 | 2 | 0.74
+0.0195 | -2.3000 | 1.9 | 2 | 0.73
+0.0176 | -2.2000 | 2.2 | 2 | 0.77
+0.0158 | -2.3000 | 2.1 | 2 | 0.83
+0.0174 | -2.4000 | 1.8 | 2 | 0.63
+0.0157 | -2.3000 | 1.9 | 2 | 0.72
+0.0141 | -2.2000 | 2.0 | 2 | 0.88
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -896,102 +781,72 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 15.93% (796652/5000000) 
+Z-fraction: 58.74% (8810365/14999999) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (201878/16433047)
-       Delete worm: (190723/191699)
+       Insert worm: (13319/34920805)
+       Delete worm: (10736/20030)
 
-       Insert anti: (233726/16433927)
-       Delete anti: (225063/303172)
+       Insert anti: (19558/34910597)
+       Delete anti: (15856/15962)
 
-       Advance head: (11768451/11768451)
-        Recede head: (12093669/12093669)
+       Advance head: (2537593/2537593)
+        Recede head: (2589606/2589606)
 
-       Advance tail: (11876164/11876164)
-        Recede tail: (11560681/11560681)
+       Advance tail: (2552452/2552452)
+        Recede tail: (2502307/2502307)
 
-   InsertZero worm: (875082/39847689)
-   DeleteZero worm: (884840/891384)
+   InsertZero worm: (411915/50984701)
+   DeleteZero worm: (415078/1039158)
 
-   InsertZero anti: (1307152/29815931)
-   DeleteZero anti: (1316910/1540023)
+   InsertZero anti: (820770/28843797)
+   DeleteZero anti: (823933/871944)
 
-   InsertBeta worm: (887209/40233737)
-   DeleteBeta worm: (897269/902999)
+   InsertBeta worm: (412822/51056787)
+   DeleteBeta worm: (415944/1038344)
 
-   InsertBeta anti: (1306709/29430550)
-   DeleteBeta anti: (1316769/1554142)
+   InsertBeta anti: (827945/28772201)
+   DeleteBeta anti: (831067/881702)
 
-              IKBH: (17372522/29087457)
-              DKBH: (17389915/21597003)
+              IKBH: (2894837/5197017)
+              DKBH: (2902459/3540768)
 
-              IKAH: (11745496/29091036)
-              DKAH: (11727828/15147363)
+              IKAH: (1889768/5179485)
+              DKAH: (1883204/2473124)
 
-              IKBT: (11566084/28665051)
-              DKBT: (11548831/14919654)
+              IKBT: (1860486/5108694)
+              DKBT: (1852970/2435263)
 
-              IKAT: (17112972/28664210)
-              DKAT: (17130505/21275980)
+              IKAT: (2850949/5125312)
+              DKAT: (2857413/3484758)
 
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.0938 | 0.5000 | 3.0 | 2 | 0.09
-0.0844 | 0.4000 | 3.0 | 2 | 0.69
-0.0928 | 0.3000 | 3.0 | 2 | 0.75
-0.1021 | 0.2000 | 3.0 | 2 | 0.69
-0.1123 | 0.1000 | 3.0 | 2 | 0.68
-0.1236 | 0.0000 | 3.0 | 2 | 0.61
-0.1359 | -0.1000 | 3.0 | 2 | 0.58
-0.1495 | -0.2000 | 3.0 | 2 | 0.54
-0.1645 | -0.3000 | 3.0 | 2 | 0.41
-0.1480 | -0.4000 | 3.0 | 2 | 0.48
-0.1332 | -0.5000 | 2.9 | 2 | 0.43
-0.1199 | -0.6000 | 2.9 | 2 | 0.43
-0.1079 | -0.7000 | 2.9 | 2 | 0.50
-0.1187 | -0.8000 | 3.0 | 2 | 0.44
-0.1068 | -0.9000 | 2.9 | 2 | 0.43
-0.0961 | -1.0000 | 2.9 | 2 | 0.40
-0.0865 | -1.1000 | 2.9 | 2 | 0.51
-0.0952 | -1.2000 | 2.8 | 2 | 0.31
-0.0857 | -1.3000 | 2.8 | 2 | 0.32
-0.0771 | -1.4000 | 2.9 | 2 | 0.43
-0.0694 | -1.5000 | 2.6 | 2 | 0.14
-0.0624 | -1.6000 | 2.0 | 2 | 0.26
-0.0562 | -1.7000 | 1.9 | 2 | 0.21
-0.0506 | -1.6000 | 2.1 | 2 | 0.32
-0.0455 | -1.7000 | 1.8 | 2 | 0.17
-0.0410 | -1.6000 | 2.3 | 2 | 0.21
-0.0369 | -1.7000 | 1.7 | 2 | 0.33
-0.0332 | -1.6000 | 2.5 | 2 | 0.43
-0.0299 | -1.7000 | 1.5 | 2 | 0.15
-0.0269 | -1.6000 | 2.0 | 2 | 0.62
-0.0296 | -1.7000 | 1.8 | 2 | 0.36
-0.0266 | -1.6000 | 2.0 | 2 | 0.33
-0.0240 | -1.7000 | 1.9 | 2 | 0.66
-0.0263 | -1.6000 | 2.0 | 2 | 0.47
-0.0237 | -1.7000 | 1.7 | 2 | 0.37
-0.0213 | -1.6000 | 1.9 | 2 | 0.71
-0.0235 | -1.5000 | 2.1 | 2 | 0.42
-0.0211 | -1.6000 | 2.6 | 2 | 0.56
-0.0232 | -1.7000 | 1.8 | 2 | 0.43
-0.0209 | -1.6000 | 2.4 | 2 | 0.53
-0.0230 | -1.7000 | 1.7 | 2 | 0.30
-0.0207 | -1.6000 | 1.7 | 2 | 0.38
-0.0186 | -1.5000 | 2.0 | 2 | 0.66
-0.0205 | -1.6000 | 2.0 | 2 | 0.60
-0.0226 | -1.7000 | 1.8 | 2 | 0.55
-0.0248 | -1.6000 | 2.0 | 2 | 0.76
-0.0273 | -1.7000 | 2.0 | 2 | 0.57
-0.0300 | -1.8000 | 1.7 | 2 | 0.45
-0.0270 | -1.7000 | 2.1 | 2 | 0.36
-0.0243 | -1.8000 | 1.5 | 2 | 0.21
-0.0219 | -1.7000 | 1.8 | 2 | 0.64
-0.0241 | -1.6000 | 2.0 | 2 | 0.52
+0.1215 | -1.0000 | 2.9 | 2 | 0.29
+0.1094 | -1.1000 | 2.9 | 2 | 0.66
+0.0984 | -1.2000 | 2.9 | 2 | 0.58
+0.0886 | -1.3000 | 2.7 | 2 | 0.63
+0.0797 | -1.4000 | 2.9 | 2 | 0.68
+0.0718 | -1.5000 | 2.2 | 2 | 0.52
+0.0646 | -1.6000 | 2.7 | 2 | 0.57
+0.0581 | -1.7000 | 2.4 | 2 | 0.41
+0.0523 | -1.8000 | 1.9 | 2 | 0.57
+0.0471 | -1.7000 | 2.6 | 2 | 0.66
+0.0424 | -1.8000 | 1.9 | 2 | 0.63
+0.0381 | -1.7000 | 2.7 | 2 | 0.71
+0.0343 | -1.8000 | 2.5 | 2 | 0.69
+0.0309 | -1.9000 | 1.7 | 2 | 0.48
+0.0278 | -1.8000 | 2.0 | 2 | 0.65
+0.0250 | -1.9000 | 1.9 | 2 | 0.74
+0.0225 | -1.8000 | 1.9 | 2 | 0.65
+0.0203 | -1.7000 | 2.5 | 2 | 0.75
+0.0182 | -1.8000 | 1.9 | 2 | 0.65
+0.0164 | -1.7000 | 3.0 | 2 | 0.95
+0.0181 | -1.8000 | 2.2 | 2 | 0.74
+0.0163 | -1.9000 | 2.0 | 2 | 0.86
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -1013,123 +868,85 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 39.49% (1974533/5000000) 
+Z-fraction: 45.82% (3436861/7499999) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (121628/24032606)
-       Delete worm: (115688/120466)
+       Insert worm: (29746/29012242)
+       Delete worm: (27038/52311)
 
-       Insert anti: (191078/24038979)
-       Delete anti: (184596/203054)
+       Insert anti: (51732/29008444)
+       Delete anti: (47188/47424)
 
-       Advance head: (10401867/10401867)
-        Recede head: (10670677/10670677)
+       Advance head: (5418443/5418443)
+        Recede head: (5550434/5550434)
 
-       Advance tail: (10623904/10623904)
-        Recede tail: (10350997/10350997)
+       Advance tail: (5588414/5588414)
+        Recede tail: (5451876/5451876)
 
-   InsertZero worm: (642795/48026089)
-   DeleteZero worm: (648861/683333)
+   InsertZero worm: (436887/47476908)
+   DeleteZero worm: (440597/1009471)
 
-   InsertZero anti: (1196991/34733221)
-   DeleteZero anti: (1203057/1292612)
+   InsertZero anti: (951951/31541008)
+   DeleteZero anti: (955661/988527)
 
-   InsertBeta worm: (644188/48081114)
-   DeleteBeta worm: (650545/685786)
+   InsertBeta worm: (434208/47472485)
+   DeleteBeta worm: (437750/1007847)
 
-   InsertBeta anti: (1191721/34679511)
-   DeleteBeta anti: (1198077/1291860)
+   InsertBeta anti: (937664/31543998)
+   DeleteBeta anti: (941206/973917)
 
-              IKBH: (14762915/24723436)
-              DKBH: (14778237/18398937)
+              IKBH: (6720948/11462096)
+              DKBH: (6730899/8421158)
 
-              IKAH: (10001029/24711185)
-              DKAH: (9985077/12931711)
+              IKAH: (4292792/11445564)
+              DKAH: (4282926/5722900)
 
-              IKBT: (9971687/24612953)
-              DKBT: (9955827/12886526)
+              IKBT: (4321338/11516753)
+              DKBT: (4310418/5757528)
 
-              IKAT: (14699495/24625870)
-              DKAT: (14715993/18317953)
+              IKAT: (6764121/11534572)
+              DKAT: (6774959/8475305)
 
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.0980 | 0.5000 | 3.0 | 2 | 0.36
-0.0882 | 0.4000 | 3.0 | 2 | 0.31
-0.0793 | 0.3000 | 3.0 | 2 | 0.78
-0.0873 | 0.2000 | 3.0 | 2 | 0.76
-0.0960 | 0.1000 | 3.0 | 2 | 0.71
-0.1056 | 0.0000 | 3.0 | 2 | 0.64
-0.1162 | -0.1000 | 3.0 | 2 | 0.60
-0.1278 | -0.2000 | 3.0 | 2 | 0.56
-0.1406 | -0.3000 | 3.0 | 2 | 0.44
-0.1265 | -0.4000 | 3.0 | 2 | 0.49
-0.1139 | -0.5000 | 3.0 | 2 | 0.53
-0.1252 | -0.6000 | 3.0 | 2 | 0.47
-0.1127 | -0.7000 | 3.0 | 2 | 0.50
-0.1015 | -0.8000 | 2.9 | 2 | 0.48
-0.0913 | -0.9000 | 3.0 | 2 | 0.56
-0.1004 | -1.0000 | 2.9 | 2 | 0.41
-0.0904 | -1.1000 | 2.9 | 2 | 0.42
-0.0814 | -1.2000 | 2.8 | 2 | 0.06
-0.0732 | -1.3000 | 2.7 | 2 | 0.01
-0.0659 | -1.4000 | 2.8 | 2 | 0.01
-0.0593 | -1.5000 | 2.2 | 2 | 0.18
-0.0534 | -1.6000 | 2.1 | 2 | 0.25
-0.0480 | -1.7000 | 1.9 | 2 | 0.18
-0.0432 | -1.6000 | 2.2 | 2 | 0.22
-0.0389 | -1.7000 | 1.8 | 2 | 0.39
-0.0350 | -1.6000 | 2.1 | 2 | 0.32
-0.0315 | -1.7000 | 2.0 | 2 | 0.42
-0.0284 | -1.8000 | 1.7 | 2 | 0.48
-0.0255 | -1.7000 | 2.0 | 2 | 0.64
-0.0281 | -1.8000 | 1.8 | 2 | 0.63
-0.0309 | -1.7000 | 1.7 | 2 | 0.39
-0.0278 | -1.6000 | 2.1 | 2 | 0.49
-0.0250 | -1.7000 | 1.7 | 2 | 0.63
-0.0275 | -1.6000 | 2.1 | 2 | 0.56
-0.0303 | -1.7000 | 2.2 | 2 | 0.32
-0.0272 | -1.8000 | 1.5 | 2 | 0.59
-0.0300 | -1.7000 | 2.2 | 2 | 0.39
-0.0270 | -1.8000 | 1.2 | 2 | 0.49
-0.0243 | -1.7000 | 2.2 | 2 | 0.47
-0.0219 | -1.8000 | 1.3 | 2 | 0.80
-0.0240 | -1.7000 | 1.4 | 2 | 0.54
-0.0264 | -1.6000 | 1.8 | 2 | 0.54
-0.0291 | -1.5000 | 2.4 | 2 | 0.16
-0.0262 | -1.6000 | 2.2 | 2 | 0.35
-0.0236 | -1.7000 | 2.1 | 2 | 0.21
-0.0212 | -1.8000 | 1.1 | 2 | 0.74
-0.0233 | -1.7000 | 1.5 | 2 | 0.57
-0.0257 | -1.6000 | 2.0 | 2 | 0.67
-0.0282 | -1.7000 | 2.0 | 2 | 0.28
-0.0254 | -1.8000 | 1.1 | 2 | 0.59
-0.0279 | -1.7000 | 2.1 | 2 | 0.43
-0.0251 | -1.8000 | 1.9 | 2 | 0.62
-0.0277 | -1.7000 | 1.7 | 2 | 0.58
-0.0304 | -1.6000 | 2.1 | 2 | 0.57
-0.0335 | -1.7000 | 1.6 | 2 | 0.57
-0.0368 | -1.6000 | 2.1 | 2 | 0.39
-0.0331 | -1.7000 | 2.1 | 2 | 0.47
-0.0298 | -1.8000 | 1.1 | 2 | 0.74
-0.0328 | -1.7000 | 1.7 | 2 | 0.46
-0.0295 | -1.6000 | 2.0 | 2 | 0.58
-0.0325 | -1.7000 | 1.7 | 2 | 0.50
-0.0357 | -1.6000 | 2.1 | 2 | 0.22
-0.0321 | -1.7000 | 1.2 | 2 | 0.56
-0.0354 | -1.6000 | 1.6 | 2 | 0.56
-0.0389 | -1.5000 | 2.1 | 2 | 0.33
-0.0350 | -1.6000 | 2.1 | 2 | 0.46
-0.0315 | -1.7000 | 1.6 | 2 | 0.52
-0.0347 | -1.6000 | 2.0 | 2 | 0.35
-0.0312 | -1.7000 | 2.1 | 2 | 0.58
-0.0343 | -1.8000 | 1.2 | 2 | 0.66
-0.0377 | -1.7000 | 1.5 | 2 | 0.48
-0.0340 | -1.6000 | 2.4 | 2 | 0.13
-0.0306 | -1.7000 | 2.0 | 2 | 0.55
+0.1533 | -1.0000 | 2.8 | 2 | 0.03
+0.1380 | -1.1000 | 2.8 | 2 | 0.66
+0.1242 | -1.2000 | 2.7 | 2 | 0.57
+0.1118 | -1.3000 | 2.6 | 2 | 0.63
+0.1006 | -1.4000 | 2.6 | 2 | 0.62
+0.0905 | -1.5000 | 2.6 | 2 | 0.62
+0.0815 | -1.6000 | 2.3 | 2 | 0.63
+0.0733 | -1.7000 | 2.3 | 2 | 0.63
+0.0660 | -1.8000 | 2.3 | 2 | 0.61
+0.0594 | -1.9000 | 2.3 | 2 | 0.68
+0.0535 | -2.0000 | 2.1 | 2 | 0.63
+0.0481 | -2.1000 | 2.1 | 2 | 0.66
+0.0433 | -2.2000 | 2.0 | 2 | 0.59
+0.0390 | -2.3000 | 2.0 | 2 | 0.63
+0.0351 | -2.4000 | 1.1 | 2 | 0.92
+0.0386 | -2.3000 | 1.2 | 2 | 0.92
+0.0424 | -2.2000 | 1.5 | 2 | 0.85
+0.0467 | -2.1000 | 1.4 | 2 | 0.83
+0.0514 | -2.0000 | 1.6 | 2 | 0.73
+0.0462 | -1.9000 | 1.5 | 2 | 0.82
+0.0508 | -1.8000 | 1.8 | 2 | 0.74
+0.0458 | -1.7000 | 1.7 | 2 | 0.73
+0.0412 | -1.6000 | 2.0 | 2 | 0.68
+0.0371 | -1.7000 | 1.7 | 2 | 0.81
+0.0408 | -1.6000 | 1.7 | 2 | 0.75
+0.0367 | -1.5000 | 1.8 | 2 | 0.78
+0.0330 | -1.4000 | 2.0 | 2 | 0.63
+0.0297 | -1.5000 | 1.8 | 2 | 0.79
+0.0268 | -1.4000 | 1.8 | 2 | 0.78
+0.0241 | -1.3000 | 2.1 | 2 | 0.67
+0.0217 | -1.4000 | 1.7 | 2 | 0.84
+0.0238 | -1.3000 | 1.5 | 2 | 0.91
+0.0262 | -1.2000 | 2.0 | 2 | 0.80
+0.0236 | -1.3000 | 1.9 | 2 | 0.82
+0.0260 | -1.2000 | 2.0 | 2 | 0.87
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -1151,194 +968,104 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 24.08% (1204030/5000000) 
+Z-fraction: 5.61% (841916/14999999) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (276495/24776326)
-       Delete worm: (263671/263671)
+       Insert worm: (45600/28844085)
+       Delete worm: (37670/37670)
 
-       Insert anti: (237769/24778106)
-       Delete anti: (230812/257981)
+       Insert anti: (40239/28847339)
+       Delete anti: (32624/80265)
 
-       Advance head: (12496394/12496394)
-        Recede head: (12881187/12881187)
+       Advance head: (5522876/5522876)
+        Recede head: (5639474/5639474)
 
-       Advance tail: (12821120/12821120)
-        Recede tail: (12440286/12440286)
+       Advance tail: (5650004/5650004)
+        Recede tail: (5529795/5529795)
 
-   InsertZero worm: (1069741/53499803)
-   DeleteZero worm: (1079563/1080271)
+   InsertZero worm: (849783/48936981)
+   DeleteZero worm: (857753/858000)
 
-   InsertZero anti: (1277259/35289448)
-   DeleteZero anti: (1287081/1378956)
+   InsertZero anti: (1007827/30241440)
+   DeleteZero anti: (1015796/2314241)
 
-   InsertBeta worm: (1071163/53633472)
-   DeleteBeta worm: (1081121/1081860)
+   InsertBeta worm: (850715/48884190)
+   DeleteBeta worm: (858291/858535)
 
-   InsertBeta anti: (1274738/35155057)
-   DeleteBeta anti: (1284697/1375848)
+   InsertBeta anti: (1007487/30293573)
+   DeleteBeta anti: (1015062/2300602)
 
-              IKBH: (18691138/31019739)
-              DKBH: (18707636/23448448)
+              IKBH: (6753817/11548336)
+              DKBH: (6763862/8347722)
 
-              IKAH: (12059453/31042724)
-              DKAH: (12042755/15970613)
+              IKAH: (4457802/11570173)
+              DKAH: (4446939/5480808)
 
-              IKBT: (12023245/30926315)
-              DKBT: (12004982/15910267)
+              IKBT: (4463347/11586591)
+              DKBT: (4453842/5486699)
 
-              IKAT: (18612808/30904210)
-              DKAT: (18631238/23345377)
+              IKAT: (6763462/11564464)
+              DKAT: (6773791/8358925)
 
 Unable to init server: Could not connect: Connection refused
 Unable to init server: Could not connect: Connection refused
 
-(main.py:19668): Gdk-CRITICAL **: 07:40:02.967: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
-
-Starting pre-equilibration stage. Determining eta and mu...
-
-  eta  |   mu   | N_calibration | N_target | Z_calibration
-0.0667 | 0.5000 | 3.0 | 2 | 0.30
-0.0600 | 0.4000 | 3.0 | 2 | 0.77
-0.0540 | 0.3000 | 3.0 | 2 | 0.82
-0.0594 | 0.2000 | 3.0 | 2 | 0.80
-0.0535 | 0.1000 | 3.0 | 2 | 0.82
-0.0588 | 0.0000 | 3.0 | 2 | 0.76
-0.0530 | -0.1000 | 3.0 | 2 | 0.82
-0.0583 | -0.2000 | 3.0 | 2 | 0.72
-0.0524 | -0.3000 | 3.0 | 2 | 0.78
-0.0472 | -0.4000 | 3.0 | 2 | 0.81
-0.0519 | -0.5000 | 3.0 | 2 | 0.73
-0.0467 | -0.6000 | 3.0 | 2 | 0.73
-0.0420 | -0.7000 | 3.0 | 2 | 0.72
-0.0378 | -0.8000 | 3.0 | 2 | 0.82
-0.0416 | -0.9000 | 3.0 | 2 | 0.55
-0.0375 | -1.0000 | 3.0 | 2 | 0.73
-0.0337 | -1.1000 | 3.0 | 2 | 0.42
-0.0303 | -1.2000 | 2.8 | 2 | 0.00
-0.0273 | -1.3000 | 2.8 | 2 | 0.00
-0.0246 | -1.4000 | 2.7 | 2 | 0.00
-0.0221 | -1.5000 | 2.3 | 2 | 0.28
-0.0199 | -1.6000 | 2.0 | 2 | 0.74
-0.0179 | -1.7000 | 1.9 | 2 | 0.63
-0.0161 | -1.6000 | 2.3 | 2 | 0.31
-0.0145 | -1.7000 | 2.0 | 2 | 0.66
-0.0131 | -1.8000 | 1.9 | 2 | 0.28
-0.0118 | -1.7000 | 1.2 | 2 | 0.55
-0.0106 | -1.6000 | 2.0 | 2 | 0.92
-0.0116 | -1.7000 | 1.8 | 2 | 0.59
-0.0105 | -1.6000 | 2.0 | 2 | 0.87
-Pre-Equilibration done.
-
-LatticePIMC started...
-
-0.00%
-10.00%
-20.00%
-30.00%
-40.00%
-50.00%
-60.00%
-70.00%
-80.00%
-90.00%
-100%%
-
-Lattice PIMC done. Saving data to disk...
-
-Ensemble: Canonical
-
--------- Z-configuration fraction --------
-Z-fraction: 49.49% (2474255/5000000) 
-
--------- Acceptance Ratios --------
-
-       Insert worm: (149836/61158477)
-       Delete worm: (145138/145518)
-
-       Insert anti: (218841/61160256)
-       Delete anti: (216189/242073)
-
-       Advance head: (19286114/19286114)
-        Recede head: (19799516/19799516)
-
-       Advance tail: (19624167/19624167)
-        Recede tail: (19112894/19112894)
-
-   InsertZero worm: (724045/109978395)
-   DeleteZero worm: (727898/729644)
-
-   InsertZero anti: (1336479/75262756)
-   DeleteZero anti: (1340331/1397126)
-
-   InsertBeta worm: (716572/110317265)
-   DeleteBeta worm: (720070/722921)
-
-   InsertBeta anti: (1316594/74923344)
-   DeleteBeta anti: (1320092/1377061)
-
-              IKBH: (27841148/46468707)
-              DKBH: (27865144/34659044)
-
-              IKAH: (19184745/46455165)
-              DKAH: (19161679/24792461)
-
-              IKBT: (19008510/46114375)
-              DKBT: (18987067/24588510)
-
-              IKAT: (27648494/46127451)
-              DKAT: (27669009/34422895)
-
+(main.py:10822): Gdk-CRITICAL **: 20:23:42.152: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
 Unable to init server: Could not connect: Connection refused
 Unable to init server: Could not connect: Connection refused
 
-(main.py:26745): Gdk-CRITICAL **: 12:59:04.571: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+(main.py:11595): Gdk-CRITICAL **: 20:24:14.437: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+usage: main.py [-h] [--t ] [--eta ] [--beta ] [--dtau ] [--M ] [--M-pre ] [--canonical] L N U mu
+main.py: error: argument --beta: expected one argument
 Unable to init server: Could not connect: Connection refused
 Unable to init server: Could not connect: Connection refused
 
-(main.py:27951): Gdk-CRITICAL **: 13:28:05.204: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+(main.py:11954): Gdk-CRITICAL **: 20:24:28.190: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+usage: main.py [-h] [--t ] [--eta ] [--beta ] [--dtau ] [--M ] [--M-pre ] [--canonical] L N U mu
+main.py: error: argument --beta: invalid float value: '5--M'
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:12184): Gdk-CRITICAL **: 20:24:36.872: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:12468): Gdk-CRITICAL **: 20:24:47.441: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:12673): Gdk-CRITICAL **: 20:24:54.536: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.0516 | 0.5000 | 3.0 | 2 | 0.00
-0.0464 | 0.4000 | 3.0 | 2 | 0.00
-0.0418 | 0.3000 | 3.0 | 2 | 0.00
-0.0376 | 0.2000 | 3.0 | 2 | 0.00
-0.0338 | 0.1000 | 3.0 | 2 | 0.00
-0.0305 | 0.0000 | 3.0 | 2 | 0.00
-0.0274 | -0.1000 | 3.0 | 2 | 0.00
-0.0247 | -0.2000 | 3.0 | 2 | 0.00
-0.0222 | -0.3000 | 3.0 | 2 | 0.00
-0.0200 | -0.4000 | 3.0 | 2 | 0.00
-0.0180 | -0.5000 | 3.0 | 2 | 0.00
-0.0162 | -0.6000 | 3.0 | 2 | 0.00
-0.0146 | -0.7000 | 3.0 | 2 | 0.00
-0.0131 | -0.8000 | 3.0 | 2 | 0.00
-0.0118 | -0.9000 | 3.0 | 2 | 0.00
-0.0106 | -1.0000 | 3.0 | 2 | 0.00
-0.0096 | -1.1000 | 3.0 | 2 | 0.00
-0.0086 | -1.2000 | 2.9 | 2 | 0.00
-0.0077 | -1.3000 | 2.9 | 2 | 0.00
-0.0070 | -1.4000 | 2.9 | 2 | 0.00
-0.0063 | -1.5000 | 2.8 | 2 | 0.00
-0.0056 | -1.6000 | 2.8 | 2 | 0.00
-0.0051 | -1.7000 | 2.0 | 2 | 0.97
-0.0056 | -1.8000 | 1.0 | 2 | 0.97
-0.0061 | -1.7000 | 1.2 | 2 | 0.58
-0.0055 | -1.6000 | 2.0 | 2 | 0.78
-0.0050 | -1.7000 | 2.0 | 2 | 0.95
-0.0055 | -1.8000 | 1.0 | 2 | 0.91
-0.0060 | -1.7000 | 1.7 | 2 | 0.40
-0.0054 | -1.6000 | 2.0 | 2 | 0.93
-0.0060 | -1.7000 | 2.0 | 2 | 0.96
-0.0066 | -1.8000 | 1.5 | 2 | 0.70
-0.0059 | -1.7000 | 1.1 | 2 | 0.80
-0.0065 | -1.6000 | 1.0 | 2 | 0.81
-0.0071 | -1.5000 | 2.1 | 2 | 0.52
-0.0064 | -1.6000 | 2.6 | 2 | 0.00
-0.0058 | -1.7000 | 2.0 | 2 | 0.84
+0.1039 | -1.0000 | 2.9 | 2 | 0.00
+0.0935 | -1.1000 | 2.8 | 2 | 0.00
+0.0842 | -1.2000 | 2.8 | 2 | 0.00
+0.0758 | -1.3000 | 2.7 | 2 | 0.06
+0.0682 | -1.4000 | 2.5 | 2 | 0.19
+0.0614 | -1.5000 | 2.3 | 2 | 0.31
+0.0552 | -1.6000 | 2.5 | 2 | 0.10
+0.0497 | -1.7000 | 2.5 | 2 | 0.15
+0.0447 | -1.8000 | 1.8 | 2 | 0.47
+0.0403 | -1.7000 | 2.1 | 2 | 0.39
+0.0362 | -1.8000 | 1.3 | 2 | 0.76
+0.0326 | -1.7000 | 1.6 | 2 | 0.58
+0.0294 | -1.6000 | 2.0 | 2 | 0.62
+0.0264 | -1.7000 | 1.5 | 2 | 0.70
+0.0238 | -1.6000 | 1.8 | 2 | 0.54
+0.0214 | -1.5000 | 1.4 | 2 | 0.83
+0.0235 | -1.4000 | 2.2 | 2 | 0.55
+0.0212 | -1.5000 | 2.3 | 2 | 0.49
+0.0191 | -1.6000 | 1.5 | 2 | 0.79
+0.0172 | -1.5000 | 2.2 | 2 | 0.67
+0.0154 | -1.6000 | 2.1 | 2 | 0.71
+0.0139 | -1.7000 | 1.1 | 2 | 0.92
+0.0153 | -1.6000 | 1.8 | 2 | 0.62
+0.0138 | -1.5000 | 2.0 | 2 | 0.69
+0.0124 | -1.6000 | 1.9 | 2 | 0.89
+0.0136 | -1.5000 | 2.0 | 2 | 0.83
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -1360,77 +1087,74 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 14.22% (710962/5000000) 
+Z-fraction: 24.26% (1819447/7499999) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (129078/109454373)
-       Delete worm: (125791/126049)
+       Insert worm: (19131/41908632)
+       Delete worm: (17719/18795)
 
-       Insert anti: (157764/109440796)
-       Delete anti: (157157/158364)
+       Insert anti: (56242/41896330)
+       Delete anti: (52805/53696)
 
-       Advance head: (19960712/19960712)
-        Recede head: (20562641/20562641)
+       Advance head: (3989891/3989891)
+        Recede head: (4070529/4070529)
 
-       Advance tail: (20645231/20645231)
-        Recede tail: (20044718/20044718)
+       Advance tail: (4125509/4125509)
+        Recede tail: (4038768/4038768)
 
-   InsertZero worm: (709905/180113782)
-   DeleteZero worm: (711780/720390)
+   InsertZero worm: (265797/58848384)
+   DeleteZero worm: (268235/288294)
 
-   InsertZero anti: (1110725/108504439)
-   DeleteZero anti: (1112599/1124196)
+   InsertZero anti: (870862/40205651)
+   DeleteZero anti: (873301/893892)
 
-   InsertBeta worm: (710536/180127884)
-   DeleteBeta worm: (712556/720520)
+   InsertBeta worm: (267292/58767264)
+   DeleteBeta worm: (269702/293065)
 
-   InsertBeta anti: (1125319/108490754)
-   DeleteBeta anti: (1127338/1140006)
+   InsertBeta anti: (874696/40287001)
+   DeleteBeta anti: (877107/893584)
 
-              IKBH: (28165704/46202874)
-              DKBH: (28183397/35774900)
+              IKBH: (5036382/8531645)
+              DKBH: (5042836/6274377)
 
-              IKAH: (17587072/46200545)
-              DKAH: (17570970/23817848)
+              IKAH: (3461549/8504894)
+              DKAH: (3455257/4399980)
 
-              IKBT: (17697200/46371120)
-              DKBT: (17678886/23934464)
+              IKBT: (3504323/8609118)
+              DKBT: (3499251/4457898)
 
-              IKAT: (28259606/46372296)
-              DKAT: (28276383/35877971)
+              IKAT: (5101115/8635291)
+              DKAT: (5106020/6348353)
 
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.1329 | 0.5000 | 3.0 | 2 | 0.38
-0.1196 | 0.4000 | 3.0 | 2 | 0.77
-0.1076 | 0.3000 | 3.0 | 2 | 0.80
-0.0969 | 0.2000 | 3.0 | 2 | 0.77
-0.0872 | 0.1000 | 3.0 | 2 | 0.83
-0.0959 | 0.0000 | 3.0 | 2 | 0.72
-0.0863 | -0.1000 | 3.0 | 2 | 0.71
-0.0777 | -0.2000 | 3.0 | 2 | 0.76
-0.0699 | -0.3000 | 3.0 | 2 | 0.78
-0.0629 | -0.4000 | 3.0 | 2 | 0.80
-0.0692 | -0.5000 | 2.9 | 2 | 0.68
-0.0623 | -0.6000 | 3.0 | 2 | 0.79
-0.0561 | -0.7000 | 3.0 | 2 | 0.83
-0.0617 | -0.8000 | 2.9 | 2 | 0.69
-0.0555 | -0.9000 | 2.9 | 2 | 0.69
-0.0499 | -1.0000 | 2.8 | 2 | 0.66
-0.0449 | -1.1000 | 2.8 | 2 | 0.74
-0.0405 | -1.2000 | 2.9 | 2 | 0.70
-0.0364 | -1.3000 | 2.8 | 2 | 0.69
-0.0328 | -1.4000 | 2.6 | 2 | 0.72
-0.0295 | -1.5000 | 2.8 | 2 | 0.73
-0.0265 | -1.6000 | 2.1 | 2 | 0.71
-0.0239 | -1.7000 | 2.5 | 2 | 0.67
-0.0215 | -1.8000 | 2.0 | 2 | 0.90
-0.0236 | -1.9000 | 1.7 | 2 | 0.36
-0.0213 | -1.8000 | 1.9 | 2 | 0.59
-0.0192 | -1.7000 | 2.0 | 2 | 0.81
+0.1061 | -1.0000 | 2.9 | 2 | 0.09
+0.0955 | -1.1000 | 2.8 | 2 | 0.00
+0.0860 | -1.2000 | 2.8 | 2 | 0.00
+0.0774 | -1.3000 | 2.5 | 2 | 0.11
+0.0696 | -1.4000 | 2.4 | 2 | 0.17
+0.0627 | -1.5000 | 2.7 | 2 | 0.03
+0.0564 | -1.6000 | 2.2 | 2 | 0.32
+0.0508 | -1.7000 | 2.4 | 2 | 0.27
+0.0457 | -1.8000 | 1.5 | 2 | 0.67
+0.0411 | -1.7000 | 2.0 | 2 | 0.53
+0.0370 | -1.8000 | 1.7 | 2 | 0.70
+0.0333 | -1.7000 | 1.9 | 2 | 0.61
+0.0300 | -1.6000 | 2.3 | 2 | 0.41
+0.0270 | -1.7000 | 2.2 | 2 | 0.38
+0.0243 | -1.8000 | 1.5 | 2 | 0.85
+0.0267 | -1.7000 | 1.6 | 2 | 0.67
+0.0240 | -1.6000 | 1.9 | 2 | 0.61
+0.0216 | -1.5000 | 1.8 | 2 | 0.84
+0.0238 | -1.4000 | 2.1 | 2 | 0.60
+0.0214 | -1.5000 | 2.2 | 2 | 0.63
+0.0193 | -1.6000 | 2.0 | 2 | 0.71
+0.0173 | -1.7000 | 1.7 | 2 | 0.78
+0.0156 | -1.6000 | 2.0 | 2 | 0.67
+0.0141 | -1.7000 | 2.0 | 2 | 0.85
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -1452,80 +1176,76 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 51.60% (2580042/5000000) 
+Z-fraction: 16.19% (1214033/7499999) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (33513/18210453)
-       Delete worm: (30777/38125)
+       Insert worm: (46998/40703849)
+       Delete worm: (42735/42735)
 
-       Insert anti: (46552/18201998)
-       Delete anti: (43464/45248)
+       Insert anti: (41315/40699996)
+       Delete anti: (38390/45414)
 
-       Advance head: (3365478/3365478)
-        Recede head: (3448397/3448397)
+       Advance head: (4555989/4555989)
+        Recede head: (4676881/4676881)
 
-       Advance tail: (3446086/3446086)
-        Recede tail: (3359909/3359909)
+       Advance tail: (4757146/4757146)
+        Recede tail: (4640837/4640837)
 
-   InsertZero worm: (342888/30057395)
-   DeleteZero worm: (345798/449952)
+   InsertZero worm: (616130/64486617)
+   DeleteZero worm: (619767/619987)
 
-   InsertZero anti: (588188/18950015)
-   DeleteZero anti: (591098/622294)
+   InsertZero anti: (703536/34448664)
+   DeleteZero anti: (707172/822250)
 
-   InsertBeta worm: (341409/30093125)
-   DeleteBeta worm: (344323/453459)
+   InsertBeta worm: (616439/64326706)
+   DeleteBeta worm: (619992/620234)
 
-   InsertBeta anti: (579441/18915332)
-   DeleteBeta anti: (582354/615163)
+   InsertBeta anti: (705452/34608629)
+   DeleteBeta anti: (709003/824722)
 
-              IKBH: (4326300/7308443)
-              DKBH: (4332799/5420201)
+              IKBH: (5764963/9742415)
+              DKBH: (5775718/7225589)
 
-              IKAH: (2830418/7305030)
-              DKAH: (2823804/3713216)
+              IKAH: (3818427/9754234)
+              DKAH: (3808918/4976964)
 
-              IKBT: (2820223/7293610)
-              DKBT: (2813490/3699200)
+              IKBT: (3886766/9917622)
+              DKBT: (3878092/5063819)
 
-              IKAT: (4320266/7299199)
-              DKAT: (4327117/5414193)
+              IKAT: (5866128/9905392)
+              DKAT: (5873560/7346035)
 
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.0485 | 0.5000 | 3.0 | 2 | 0.42
-0.0437 | 0.4000 | 3.0 | 2 | 0.80
-0.0480 | 0.3000 | 3.0 | 2 | 0.67
-0.0432 | 0.2000 | 3.0 | 2 | 0.00
-0.0389 | 0.1000 | 3.0 | 2 | 0.00
-0.0350 | 0.0000 | 3.0 | 2 | 0.00
-0.0315 | -0.1000 | 3.0 | 2 | 0.00
-0.0284 | -0.2000 | 3.0 | 2 | 0.00
-0.0255 | -0.3000 | 3.0 | 2 | 0.00
-0.0230 | -0.4000 | 3.0 | 2 | 0.00
-0.0207 | -0.5000 | 3.0 | 2 | 0.00
-0.0186 | -0.6000 | 3.0 | 2 | 0.00
-0.0167 | -0.7000 | 3.0 | 2 | 0.10
-0.0151 | -0.8000 | 3.0 | 2 | 0.94
-0.0166 | -0.9000 | 3.0 | 2 | 0.82
-0.0182 | -1.0000 | 3.0 | 2 | 0.80
-0.0201 | -1.1000 | 3.0 | 2 | 0.00
-0.0181 | -1.2000 | 3.0 | 2 | 0.00
-0.0162 | -1.3000 | 3.0 | 2 | 0.00
-0.0146 | -1.4000 | 2.9 | 2 | 0.00
-0.0132 | -1.5000 | 2.8 | 2 | 0.00
-0.0118 | -1.6000 | 2.5 | 2 | 0.00
-0.0107 | -1.7000 | 2.0 | 2 | 0.58
-0.0096 | -1.8000 | 2.0 | 2 | 0.74
-0.0086 | -1.9000 | 1.0 | 2 | 0.86
-0.0095 | -1.8000 | 1.0 | 2 | 0.78
-0.0085 | -1.7000 | 1.5 | 2 | 0.04
-0.0077 | -1.6000 | 2.0 | 2 | 0.64
-0.0069 | -1.7000 | 2.0 | 2 | 0.94
-0.0076 | -1.8000 | 2.0 | 2 | 0.82
+0.0892 | -1.0000 | 2.9 | 2 | 0.09
+0.0803 | -1.1000 | 2.9 | 2 | 0.00
+0.0723 | -1.2000 | 2.7 | 2 | 0.24
+0.0650 | -1.3000 | 2.9 | 2 | 0.57
+0.0585 | -1.4000 | 2.4 | 2 | 0.52
+0.0527 | -1.5000 | 2.5 | 2 | 0.47
+0.0474 | -1.6000 | 2.6 | 2 | 0.37
+0.0427 | -1.7000 | 1.9 | 2 | 0.46
+0.0384 | -1.6000 | 2.2 | 2 | 0.34
+0.0346 | -1.7000 | 2.6 | 2 | 0.40
+0.0311 | -1.8000 | 2.1 | 2 | 0.49
+0.0280 | -1.9000 | 1.8 | 2 | 0.44
+0.0252 | -1.8000 | 1.7 | 2 | 0.50
+0.0227 | -1.7000 | 2.0 | 2 | 0.71
+0.0204 | -1.8000 | 1.8 | 2 | 0.55
+0.0184 | -1.7000 | 1.9 | 2 | 0.66
+0.0165 | -1.6000 | 2.7 | 2 | 0.87
+0.0182 | -1.7000 | 2.5 | 2 | 0.63
+0.0164 | -1.8000 | 1.9 | 2 | 0.71
+0.0147 | -1.7000 | 2.0 | 2 | 0.80
+0.0133 | -1.8000 | 1.8 | 2 | 0.64
+0.0119 | -1.7000 | 2.0 | 2 | 0.75
+0.0107 | -1.8000 | 1.9 | 2 | 0.77
+0.0097 | -1.7000 | 2.0 | 2 | 0.59
+0.0087 | -1.8000 | 1.7 | 2 | 0.53
+0.0078 | -1.7000 | 2.0 | 2 | 0.94
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -1547,81 +1267,74 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 2.86% (142963/5000000) 
+Z-fraction: 55.88% (2619301/4687499) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (429357/149555069)
-       Delete worm: (422378/423091)
+       Insert worm: (24386/42359077)
+       Delete worm: (22631/22699)
 
-       Insert anti: (25937/149561718)
-       Delete anti: (26215/26752)
+       Insert anti: (22816/42369916)
+       Delete anti: (21955/23782)
 
-       Advance head: (24791356/24791356)
-        Recede head: (25713465/25713465)
+       Advance head: (3726868/3726868)
+        Recede head: (3828085/3828085)
 
-       Advance tail: (25738367/25738367)
-        Recede tail: (24810837/24810837)
+       Advance tail: (3917167/3917167)
+        Recede tail: (3816421/3816421)
 
-   InsertZero worm: (1473292/261176363)
-   DeleteZero worm: (1476667/1487294)
+   InsertZero worm: (349709/65010865)
+   DeleteZero worm: (351040/354348)
 
-   InsertZero anti: (353037/113644559)
-   DeleteZero anti: (356411/360653)
+   InsertZero anti: (422731/34162470)
+   DeleteZero anti: (424062/455602)
 
-   InsertBeta worm: (1470044/261154808)
-   DeleteBeta worm: (1473371/1481113)
+   InsertBeta worm: (351577/64712114)
+   DeleteBeta worm: (352862/355831)
 
-   InsertBeta anti: (354322/113667065)
-   DeleteBeta anti: (357648/361796)
+   InsertBeta anti: (427065/34461132)
+   DeleteBeta anti: (428350/455958)
 
-              IKBH: (38874508/63030565)
-              DKBH: (38874139/49512586)
+              IKBH: (4752395/7954089)
+              DKBH: (4760602/5992971)
 
-              IKAH: (23094422/63150220)
-              DKAH: (23094683/32239477)
+              IKAH: (3104690/7959378)
+              DKAH: (3097943/4102858)
 
-              IKBT: (23107055/63191921)
-              DKBT: (23104181/32262464)
+              IKBT: (3189881/8137162)
+              DKBT: (3184740/4209377)
 
-              IKAT: (38893257/63075027)
-              DKAT: (38896280/49543246)
+              IKAT: (4853330/8130407)
+              DKAT: (4857013/6111224)
 
 
 Starting pre-equilibration stage. Determining eta and mu...
 
   eta  |   mu   | N_calibration | N_target | Z_calibration
-0.0790 | 0.5000 | 3.0 | 2 | 0.40
-0.0711 | 0.4000 | 3.0 | 2 | 0.78
-0.0640 | 0.3000 | 3.0 | 2 | 0.82
-0.0704 | 0.2000 | 3.0 | 2 | 0.76
-0.0633 | 0.1000 | 3.0 | 2 | 0.78
-0.0570 | 0.0000 | 3.0 | 2 | 0.75
-0.0513 | -0.1000 | 3.0 | 2 | 0.85
-0.0564 | -0.2000 | 3.0 | 2 | 0.81
-0.0621 | -0.3000 | 3.0 | 2 | 0.71
-0.0559 | -0.4000 | 3.0 | 2 | 0.58
-0.0503 | -0.5000 | 3.0 | 2 | 0.00
-0.0453 | -0.6000 | 3.0 | 2 | 0.00
-0.0407 | -0.7000 | 2.9 | 2 | 0.00
-0.0367 | -0.8000 | 2.9 | 2 | 0.00
-0.0330 | -0.9000 | 2.9 | 2 | 0.00
-0.0297 | -1.0000 | 2.9 | 2 | 0.00
-0.0267 | -1.1000 | 2.9 | 2 | 0.00
-0.0241 | -1.2000 | 2.9 | 2 | 0.00
-0.0216 | -1.3000 | 2.8 | 2 | 0.00
-0.0195 | -1.4000 | 2.7 | 2 | 0.00
-0.0175 | -1.5000 | 2.6 | 2 | 0.00
-0.0158 | -1.6000 | 2.0 | 2 | 0.56
-0.0142 | -1.7000 | 2.4 | 2 | 0.34
-0.0128 | -1.8000 | 1.5 | 2 | 0.31
-0.0115 | -1.7000 | 2.3 | 2 | 0.27
-0.0104 | -1.8000 | 1.5 | 2 | 0.50
-0.0093 | -1.7000 | 1.0 | 2 | 0.83
-0.0103 | -1.6000 | 1.1 | 2 | 0.59
-0.0092 | -1.5000 | 1.8 | 2 | 0.83
-0.0101 | -1.4000 | 2.0 | 2 | 0.90
-0.0112 | -1.5000 | 2.0 | 2 | 0.83
+0.1055 | -1.0000 | 2.9 | 2 | 0.00
+0.0949 | -1.1000 | 3.0 | 2 | 0.72
+0.0854 | -1.2000 | 2.9 | 2 | 0.69
+0.0769 | -1.3000 | 2.9 | 2 | 0.56
+0.0692 | -1.4000 | 2.8 | 2 | 0.48
+0.0623 | -1.5000 | 2.7 | 2 | 0.62
+0.0561 | -1.6000 | 2.4 | 2 | 0.56
+0.0505 | -1.7000 | 2.3 | 2 | 0.44
+0.0454 | -1.8000 | 2.1 | 2 | 0.39
+0.0409 | -1.9000 | 2.0 | 2 | 0.52
+0.0368 | -2.0000 | 1.7 | 2 | 0.38
+0.0331 | -1.9000 | 1.9 | 2 | 0.44
+0.0298 | -1.8000 | 1.9 | 2 | 0.63
+0.0268 | -1.7000 | 2.5 | 2 | 0.71
+0.0241 | -1.8000 | 2.1 | 2 | 0.55
+0.0217 | -1.9000 | 2.5 | 2 | 0.67
+0.0195 | -2.0000 | 1.9 | 2 | 0.82
+0.0215 | -1.9000 | 1.8 | 2 | 0.58
+0.0194 | -1.8000 | 1.9 | 2 | 0.81
+0.0213 | -1.7000 | 2.1 | 2 | 0.67
+0.0192 | -1.8000 | 1.8 | 2 | 0.55
+0.0172 | -1.7000 | 1.9 | 2 | 0.72
+0.0155 | -1.6000 | 2.2 | 2 | 0.59
+0.0140 | -1.7000 | 2.0 | 2 | 0.86
 Pre-Equilibration done.
 
 LatticePIMC started...
@@ -1643,148 +1356,43 @@ Lattice PIMC done. Saving data to disk...
 Ensemble: Canonical
 
 -------- Z-configuration fraction --------
-Z-fraction: 7.21% (720624/10000000) 
+Z-fraction: 53.81% (4035782/7499999) 
 
 -------- Acceptance Ratios --------
 
-       Insert worm: (139999/68487010)
-       Delete worm: (134955/134955)
+       Insert worm: (42506/40418148)
+       Delete worm: (38922/41102)
 
-       Insert anti: (200719/68476349)
-       Delete anti: (196847/476571)
+       Insert anti: (45612/40418109)
+       Delete anti: (42194/48298)
 
-       Advance head: (40225659/40225659)
-        Recede head: (41205192/41205192)
+       Advance head: (4739409/4739409)
+        Recede head: (4858849/4858849)
 
-       Advance tail: (41363228/41363228)
-        Recede tail: (40376316/40376316)
+       Advance tail: (4860418/4860418)
+        Recede tail: (4741063/4741063)
 
-   InsertZero worm: (991119/156097604)
-   DeleteZero worm: (995570/995954)
+   InsertZero worm: (569469/63294154)
+   DeleteZero worm: (573059/612101)
 
-   InsertZero anti: (1741214/117243116)
-   DeleteZero anti: (1745666/2686207)
+   InsertZero anti: (767902/35612729)
+   DeleteZero anti: (771491/863221)
 
-   InsertBeta worm: (996031/155732353)
-   DeleteBeta worm: (1000495/1000517)
+   InsertBeta worm: (565804/63330838)
+   DeleteBeta worm: (569217/609205)
 
-   InsertBeta anti: (1751568/117608090)
-   DeleteBeta anti: (1756032/2704135)
+   InsertBeta anti: (762316/35577025)
+   DeleteBeta anti: (765728/859315)
 
-              IKBH: (56561888/94828918)
-              DKBH: (56588292/70008115)
+              IKBH: (5991571/10125754)
+              DKBH: (6001413/7505374)
 
-              IKAH: (40172527/94813255)
-              DKAH: (40146963/51151328)
+              IKAH: (3972688/10129346)
+              DKAH: (3961581/5172534)
 
-              IKBT: (40331700/95117709)
-              DKBT: (40308881/51356841)
+              IKBT: (3967858/10132306)
+              DKBT: (3958901/5169555)
 
-              IKAT: (56744348/95133184)
-              DKAT: (56766299/70210660)
-
-
-Starting pre-equilibration stage. Determining eta and mu...
-
-  eta  |   mu   | N_calibration | N_target | Z_calibration
-0.0435 | 0.5000 | 3.0 | 2 | 0.39
-0.0392 | 0.4000 | 3.0 | 2 | 0.82
-0.0431 | 0.3000 | 3.0 | 2 | 0.77
-0.0388 | 0.2000 | 3.0 | 2 | 0.80
-0.0349 | 0.1000 | 3.0 | 2 | 0.83
-0.0384 | 0.0000 | 3.0 | 2 | 0.81
-0.0422 | -0.1000 | 3.0 | 2 | 0.75
-0.0380 | -0.2000 | 3.0 | 2 | 0.80
-0.0418 | -0.3000 | 3.0 | 2 | 0.69
-0.0376 | -0.4000 | 3.0 | 2 | 0.67
-0.0339 | -0.5000 | 3.0 | 2 | 0.75
-0.0305 | -0.6000 | 3.0 | 2 | 0.81
-0.0335 | -0.7000 | 3.0 | 2 | 0.77
-0.0302 | -0.8000 | 3.0 | 2 | 0.75
-0.0272 | -0.9000 | 3.0 | 2 | 0.79
-0.0244 | -1.0000 | 3.0 | 2 | 0.77
-0.0220 | -1.1000 | 3.0 | 2 | 0.76
-0.0198 | -1.2000 | 3.0 | 2 | 0.71
-0.0178 | -1.3000 | 3.0 | 2 | 0.40
-0.0160 | -1.4000 | 3.0 | 2 | 0.71
-0.0144 | -1.5000 | 2.9 | 2 | 0.23
-0.0130 | -1.6000 | 2.9 | 2 | 0.24
-0.0117 | -1.7000 | 2.6 | 2 | 0.00
-0.0105 | -1.8000 | 2.0 | 2 | 0.54
-0.0095 | -1.9000 | 1.3 | 2 | 0.00
-0.0085 | -1.8000 | 1.1 | 2 | 0.00
-0.0077 | -1.7000 | 1.6 | 2 | 0.00
-0.0069 | -1.6000 | 2.0 | 2 | 0.70
-0.0062 | -1.7000 | 2.0 | 2 | 0.78
-0.0056 | -1.8000 | 1.5 | 2 | 0.00
-0.0050 | -1.7000 | 1.6 | 2 | 0.19
-0.0045 | -1.6000 | 2.0 | 2 | 0.98
-0.0050 | -1.7000 | 2.0 | 2 | 0.96
-0.0055 | -1.8000 | 2.0 | 2 | 0.94
-0.0060 | -1.9000 | 2.0 | 2 | 0.95
-0.0066 | -2.0000 | 1.1 | 2 | 0.00
-0.0060 | -1.9000 | 1.1 | 2 | 0.00
-0.0054 | -1.8000 | 1.4 | 2 | 0.00
-0.0048 | -1.7000 | 1.4 | 2 | 0.00
-0.0044 | -1.6000 | 2.0 | 2 | 0.83
-Pre-Equilibration done.
-
-LatticePIMC started...
-
-0.00%
-10.00%
-20.00%
-30.00%
-40.00%
-50.00%
-60.00%
-70.00%
-80.00%
-90.00%
-100%%
-
-Lattice PIMC done. Saving data to disk...
-
-Ensemble: Canonical
-
--------- Z-configuration fraction --------
-Z-fraction: 28.38% (1418828/5000000) 
-
--------- Acceptance Ratios --------
-
-       Insert worm: (199994/185673595)
-       Delete worm: (196015/196015)
-
-       Insert anti: (294443/185686002)
-       Delete anti: (294355/295881)
-
-       Advance head: (31677651/31677651)
-        Recede head: (32565965/32565965)
-
-       Advance tail: (32735690/32735690)
-        Recede tail: (31855612/31855612)
-
-   InsertZero worm: (812926/287360042)
-   DeleteZero worm: (814967/815227)
-
-   InsertZero anti: (1546081/180852706)
-   DeleteZero anti: (1548122/1558084)
-
-   InsertBeta worm: (819707/287166651)
-   DeleteBeta worm: (821733/821733)
-
-   InsertBeta anti: (1561580/181047250)
-   DeleteBeta anti: (1563606/1573024)
-
-              IKBH: (48084463/80104732)
-              DKBH: (48113578/59649345)
-
-              IKAH: (33555183/80085636)
-              DKAH: (33525159/43235169)
-
-              IKBT: (33724187/80447926)
-              DKBT: (33694352/43451058)
-
-              IKAT: (48288327/80463450)
-              DKAT: (48319079/59897887)
+              IKAT: (5995128/10127504)
+              DKAT: (6005361/7514596)
 

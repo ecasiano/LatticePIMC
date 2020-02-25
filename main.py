@@ -11,6 +11,7 @@ import importlib
 import argparse
 importlib.reload(pimc)
 import pickle
+import random
 
 is_pickled = False
 
@@ -136,80 +137,76 @@ while(is_pre_equilibration):
     for m in range(int(M_pre)):
         
         # assign a label to each update
-        labels = list(range(15)) # There are 15 update functions
-        shuffle(labels)
-        
-        # At every mc step, try EVERY update in random order
-        for label in labels:   
-            
-            # Non-Spaceshift moves
-            if label == 0:
-                pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                    N_tracker,
-                    insert_worm_data,insert_anti_data,N_flats_tracker)
+        label = np.random.randint(15) # There are 15 update functions
 
-            elif label == 1:
-                pimc.worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                    N_tracker,delete_worm_data,delete_anti_data,N_flats_tracker)
+        # Non-Spaceshift moves
+        if label == 0:
+            pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,
+                insert_worm_data,insert_anti_data,N_flats_tracker)
 
-            elif label == 2:
-                #pass
-                pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,
-                    N_tracker,advance_head_data,recede_head_data,
-                    advance_tail_data,recede_tail_data,N_flats_tracker)
+        elif label == 1:
+            pimc.worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,delete_worm_data,delete_anti_data,N_flats_tracker)
 
-            elif label == 3:
+        elif label == 2:
+            #pass
+            pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,
+                N_tracker,advance_head_data,recede_head_data,
+                advance_tail_data,recede_tail_data,N_flats_tracker)
+
+        elif label == 3:
 #                 pass
-                pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                    N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
+            pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
 
-            elif label == 4:
+        elif label == 4:
 #                pass
-                pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                    N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
+            pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
 
-            elif label == 5:
+        elif label == 5:
 #                pass
-                pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                    N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
+            pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
 
-            elif label == 6:
+        elif label == 6:
 #                pass
-                pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                    N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
+            pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+                N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
 
-            # Spaceshift moves   
-            elif label == 7:
-                pimc.insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                    N_tracker,ikbh_data,N_flats_tracker)  
+        # Spaceshift moves   
+        elif label == 7:
+            pimc.insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,ikbh_data,N_flats_tracker)  
 
-            elif label == 8:
-                pimc.delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                    N_tracker,dkbh_data,N_flats_tracker) 
+        elif label == 8:
+            pimc.delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,dkbh_data,N_flats_tracker) 
 
-            elif label == 9:
-                pimc.insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                    N_tracker,ikah_data,N_flats_tracker)   
+        elif label == 9:
+            pimc.insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,ikah_data,N_flats_tracker)   
 
-            elif label == 10:
-                pimc.delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                    N_tracker,dkah_data,N_flats_tracker)
+        elif label == 10:
+            pimc.delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,dkah_data,N_flats_tracker)
 
-            elif label == 11:
-                pimc.insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                    N_tracker,ikbt_data,N_flats_tracker)  
+        elif label == 11:
+            pimc.insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,ikbt_data,N_flats_tracker)  
 
-            elif label == 12:
-                pimc.delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                    N_tracker,dkbt_data,N_flats_tracker) 
+        elif label == 12:
+            pimc.delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,dkbt_data,N_flats_tracker) 
 
-            elif label == 13:
-                pimc.insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                    N_tracker,ikat_data,N_flats_tracker)   
+        elif label == 13:
+            pimc.insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,ikat_data,N_flats_tracker)   
 
-            else:
-                pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                    N_tracker,dkat_data,N_flats_tracker)
+        else:
+            pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+                N_tracker,dkat_data,N_flats_tracker)
         
         
         # Count <N_flats> and <N>
@@ -319,84 +316,140 @@ dkat_data = [0,0]
 # Count measurements and measurement attempts
 measurements = [0,0] # [made,attempted]
 
-# Randomly propose every update M times
+    
+# Randomly an update M times
 for m in range(int(M)):
+        
+    # Determine i) no. of worm ends ii) adjacent or not 
+    # iii) kinks or not iv) kink near which end
 
-    # assign a label to each update
-    labels = list(range(15)) # There are 15 update functions
-    shuffle(labels)
+    # Set menu of possible moves based on configuration.    
+    if head_loc and tail_loc: # Both worm ends present
 
-    # At every mc step, try EVERY update in random order
-    for label in labels:   
+        # Extract site and kink indices of head and tail
+        hx,hk = head_loc[0],head_loc[1]
+        tx,tk = tail_loc[0],head_loc[1]
 
-        # Non-Spaceshift moves
-        if label == 0:
-            pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,
-                insert_worm_data,insert_anti_data,N_flats_tracker)
-
-        elif label == 1:
-            pimc.worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,delete_worm_data,delete_anti_data,N_flats_tracker)
-
-        elif label == 2:
-            #pass
-            pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,
-                N_tracker,advance_head_data,recede_head_data,
-                advance_tail_data,recede_tail_data,N_flats_tracker)
-
-        elif label == 3:
-#                 pass
-            pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
-
-        elif label == 4:
-#                pass
-            pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
-
-        elif label == 5:
-#                pass
-            pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
-
-        elif label == 6:
-#                pass
-            pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
-
-        # Spaceshift moves   
-        elif label == 7:
-            pimc.insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,ikbh_data,N_flats_tracker)  
-
-        elif label == 8:
-            pimc.delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,dkbh_data,N_flats_tracker) 
-
-        elif label == 9:
-            pimc.insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,ikah_data,N_flats_tracker)   
-
-        elif label == 10:
-            pimc.delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,dkah_data,N_flats_tracker)
-
-        elif label == 11:
-            pimc.insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,ikbt_data,N_flats_tracker)  
-
-        elif label == 12:
-            pimc.delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,dkbt_data,N_flats_tracker) 
-
-        elif label == 13:
-            pimc.insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,ikat_data,N_flats_tracker)   
-
+        # Are worm ends on same flat?
+        if hx==tx and abs(hk-tk)==1: 
+            same_flat = True
         else:
-            pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,dkat_data,N_flats_tracker)
+            same_flat = False
+
+        # Determine if there's kinks before/after head/tail
+        if data_struct[hx][hk-1][2][0]==data_struct[hx][hk-1][2][1]:
+            kink_before_head = False
+        else:
+            kink_before_head = True
+            
+        if hk==len(data_struct[hx])-1:
+            kink_after_head = False
+        elif data_struct[hx][hk+1][2][0]==data_struct[hx][hk+1][2][1]:
+            kink_after_head = False
+        else:
+            kink_after_head = True  
+            
+        if data_struct[tx][tk-1][2][0]==data_structthx][tk-1][2][1]:
+            kink_before_tail = False
+        else:
+            kink_before_tail = True
+            
+        if tk==len(data_struct[tx])-1:
+            kink_after_tail = False
+        elif data_struct[tx][tk+1][2][0]==data_struct[tx][tk+1][2][1]:
+            kink_after_tail = False
+        else:
+            kink_after_tail = True
+            
+            
+            
+    elif head_loc: # only head present
+
+        # Extract site and kink indices of head
+        hx,hk = head_loc[0],head_loc[1]
+
+        pass
+
+    elif tail_loc: # only tail present
+
+        # Extract site and kink indices of tail
+        tx,tk = tail_loc[0],tail_loc[1]
+
+        pass
+
+    else: # no worm ends present
+        pass
+
+    label = random.choice(moves_menu)
+  
+    # Non-Spaceshift moves
+    if label == 0:
+        pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+            N_tracker,
+            insert_worm_data,insert_anti_data,N_flats_tracker)
+
+    elif label == 1:
+        pimc.worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+            N_tracker,delete_worm_data,delete_anti_data,N_flats_tracker)
+
+    elif label == 2:
+        #pass
+        pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,
+            N_tracker,advance_head_data,recede_head_data,
+            advance_tail_data,recede_tail_data,N_flats_tracker)
+
+    elif label == 3:
+#                 pass
+        pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+            N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
+
+    elif label == 4:
+#                pass
+        pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+            N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
+
+    elif label == 5:
+#                pass
+        pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+            N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
+
+    elif label == 6:
+#                pass
+        pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
+            N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
+
+    # Spaceshift moves   
+    elif label == 7:
+        pimc.insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+            N_tracker,ikbh_data,N_flats_tracker)  
+
+    elif label == 8:
+        pimc.delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+            N_tracker,dkbh_data,N_flats_tracker) 
+
+    elif label == 9:
+        pimc.insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+            N_tracker,ikah_data,N_flats_tracker)   
+
+    elif label == 10:
+        pimc.delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+            N_tracker,dkah_data,N_flats_tracker)
+
+    elif label == 11:
+        pimc.insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+            N_tracker,ikbt_data,N_flats_tracker)  
+
+    elif label == 12:
+        pimc.delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+            N_tracker,dkbt_data,N_flats_tracker) 
+
+    elif label == 13:
+        pimc.insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+            N_tracker,ikat_data,N_flats_tracker)   
+
+    else:
+        pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
+            N_tracker,dkat_data,N_flats_tracker)
     
     # Print completion percent
     if m%(int(M/10))==0:        

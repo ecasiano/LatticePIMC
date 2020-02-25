@@ -100,13 +100,13 @@ def tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L):
     '''Calculates the kinetic and diagonal energies'''
 
 
-#     # Generate tau_slices 
-#     start = dtau
-#     tau_slices = []
-#     window_size = 2*dtau
-#     for i in range(int(beta/window_size)):
-#         tau_slices.append(start)
-#         start += window_size
+    # Generate tau_slices 
+    start = dtau
+    tau_slices = []
+    window_size = 2*dtau
+    for i in range(int(beta/window_size)):
+        tau_slices.append(start)
+        start += window_size
 
     # Generate tau slices
     tau_slices = np.linspace(0,beta,11) # [0*beta,0.1*beta,...,1*beta]
@@ -119,11 +119,11 @@ def tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L):
     # Define the size of measurement window
     window_size = 2*dtau 
         
-    # Initialize arrays that will save energies measured wrt tau slices
+    # Initialize arrays that will save energies measured @ tau slices
     diagonal = np.zeros_like(tau_slices)
     kinetic = np.zeros_like(tau_slices)
 
-    # Iterate over all tau slices to measue energies (throw away first and last)
+    # Iterate over all tau slices to measue energies
     for idx,tau_slice in enumerate(tau_slices):
                 
         # Stores Fock state at tau_slice (need for diagonal energy)
@@ -162,6 +162,51 @@ def tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L):
     ##sys.exit()
     
     return kinetic,diagonal
+
+# def tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L):
+    
+#     '''Calculates the kinetic and diagonal energies'''
+
+
+#     # Generate tau_slices 
+#     start = dtau
+#     tau_slices = []
+#     window_size = 2*dtau
+#     for i in range(int(beta/window_size)):
+#         tau_slices.append(start)
+#         start += window_size
+
+#     # Generate tau slices
+#     tau_slices = np.linspace(0,beta,13) # [0*beta,0.1*beta,...,1*beta]
+#     tau_slices = tau_slices[1:-1] # do not measure at end points
+    
+#     # Check that measurement window doesn't overlap w/ adjacent slices
+#     if dtau > tau_slices[1]-tau_slices[0]:
+#         print("WARNING: dtau overlaps adjacent time slices. Decrease dtau.")
+    
+#     # Define the size of measurement window
+#     window_size = 2*dtau 
+        
+#     # Initialize arrays that will save energies measured @ tau slices
+#     diagonal = np.zeros_like(tau_slices)
+#     kinetic = np.zeros_like(tau_slices)
+
+#     for i in range(L):
+#         for idx,tau_slice in enumerate(tau_slices):
+#             for k in range(data_struct[i]):
+                
+#                 tau = data_struct[i][k][0]
+#                 n_i = data_struct[i][k][1]
+                                
+#                 if tau > tau_slice-dtau and tau < tau_slice+dtau and tau != 0:
+#                     kinetic[idx] += 1
+#                 else: # Proceed to measure at next tau_slice
+#                     break
+        
+#     #print(kinetic)
+#     ##sys.exit()
+    
+#     return kinetic,diagonal
 
 '----------------------------------------------------------------------------------'
 
@@ -1348,7 +1393,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1459,7 +1504,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1579,7 +1624,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
 
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1697,7 +1742,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
 
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1806,7 +1851,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1918,7 +1963,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -2036,7 +2081,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
 
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
@@ -2153,7 +2198,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = (t*np.sqrt(n_wi*n_wj)+eta*np.sqrt(n_wj)+eta*np.sqrt(n_wi))*np.sqrt(n_wj/n_wi) * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
 
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
