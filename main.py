@@ -320,67 +320,8 @@ measurements = [0,0] # [made,attempted]
 # Randomly an update M times
 for m in range(int(M)):
         
-    # Determine i) no. of worm ends ii) adjacent or not 
-    # iii) kinks or not iv) kink near which end
-
-    # Set menu of possible moves based on configuration.    
-    if head_loc and tail_loc: # Both worm ends present
-
-        # Extract site and kink indices of head and tail
-        hx,hk = head_loc[0],head_loc[1]
-        tx,tk = tail_loc[0],head_loc[1]
-
-        # Are worm ends on same flat?
-        if hx==tx and abs(hk-tk)==1: 
-            same_flat = True
-        else:
-            same_flat = False
-
-        # Determine if there's kinks before/after head/tail
-        if data_struct[hx][hk-1][2][0]==data_struct[hx][hk-1][2][1]:
-            kink_before_head = False
-        else:
-            kink_before_head = True
-            
-        if hk==len(data_struct[hx])-1:
-            kink_after_head = False
-        elif data_struct[hx][hk+1][2][0]==data_struct[hx][hk+1][2][1]:
-            kink_after_head = False
-        else:
-            kink_after_head = True  
-            
-        if data_struct[tx][tk-1][2][0]==data_structthx][tk-1][2][1]:
-            kink_before_tail = False
-        else:
-            kink_before_tail = True
-            
-        if tk==len(data_struct[tx])-1:
-            kink_after_tail = False
-        elif data_struct[tx][tk+1][2][0]==data_struct[tx][tk+1][2][1]:
-            kink_after_tail = False
-        else:
-            kink_after_tail = True
-            
-            
-            
-    elif head_loc: # only head present
-
-        # Extract site and kink indices of head
-        hx,hk = head_loc[0],head_loc[1]
-
-        pass
-
-    elif tail_loc: # only tail present
-
-        # Extract site and kink indices of tail
-        tx,tk = tail_loc[0],tail_loc[1]
-
-        pass
-
-    else: # no worm ends present
-        pass
-
-    label = random.choice(moves_menu)
+    # INCLUDE FUNCTION HERE THAT CREATES MOVE MENU #
+    label = np.random.randint(15)
   
     # Non-Spaceshift moves
     if label == 0:

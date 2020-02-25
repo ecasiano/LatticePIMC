@@ -2240,7 +2240,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
         return False
 
 '----------------------------------------------------------------------------------'
-
+'----------------------------------------------------------------------------------'
 
 # Visualize worldline configurations for Lattice Path Integral Monte Carlo (PIMC)
 def view_worldlines(data_struct,beta,figure_name=None):
