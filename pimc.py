@@ -95,33 +95,31 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice):
 
 '----------------------------------------------------------------------------------'
 
-def tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L):
+def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L):
     
     '''Calculates the kinetic and diagonal energies'''
 
-
-    # Generate tau_slices 
-    start = dtau
-    tau_slices = []
-    window_size = 2*dtau
-    for i in range(int(beta/window_size)):
-        tau_slices.append(start)
-        start += window_size
-
     # Generate tau slices
-    tau_slices = np.linspace(0,beta,11) # [0*beta,0.1*beta,...,1*beta]
-    tau_slices = tau_slices[1:-1] # do not measure at end points
+    tau_slices = np.linspace(0,beta,n_slices)
+    
+    # Set the measurement window
+    dtau = tau_slices[1]-tau_slices[0]
+    window_size = 2*dtau
     
     # Check that measurement window doesn't overlap w/ adjacent slices
     if dtau > tau_slices[1]-tau_slices[0]:
-        print("WARNING: dtau overlaps adjacent time slices. Decrease dtau.")
-    
-    # Define the size of measurement window
-    window_size = 2*dtau 
+        print("WARNING: dtau overlaps adjacent time slices. Decrease dtau.") 
         
+    # Throw away the tau=0,beta slices. Keep only measurement slices.
+    tau_slices = tau_slices[1:-1][::2]
+    
     # Initialize arrays that will save energies measured @ tau slices
     diagonal = np.zeros_like(tau_slices)
     kinetic = np.zeros_like(tau_slices)
+        
+#     # Build the Fock state at tau=0
+#     alpha_0 = np.zeros(L)
+#     for i in range:
 
     # Iterate over all tau slices to measue energies
     for idx,tau_slice in enumerate(tau_slices):
@@ -151,62 +149,31 @@ def tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L):
 
         # Calculate kinetic energy estimator
         N_kinks /= 2 # Kinks counted at source and destination site. This corrects.
-        kinetic[idx] = -1*N_kinks/window_size
+        kinetic[idx] = -N_kinks/window_size
 
         # Calculate diagonal energy
         for i in range(L):
             n_i = alpha[i]
             diagonal[idx] += ( (U/2)*n_i*(n_i-1)-mu*n_i )
+        #print(alpha,diagonal[idx])
 
     #print(kinetic)
     ##sys.exit()
     
-    return kinetic,diagonal
+    return np.array(kinetic),np.array(diagonal)
 
-# def tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L):
+'----------------------------------------------------------------------------------'
+
+def get_fock_state_beta(data_struct,L):
     
-#     '''Calculates the kinetic and diagonal energies'''
-
-
-#     # Generate tau_slices 
-#     start = dtau
-#     tau_slices = []
-#     window_size = 2*dtau
-#     for i in range(int(beta/window_size)):
-#         tau_slices.append(start)
-#         start += window_size
-
-#     # Generate tau slices
-#     tau_slices = np.linspace(0,beta,13) # [0*beta,0.1*beta,...,1*beta]
-#     tau_slices = tau_slices[1:-1] # do not measure at end points
+    '''Get the Fock state at end of path (i.e, tau=beta)'''
     
-#     # Check that measurement window doesn't overlap w/ adjacent slices
-#     if dtau > tau_slices[1]-tau_slices[0]:
-#         print("WARNING: dtau overlaps adjacent time slices. Decrease dtau.")
+    alpha = np.zeros(L) # Stores Fock State
+    for i in range(L):
+        n_i = data_struct[i][-1][1]
+        alpha[i]=n_i
     
-#     # Define the size of measurement window
-#     window_size = 2*dtau 
-        
-#     # Initialize arrays that will save energies measured @ tau slices
-#     diagonal = np.zeros_like(tau_slices)
-#     kinetic = np.zeros_like(tau_slices)
-
-#     for i in range(L):
-#         for idx,tau_slice in enumerate(tau_slices):
-#             for k in range(data_struct[i]):
-                
-#                 tau = data_struct[i][k][0]
-#                 n_i = data_struct[i][k][1]
-                                
-#                 if tau > tau_slice-dtau and tau < tau_slice+dtau and tau != 0:
-#                     kinetic[idx] += 1
-#                 else: # Proceed to measure at next tau_slice
-#                     break
-        
-#     #print(kinetic)
-#     ##sys.exit()
-    
-#     return kinetic,diagonal
+    return alpha
 
 '----------------------------------------------------------------------------------'
 
@@ -242,6 +209,35 @@ def n_i_pimc(data_struct,beta,L):
         n.append(n_i)
 
     return n
+
+'----------------------------------------------------------------------------------'
+
+# Error analysis functions
+
+def get_std_error(mc_data):
+    '''Input array and calculate standard error'''
+    N_bins = np.shape(mc_data)[0]
+    std_error = np.std(mc_data,axis=0)/np.sqrt(N_bins)
+    
+    return std_error
+
+'----------------------------------------------------------------------------------'
+
+def get_binned_data(mc_data):
+    '''Return neighbor averaged data.'''
+    N_bins = np.shape(mc_data)[0]
+    start_bin = N_bins % 2
+    binned_mc_data = 0.5*(mc_data[start_bin::2]+mc_data[start_bin+1::2]) #Averages (A0,A1), (A2,A3), + ... A0 ignored if odd data
+
+    return binned_mc_data
+
+'----------------------------------------------------------------------------------'
+
+def get_autocorrelation_time(error_data):
+    '''Given an array of standard errors, calculates autocorrelation time'''
+    print(error_data[0],error_data[-2])
+    autocorr_time = 0.5*((error_data[-2]/error_data[0])**2 - 1)
+    return autocorr_time
 
 '----------------------------------------------------------------------------------'
 
@@ -2324,9 +2320,9 @@ def view_worldlines(data_struct,beta,figure_name=None):
     plt.tick_params(axis='x',which='both',top=False,bottom=False)
     plt.xlabel(r"$i$")
     plt.ylabel(r"$\tau/\beta$")
+    plt.show()
     if figure_name != None:
         plt.savefig(figure_name)
-    plt.show()
     #plt.close()
 
     return None
