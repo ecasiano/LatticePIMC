@@ -97,70 +97,53 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice):
 
 def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L):
     
-    '''Calculates the kinetic and diagonal energies'''
+	'''Calculates the kinetic and diagonal energies'''
 
-    # Generate tau slices
-    tau_slices = np.linspace(0,beta,n_slices)
-    
-    # Set the measurement window
-    dtau = tau_slices[1]-tau_slices[0]
-    window_size = 2*dtau
-    
-    # Check that measurement window doesn't overlap w/ adjacent slices
-    if dtau > tau_slices[1]-tau_slices[0]:
-        print("WARNING: dtau overlaps adjacent time slices. Decrease dtau.") 
-        
-    # Throw away the tau=0,beta slices. Keep only measurement slices.
-    tau_slices = tau_slices[1:-1][::2]
-    
-    # Initialize arrays that will save energies measured @ tau slices
-    diagonal = np.zeros_like(tau_slices)
-    kinetic = np.zeros_like(tau_slices)
-        
-#     # Build the Fock state at tau=0
-#     alpha_0 = np.zeros(L)
-#     for i in range:
+	# Generate tau slices (measurement centers)
+	tau_slices = np.linspace(0,beta,n_slices)
 
-    # Iterate over all tau slices to measue energies
-    for idx,tau_slice in enumerate(tau_slices):
-                
-        # Stores Fock state at tau_slice (need for diagonal energy)
-        alpha = np.zeros(L)
+	# Set the measurement window
+	dtau = tau_slices[1]-tau_slices[0]
+	window_size = 2*dtau
 
-        # Iterate over every site to get Fock state at tau_slice and kinks near it.
-        N_kinks = 0 # number of kinks inside measurement window
-        for i in range(L):
-            N_flats = len(data_struct[i]) # Number of total flat regions on site
-            for k in range(N_flats):
+	# Generate bins
+	tau_slices_bins = tau_slices[::2]
 
-                # Count the kinks inside the window: [tau_slice +- dtau]
-                tau = data_struct[i][k][0] # time of the kink
-                if tau >= tau_slice-dtau and tau <= tau_slice+dtau:
-                    if k!=0: # Don't add the initial value kink of each site
-                        N_kinks += 1
+	# Initialize list that will store the kink times
+	kinks = []
 
-                # Store the Fock state at tau_slice (to calculate diagonal energy)
-                if tau <= tau_slice:
-                    n_i = data_struct[i][k][1] # no. of particles in the flat
-                    alpha[i] = n_i
+	# Initialize list that will contain Fock states at all tau_slices
+	alpha = [0]*L
+	alphas = [alpha for tau_slice in tau_slices]
 
-                # Exit inner loop after tau_slice+dtau. Go to next site's loop.
-                if tau > tau_slice+dtau: break
+	# Kinetic
+	for i in range(L):
+	   for k in range(len(data_struct[i])):
 
-        # Calculate kinetic energy estimator
-        N_kinks /= 2 # Kinks counted at source and destination site. This corrects.
-        kinetic[idx] = -N_kinks/window_size
+	       # Get imaginary time at which kink happens
+	       tau = data_struct[i][k][0]
 
-        # Calculate diagonal energy
-        for i in range(L):
-            n_i = alpha[i]
-            diagonal[idx] += ( (U/2)*n_i*(n_i-1)-mu*n_i )
-        #print(alpha,diagonal[idx])
+	       if tau > 0: # Don't count initial element
+	           kinks.append(tau)
 
-    #print(kinetic)
-    ##sys.exit()
-    
-    return np.array(kinetic),np.array(diagonal)
+	       else: pass
+
+	# Generate histogram of kinks
+	kinks = np.array(kinks)
+	kinetic = -np.histogram(kinks,bins=tau_slices_bins)[0]/2 # correct kink overcount
+	kinetic /= window_size
+
+	# Diagonal
+	#     for i in range(L):
+	#         for k in range(len(data_struct[i])):
+	#             tau = data_struct[i][k][0]    
+	        # if tau <= tau_slice:
+	     #    n_i = data_struct[i][k][1] # no. of particles in the flat
+	     #    alpha[i] = n_i
+
+	diagonal = np.zeros_like(tau_slices[1:-1][::2])
+
+	return np.array(kinetic),np.array(diagonal)
 
 '----------------------------------------------------------------------------------'
 
@@ -266,7 +249,7 @@ def C_SF(N,L,alpha):
 '----------------------------------------------------------------------------------'
 
 def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-	insert_worm_data,insert_anti_data,N_flats_tracker):
+    insert_worm_data,insert_anti_data,N_flats_tracker):
 
     '''Inserts a worm or antiworm'''
 
@@ -397,7 +380,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
 '----------------------------------------------------------------------------------'
 
 def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-	delete_worm_data,delete_anti_data,N_flats_tracker):
+    delete_worm_data,delete_anti_data,N_flats_tracker):
 
     # Can only propose worm deletion if both worm ends are present
     if not(head_loc) or not(tail_loc) : return None
@@ -510,7 +493,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
 '----------------------------------------------------------------------------------'
 
 def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,N_tracker,
-	advance_head_data,recede_head_data,advance_tail_data,recede_tail_data,N_flats_tracker):
+    advance_head_data,recede_head_data,advance_tail_data,recede_tail_data,N_flats_tracker):
 
     # Reject update if there are is no worm end present
     if head_loc == [] and tail_loc == [] : return None
@@ -638,7 +621,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,N_track
 '----------------------------------------------------------------------------------'
 
 def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-	insertZero_worm_data,insertZero_anti_data,N_flats_tracker):
+    insertZero_worm_data,insertZero_anti_data,N_flats_tracker):
 
     # Cannot insert if there's two worm ends present
     if head_loc and tail_loc: return None
@@ -742,26 +725,26 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     else: # insert antiworm
         N_post= N_pre-1
         
-    # Fock states pre and post worm insertion
-    alpha_pre = []
-    alpha_post = []
-    for g in range(L):
-        alpha_pre.append(data_struct[g][0][1])
-    if insert_worm:
-        alpha_post = np.copy(alpha_pre)
-        alpha_post[i] += 1
-    else: # insert antiworm
-        alpha_post = np.copy(alpha_pre)
-        alpha_post[i] -= 1
+#     # Fock states pre and post worm insertion
+#     alpha_pre = []
+#     alpha_post = []
+#     for g in range(L):
+#         alpha_pre.append(data_struct[g][0][1])
+#     if insert_worm:
+#         alpha_post = np.copy(alpha_pre)
+#         alpha_post[i] += 1
+#     else: # insert antiworm
+#         alpha_post = np.copy(alpha_pre)
+#         alpha_post[i] -= 1
     
-#     # Superfluid coefficient ratio (C_post/C_pre)
-    C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre) 
+# #     # Superfluid coefficient ratio (C_post/C_pre)
+#     C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre) 
 
     #######
     #C = 1
     
     # Build the weigh ratio W'/W
-    # C = 1 # Ratio of trial wavefn coefficients post/pre update
+    C = 1 # Ratio of trial wavefn coefficients post/pre update
     if insert_worm:
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
     else: # antiworm
@@ -813,7 +796,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 '----------------------------------------------------------------------------------'
 
 def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-	deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker):
+    deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker):
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -908,8 +891,8 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
         dN = +1 * l_path / beta
 
     if canonical:
-	    # Reject the update if the total number is outside of (N-1,N+1)
-	    if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        # Reject the update if the total number is outside of (N-1,N+1)
+        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
 
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -924,26 +907,26 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     else: # delete anti
         N_pre= N_post+1
         
-    # Fock states pre and post worm insertion
-    alpha_pre = []
-    alpha_post = []
-    for g in range(L):
-        alpha_post.append(data_struct[g][0][1])
-    if delete_head: # delete worm
-        alpha_pre = np.copy(alpha_post)
-        alpha_pre[x] -= 1
-    else: # insert antiworm
-        alpha_pre = np.copy(alpha_post)
-        alpha_pre[x] += 1
+    # # Fock states pre and post worm insertion
+    # alpha_pre = []
+    # alpha_post = []
+    # for g in range(L):
+    #     alpha_post.append(data_struct[g][0][1])
+    # if delete_head: # delete worm
+    #     alpha_pre = np.copy(alpha_post)
+    #     alpha_pre[x] -= 1
+    # else: # insert antiworm
+    #     alpha_pre = np.copy(alpha_post)
+    #     alpha_pre[x] += 1
     
-    # Superfluid coefficient ratio (C_post/C_pre)
-    C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+    # # Superfluid coefficient ratio (C_post/C_pre)
+    # C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
 #     #######
 #     C = 1
     
     # Build the weigh ratio W'/W
-    # C = 1 # C_post/C_pre
+    C = 1 # C_post/C_pre
     if delete_head: # delete worm
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
     else: # delete antiworm
@@ -994,7 +977,7 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 '----------------------------------------------------------------------------------'
 
 def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-	insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker):
+    insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker):
 
     # Cannot insert if there's two worm end already present
     if head_loc and tail_loc: return None
@@ -1101,26 +1084,26 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     else: # insert antiworm
         N_post= N_pre-1
         
-    # Fock states pre and post worm insertion
-    alpha_pre = []
-    alpha_post = []
-    for g in range(L):
-        alpha_pre.append(data_struct[g][-1][1])
-    if insert_worm:
-        alpha_post = np.copy(alpha_pre)
-        alpha_post[i] += 1
-    else: # insert antiworm
-        alpha_post = np.copy(alpha_pre)
-        alpha_post[i] -= 1
+    # # Fock states pre and post worm insertion
+    # alpha_pre = []
+    # alpha_post = []
+    # for g in range(L):
+    #     alpha_pre.append(data_struct[g][-1][1])
+    # if insert_worm:
+    #     alpha_post = np.copy(alpha_pre)
+    #     alpha_post[i] += 1
+    # else: # insert antiworm
+    #     alpha_post = np.copy(alpha_pre)
+    #     alpha_post[i] -= 1
     
     # Superfluid coefficient ratio (C_post/C_pre)
-    C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+    # C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
 #     #######
 #     C = 1
     
     # Build the weight ratio W'/W
-    # C = 1  # C_pre/C_post
+    C = 1  # C_pre/C_post
     if insert_worm:
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
     else: # antiworm
@@ -1158,7 +1141,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 '----------------------------------------------------------------------------------'
 
 def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-	deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker):
+    deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker):
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -1269,26 +1252,26 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     else: # delete worm
         N_pre= N_post-1
         
-    # Fock states pre and post worm insertion
-    alpha_pre = []
-    alpha_post = []
-    for g in range(L):
-        alpha_post.append(data_struct[g][-1][1])
-    if delete_head: # delete anti
-        alpha_pre = np.copy(alpha_post)
-        alpha_pre[x] += 1
-    else: # delete worm
-        alpha_pre = np.copy(alpha_post)
-        alpha_pre[x] -= 1
+    # # Fock states pre and post worm insertion
+    # alpha_pre = []
+    # alpha_post = []
+    # for g in range(L):
+    #     alpha_post.append(data_struct[g][-1][1])
+    # if delete_head: # delete anti
+    #     alpha_pre = np.copy(alpha_post)
+    #     alpha_pre[x] += 1
+    # else: # delete worm
+    #     alpha_pre = np.copy(alpha_post)
+    #     alpha_pre[x] -= 1
     
-    # Superfluid coefficient ratio (C_post/C_pre)
-    C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
+    # # Superfluid coefficient ratio (C_post/C_pre)
+    # C = C_SF(N_post,L,alpha_post)/C_SF(N_pre,L,alpha_pre)
 
 #     #######
 #     C = 1
     
     # Build the weight ratio W'/W
-    # C = 1 # C_post/C_pre
+    C = 1 # C_post/C_pre
     if not(delete_head): # delete tail (worm)
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
     else: # delete head (antiworm)
@@ -1328,7 +1311,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 '----------------------------------------------------------------------------------'
 
 def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-	N_tracker,ikbh_data,N_flats_tracker):
+    N_tracker,ikbh_data,N_flats_tracker):
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1434,7 +1417,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
 '----------------------------------------------------------------------------------'
 
 def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-	N_tracker,dkbh_data,N_flats_tracker):
+    N_tracker,dkbh_data,N_flats_tracker):
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1544,7 +1527,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
 '----------------------------------------------------------------------------------'
 
 def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-	N_tracker,ikah_data,N_flats_tracker):
+    N_tracker,ikah_data,N_flats_tracker):
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1665,7 +1648,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
 '----------------------------------------------------------------------------------'
 
 def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-	N_tracker,dkah_data,N_flats_tracker):
+    N_tracker,dkah_data,N_flats_tracker):
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1782,7 +1765,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
 '----------------------------------------------------------------------------------'
 
 def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-	N_tracker,ikbt_data,N_flats_tracker):
+    N_tracker,ikbt_data,N_flats_tracker):
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1892,7 +1875,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
 '----------------------------------------------------------------------------------'
 
 def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-	N_tracker,dkbt_data,N_flats_tracker):
+    N_tracker,dkbt_data,N_flats_tracker):
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -2003,7 +1986,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
 '----------------------------------------------------------------------------------'
 
 def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-	N_tracker,ikat_data,N_flats_tracker):
+    N_tracker,ikat_data,N_flats_tracker):
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -2122,7 +2105,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
 '----------------------------------------------------------------------------------'
 
 def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-	N_tracker,dkat_data,N_flats_tracker):
+    N_tracker,dkat_data,N_flats_tracker):
 
     # Update only possible if there is worm tail present
     if not(tail_loc): return None

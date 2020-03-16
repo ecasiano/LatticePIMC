@@ -14,11 +14,6 @@ import pickle
 import random
 import datetime
 
-time = datetime.datetime.now()
-timeID = int((str(time).split(":")[1]+str(time).split(":")[2]).replace('.',''))
-
-is_pickled = False
-
 # -------- Set command line arguments -------- #
 
 # Positional arguments
@@ -50,6 +45,8 @@ parser.add_argument("--no-energies",help="Measure diagonal and kinetic energies 
                     action='store_true') 
 parser.add_argument("--get-fock-state",help="Measure Fock state at beta (Default: False)",
                     action='store_true') 
+parser.add_argument("--seed",help="Set the random num. generator's seed (default: 0)",
+                    type=int,metavar='\b') 
 
 # Parse arguments
 args = parser.parse_args()
@@ -70,6 +67,7 @@ M_pre = int(5E+05) if not(args.M_pre) else args.M_pre
 bin_size = 10 if not(args.bin_size) else args.bin_size
 no_energies = False if not(args.no_energies) else True
 get_fock_state = False if not(args.get_fock_state) else True
+seed = int(0) if not(args.seed) else args.seed
 
 # Initial eta value (actual value will be obtained in pre-equilibration stage)
 eta = 1/np.sqrt(L*beta)
@@ -94,6 +92,9 @@ N_flats_tracker = [L]   # Total flat regions
 print("\nStarting pre-equilibration stage. Determining eta and mu...\n")
 
 print("  eta  |   mu   | N_calibration | N_target | Z_calibration")
+
+# Set the random seed
+np.random.seed(seed)
 
 is_pre_equilibration = True
 need_eta = True
@@ -239,6 +240,13 @@ if canonical: # kinetic
     if get_fock_state:
         fock_state_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%d_fock.dat"%(L,N,U,mu,t,beta,M,timeID),"w+")
         
+# Create a label for the Fock State files
+time = datetime.datetime.now()
+timeID = int((str(time).split(":")[1]+str(time).split(":")[2]).replace('.',''))
+
+# We may want to save data in binary via the Pickle package
+is_pickled = False
+
 print("LatticePIMC started...\n")
 
 # Initialize values to be measured
