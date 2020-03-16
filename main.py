@@ -45,7 +45,7 @@ parser.add_argument("--no-energies",help="Measure diagonal and kinetic energies 
                     action='store_true') 
 parser.add_argument("--get-fock-state",help="Measure Fock state at beta (Default: False)",
                     action='store_true') 
-parser.add_argument("--seed",help="Set the random num. generator's seed (default: 0)",
+parser.add_argument("--rseed",help="Set the random num. generator's seed (default: 0)",
                     type=int,metavar='\b') 
 
 # Parse arguments
@@ -67,7 +67,7 @@ M_pre = int(5E+05) if not(args.M_pre) else args.M_pre
 bin_size = 10 if not(args.bin_size) else args.bin_size
 no_energies = False if not(args.no_energies) else True
 get_fock_state = False if not(args.get_fock_state) else True
-seed = int(0) if not(args.seed) else args.seed
+rseed = int(0) if not(args.rseed) else args.rseed
 
 # Initial eta value (actual value will be obtained in pre-equilibration stage)
 eta = 1/np.sqrt(L*beta)
@@ -89,12 +89,13 @@ N_flats_tracker = [L]   # Total flat regions
   
 # ---------------- Pre-Equilibration ---------------- #
 
+print("Seed: ", rseed)
 print("\nStarting pre-equilibration stage. Determining eta and mu...\n")
 
 print("  eta  |   mu   | N_calibration | N_target | Z_calibration")
 
 # Set the random seed
-np.random.seed(seed)
+np.random.seed(rseed)
 
 is_pre_equilibration = True
 need_eta = True
