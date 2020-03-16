@@ -45,7 +45,7 @@ parser.add_argument("--no-energies",help="Measure diagonal and kinetic energies 
                     action='store_true') 
 parser.add_argument("--get-fock-state",help="Measure Fock state at beta (Default: False)",
                     action='store_true') 
-parser.add_argument("--rseed",help="Set the random num. generator's seed (default: 0)",
+parser.add_argument("--rseed",help="Set the random number generator's seed (default: 0)",
                     type=int,metavar='\b') 
 
 # Parse arguments
@@ -68,6 +68,9 @@ bin_size = 10 if not(args.bin_size) else args.bin_size
 no_energies = False if not(args.no_energies) else True
 get_fock_state = False if not(args.get_fock_state) else True
 rseed = int(0) if not(args.rseed) else args.rseed
+
+# Set the random seed
+np.random.seed(rseed)
 
 # Initial eta value (actual value will be obtained in pre-equilibration stage)
 eta = 1/np.sqrt(L*beta)
@@ -93,9 +96,6 @@ print("Seed: ", rseed)
 print("\nStarting pre-equilibration stage. Determining eta and mu...\n")
 
 print("  eta  |   mu   | N_calibration | N_target | Z_calibration")
-
-# Set the random seed
-np.random.seed(rseed)
 
 is_pre_equilibration = True
 need_eta = True
@@ -235,11 +235,11 @@ if canonical: # kinetic
     
     
     if not(no_energies):
-        kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_canK.dat"%(L,N,U,mu,t,beta,M),"w+")
-        diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_canV.dat"%(L,N,U,mu,t,beta,M),"w+")
+        kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_canK.dat"%(L,N,U,mu,t,beta,M,rseed),"w+")
+        diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_canV.dat"%(L,N,U,mu,t,beta,M,rseed),"w+")
     
     if get_fock_state:
-        fock_state_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%d_fock.dat"%(L,N,U,mu,t,beta,M,timeID),"w+")
+        fock_state_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%d_fock.dat"%(L,N,U,mu,t,beta,M,rseed,timeID),"w+")
         
 # Create a label for the Fock State files
 time = datetime.datetime.now()
