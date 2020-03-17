@@ -12,8 +12,7 @@ import argparse
 importlib.reload(pimc)
 import pickle
 import random
-
-is_pickled = False
+import datetime
 
 # -------- Set command line arguments -------- #
 
@@ -32,14 +31,24 @@ parser.add_argument("--eta",help="Worm end fugacity (default: 1/sqrt(<N_flats>)"
                     type=float,metavar='\b')
 parser.add_argument("--beta",help="Thermodynamic beta 1/(K_B*T) (default: 1.0)",
                     type=float,metavar='\b')
-parser.add_argument("--dtau",help="Measurement window)",
-                    type=float,metavar='\b')
+parser.add_argument("--n-slices",help="Measurement window",
+                    type=int,metavar='\b')
 parser.add_argument("--M",help="Number of Monte Carlo steps (default: 1E+05)",
                     type=int,metavar='\b') 
 parser.add_argument("--M-pre",help="Number of Calibration steps (default: 5E+04)",
                     type=int,metavar='\b') 
 parser.add_argument("--canonical",help="Statistical ensemble (Default: Grand Canonical)",
                     action='store_true') 
+parser.add_argument("--bin-size",help="Number of measurements at each bin (defaul: 10)",
+                    type=int,metavar='\b') 
+parser.add_argument("--no-energies",help="Measure diagonal and kinetic energies (Default: True)",
+                    action='store_true') 
+parser.add_argument("--get-fock-state",help="Measure Fock state at beta (Default: False)",
+                    action='store_true') 
+parser.add_argument("--rseed",help="Set the random number generator's seed (default: 0)",
+                    type=int,metavar='\b') 
+parser.add_argument("--mfreq",help="Measurements made every other mfreq*L*beta steps (default: 2000)",
+                    type=int,metavar='\b')
 
 # Parse arguments
 args = parser.parse_args()
@@ -55,15 +64,22 @@ t = 1.0 if not(args.t) else args.t
 beta = 1.0 if not(args.beta) else args.beta
 M = int(1E+05) if not(args.M) else args.M
 canonical = False if not(args.canonical) else True
-dtau = beta/10 if not(args.dtau) else args.dtau
-M_pre = int(5E+04) if not(args.M_pre) else args.M_pre
+n_slices = 43 if not(args.n_slices) else args.n_slices
+M_pre = int(5E+05) if not(args.M_pre) else args.M_pre
+bin_size = 10 if not(args.bin_size) else args.bin_size
+no_energies = False if not(args.no_energies) else True
+get_fock_state = False if not(args.get_fock_state) else True
+rseed = int(0) if not(args.rseed) else args.rseed
+mfreq = int(2000) if not(args.mfreq) else args.mfreq
+
+# Set the random seed
+np.random.seed(rseed)
 
 # Initial eta value (actual value will be obtained in pre-equilibration stage)
 eta = 1/np.sqrt(L*beta)
 
 # Initialize Fock state
 alpha = pimc.random_boson_config(L,N)
-alpha = [1]*L
 
 # Create worldline data structure
 data_struct = pimc.create_data_struct(alpha,L)
@@ -79,50 +95,17 @@ N_flats_tracker = [L]   # Total flat regions
   
 # ---------------- Pre-Equilibration ---------------- #
 
+print("Seed: ", rseed)
 print("\nStarting pre-equilibration stage. Determining eta and mu...\n")
 
 print("  eta  |   mu   | N_calibration | N_target | Z_calibration")
 
-is_pre_equilibration = True
-need_eta = True
+is_pre_equilibration = True # CHANGE TO TRUE
+need_eta = True # CHANGE TO TRUE
 while(is_pre_equilibration):
 
     # Counters for acceptance and proposal of each move
-    insert_worm_data = [0,0] # [accepted,proposed]
-    delete_worm_data = [0,0]
-
-    insert_anti_data = [0,0]
-    delete_anti_data = [0,0]
-
-    advance_head_data = [0,0]
-    recede_head_data = [0,0]
-
-    advance_tail_data = [0,0]
-    recede_tail_data = [0,0]
-
-    insertZero_worm_data = [0,0]
-    deleteZero_worm_data = [0,0]
-
-    insertZero_anti_data = [0,0]
-    deleteZero_anti_data = [0,0]
-
-    insertBeta_worm_data = [0,0]
-    deleteBeta_worm_data = [0,0]
-
-    insertBeta_anti_data = [0,0]
-    deleteBeta_anti_data = [0,0]
-
-    ikbh_data = [0,0] 
-    dkbh_data = [0,0]
-
-    ikah_data = [0,0]
-    dkah_data = [0,0]
-
-    ikbt_data = [0,0]
-    dkbt_data = [0,0]
-
-    ikat_data = [0,0]
-    dkat_data = [0,0]
+    dummy_data = [0,0]
 
     N_flats_calibration = 0     # Average number of flats
     N_calibration = 0           # Store total N to check mu is good
@@ -130,87 +113,77 @@ while(is_pre_equilibration):
     Z = 0.80                     # Minimum diagonal fraction desired
     calibration_samples = 0     # Pre-equilibration samples    
 
-    # Set how many times the set of updates will be attempted based on stage of the code
-    # M_pre = 5.0E+04
-
     # Randomly propose every update M_pre times
     for m in range(int(M_pre)):
         
         # assign a label to each update
-        label = np.random.randint(15) # There are 15 update functions
+        label = int(np.random.random()*15)
 
         # Non-Spaceshift moves
         if label == 0:
             pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,
-                insert_worm_data,insert_anti_data,N_flats_tracker)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker)
 
         elif label == 1:
             pimc.worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,delete_worm_data,delete_anti_data,N_flats_tracker)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker)
 
         elif label == 2:
             #pass
             pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,
-                N_tracker,advance_head_data,recede_head_data,
-                advance_tail_data,recede_tail_data,N_flats_tracker)
+                N_tracker,dummy_data,dummy_data,dummy_data,dummy_data,N_flats_tracker)
 
         elif label == 3:
-#                 pass
             pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker)
 
         elif label == 4:
-#                pass
             pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker)
 
         elif label == 5:
-#                pass
             pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker)
 
         elif label == 6:
-#                pass
             pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
-                N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker)
 
         # Spaceshift moves   
         elif label == 7:
             pimc.insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,ikbh_data,N_flats_tracker)  
+                N_tracker,dummy_data,N_flats_tracker)  
 
         elif label == 8:
             pimc.delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,dkbh_data,N_flats_tracker) 
+                N_tracker,dummy_data,N_flats_tracker) 
 
         elif label == 9:
             pimc.insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,ikah_data,N_flats_tracker)   
+                N_tracker,dummy_data,N_flats_tracker)   
 
         elif label == 10:
             pimc.delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,dkah_data,N_flats_tracker)
+                N_tracker,dummy_data,N_flats_tracker)
 
         elif label == 11:
             pimc.insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,ikbt_data,N_flats_tracker)  
+                N_tracker,dummy_data,N_flats_tracker)  
 
         elif label == 12:
             pimc.delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,dkbt_data,N_flats_tracker) 
+                N_tracker,dummy_data,N_flats_tracker) 
 
         elif label == 13:
             pimc.insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,ikat_data,N_flats_tracker)   
+                N_tracker,dummy_data,N_flats_tracker)   
 
         else:
             pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-                N_tracker,dkat_data,N_flats_tracker)
-        
-        
+                N_tracker,dummy_data,N_flats_tracker)
+              
         # Count <N_flats> and <N>
-        trash_percent = 0.5
+        trash_percent = 0.25
         if m >= int(M_pre*trash_percent): # Only count after half of pre-equilibration steps
             N_flats_calibration += N_flats_tracker[0]
             N_calibration += N_tracker[0]
@@ -232,7 +205,7 @@ while(is_pre_equilibration):
         need_eta = False
 
     # Print the current set of parameters
-    print("%.4f | %.4f | %.1f | %i | %.2f"%(eta,mu,N_calibration,N,Z_calibration))
+    print("%.6f | %.4f | %.1f | %i | %.2f"%(eta,mu,N_calibration,N,Z_calibration))
     
     if N_calibration != N or (Z_calibration < Z or Z_calibration >= 1.2*Z):
         
@@ -260,14 +233,31 @@ print("Pre-Equilibration done.\n")
 
 # ---------------- Lattice PIMC ---------------- #
 
+# Open files that will save data
+if canonical: # kinetic
+    
+    
+    if not(no_energies):
+        kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_canK.dat"%(L,N,U,mu,t,beta,M,rseed),"w+")
+        diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_canV.dat"%(L,N,U,mu,t,beta,M,rseed),"w+")
+    
+    if get_fock_state:
+        fock_state_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%d_fock.dat"%(L,N,U,mu,t,beta,M,rseed,timeID),"w+")
+        
+# Create a label for the Fock State files
+time = datetime.datetime.now()
+timeID = int((str(time).split(":")[1]+str(time).split(":")[2]).replace('.',''))
+
+# We may want to save data in binary via the Pickle package
+is_pickled = False
+
 print("LatticePIMC started...\n")
 
-
 # Initialize values to be measured
-diagonal_list = []
-kinetic_list = []
-tr_diagonal_list = []
-tr_kinetic_list = []
+bin_ctr = 0
+tau_slices = np.linspace(0,beta,n_slices)[1:-1][::2] # slices were observables are measured
+tr_kinetic_list = np.zeros_like(tau_slices)
+tr_diagonal_list = np.zeros_like(tau_slices)
 N_list = []              # average total particles 
 occ_list = []            # average particle occupation
 E_N_list = []            # Fixed total particle energies
@@ -316,13 +306,11 @@ dkat_data = [0,0]
 # Count measurements and measurement attempts
 measurements = [0,0] # [made,attempted]
 
-    
 # Randomly an update M times
-for m in range(int(M)):
+for m in range(int(M*L*beta)):
         
-    # INCLUDE FUNCTION HERE THAT CREATES MOVE MENU #
-    label = np.random.randint(15)
-  
+    label = int(np.random.random()*15)
+
     # Non-Spaceshift moves
     if label == 0:
         pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
@@ -334,28 +322,23 @@ for m in range(int(M)):
             N_tracker,delete_worm_data,delete_anti_data,N_flats_tracker)
 
     elif label == 2:
-        #pass
         pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,
             N_tracker,advance_head_data,recede_head_data,
             advance_tail_data,recede_tail_data,N_flats_tracker)
 
     elif label == 3:
-#                 pass
         pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
             N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker)
 
     elif label == 4:
-#                pass
         pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
             N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker)
 
     elif label == 5:
-#                pass
         pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
             N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker)
 
     elif label == 6:
-#                pass
         pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,
             N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker)
 
@@ -395,46 +378,77 @@ for m in range(int(M)):
     # Print completion percent
     if m%(int(M/10))==0:        
         print("%.2f%%"%(100*m/M))
+    else: pass
+                 
+                
+    # After 25% equilibration, measure every L*beta steps
+    if beta < 1: 
+        if m%(int(mfreq*L)):
+            try_measure=True
+        else:
+            try_measure=False
+    else:
+        if m%(int(mfreq*L*beta))==0:
+            try_measure=True
+        else:
+            try_measure=False
+            
+    if try_measure and m > int(M*0.25):  
         
-    # Attempt to measure every L*beta steps, and after equilibration
-    if m%int(L*beta)==0 and m > 0.25*M:
-
         # Add to MEASUREMENTS ATTEMPTS counter
         measurements[1] += 1
-
+        
         # Make measurement if no worm ends present
         if not(pimc.check_worm(head_loc,tail_loc)):
     
-            #print(N_tracker[0])
-
             if canonical: # Canonical simulation
-
-                if round(N_tracker[0],12)==N:
+     
+                #print(round(N_tracker[0],10),N_tracker[0])
+                if round(N_tracker[0],10)==N:
+                    
+                    bin_ctr += 1
 
                     # Add to MEASUREMENTS MADE counter
                     measurements[0] += 1
 
-                    # Energies, but measured at different tau slices
-                    kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
-                    tr_kinetic_list.append(np.array(kinetic))
-                    tr_diagonal_list.append(np.array(diagonal))
+                    if not(no_energies):
+                        
+                        # Energies, but measured at different tau slices (time resolved)
+                        tr_kinetic,tr_diagonal = pimc.tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L)
+                        tr_kinetic_list += tr_kinetic # cumulative sum
+                        tr_diagonal_list += tr_diagonal # cumulative sum
 
-                    # Total number of particles in worldline configuration
-                    N_list.append(N_tracker[0])     
-                    
-#                     # Energies using original method
-#                     tau_slice=beta/2
-#                     kinetic_og,diagonal_og = pimc.bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice)
-#                     kinetic_og_list.append(kinetic_og)
-#                     diagonal_og_list.append(diagonal_og)
+                        # Take the binned average of the time resolved energies
+                        if bin_ctr == bin_size:
 
-                    if not(is_pickled) and m > int(m/2):
-                        kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,dtau,U,mu,t,L)
-                        #print(kinetic,diagonal)
-                        with open('pickled_config.pickle', 'wb') as pfile:
-                            pickle.dump(data_struct,pfile,pickle.HIGHEST_PROTOCOL)
+                            tr_kinetic_list /= bin_size
+                            tr_diagonal_list /= bin_size
 
-                        is_pickled = True
+                            # Write to file(s)
+                            data_len = len(tr_kinetic_list)
+                            np.savetxt(kinetic_file,np.reshape(tr_kinetic_list,(1,data_len)),fmt="%.16f",delimiter=" ")
+                            np.savetxt(diagonal_file,np.reshape(tr_diagonal_list,(1,data_len)),fmt="%.16f",delimiter=" ")
+
+                            # Reset bin_ctr and time resolved energies arrays
+                            bin_ctr = 0
+                            tr_kinetic_list *= 0
+                            tr_diagonal_list *= 0
+                            
+                    if get_fock_state:
+
+                        # Measue the Fock state at tau=beta
+                        alpha = np.array(pimc.get_fock_state_beta(data_struct,L),dtype=int)
+                        
+                        # Write to file
+                        np.savetxt(fock_state_file,np.reshape(alpha,(1,L)),fmt="%i",delimiter=" ")                   
+
+#                     if not(is_pickled) and m > int(m/2):
+#                         kinetic,diagonal = pimc.tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L)
+#                         #print(kinetic,diagonal)
+#                         with open('pickled_config.pickle', 'wb') as pfile:
+#                             pickle.dump(data_struct,pfile,pickle.HIGHEST_PROTOCOL)
+
+#                         is_pickled = True
 
                 else: # Worldline doesn't have target particle number
                     pass
@@ -448,52 +462,66 @@ for m in range(int(M)):
 
                 # # Total number of particles in worldline configuration
                 # N_list.append(N_tracker[0])
+                
+        else: # There's a worm in the worldline configuration
+            pass
+        
+    else: # We  only measure every L*beta steps
+        pass
+                
+# Close the data files
+if not(no_energies):
+    kinetic_file.close()
+    diagonal_file.close()
+if get_fock_state:
+    fock_state_file.close()
 
 # Save diagonal fraction obtained from main loop
 Z_frac = 100*measurements[0]/measurements[1]
 print("100%%")
-print("\nLattice PIMC done. Saving data to disk...")
+print("\nLattice PIMC done.")
+
 
 # ---------------- Format data and save to disk ---------------- #
 
-# Promote lists to arrays so we can use np.savetxt
-diagonal_list = np.array(diagonal_list)            # <H_0>
-kinetic_list = np.array(kinetic_list)              # <H_1>
-total_list = np.array(kinetic_list+diagonal_list)  # <H_0> + <H_1> 
-N_list = np.array(N_list)                          # <N>
+# # Promote lists to arrays so we can use np.savetxt
+# diagonal_list = np.array(diagonal_list)            # <H_0>
+# kinetic_list = np.array(kinetic_list)              # <H_1>
+# total_list = np.array(kinetic_list+diagonal_list)  # <H_0> + <H_1> 
+# N_list = np.array(N_list)                          # <N>
 
-# Combine all arrays to a single array
-data_list = [diagonal_list/t,kinetic_list/t,total_list,N_list]
+# # Combine all arrays to a single array
+# data_list = [diagonal_list/t,kinetic_list/t,total_list,N_list]
 
-# Create file headers
-header_K = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s} {5:^10s}'.format(
-    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,dtau=%.2f,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,dtau,beta,M,Z_frac),
-    '0.1*tau/b','0.3*tau/b','0.5*tau/b','0.7*tau/b','1.0*tau/b')
-header_V = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s} {5:^10s}'.format(
-    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,dtau=%.2f,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,dtau,beta,M,Z_frac),
-    '0.1*tau/b','0.3*tau/b','0.5*tau/b','0.7*tau/b','1.0*tau/b')
-header_N = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s} {5:^10s}'.format(
-    "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,dtau=%.2f,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,dtau,beta,M,Z_frac),
-    '0.1*tau/b','0.3*tau/b','0.5*tau/b','0.7*tau/b','1.0*tau/b')
+# # Create file headers
+# header_K = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s} {5:^10s}'.format(
+#     "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,n_slices=%i,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,n_slices,beta,M,Z_frac),
+#     '0.1*tau/b','0.3*tau/b','0.5*tau/b','0.7*tau/b','1.0*tau/b')
+# header_V = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s} {5:^10s}'.format(
+#     "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,n_slices=%i,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,n_slices,beta,M,Z_frac),
+#     '0.1*tau/b','0.3*tau/b','0.5*tau/b','0.7*tau/b','1.0*tau/b')
+# header_N = '{0:^67s}\n{1:^6s} {2:^29s} {3:^10s} {4:^27s} {5:^10s}'.format(
+#     "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,n_slices=%i,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,n_slices,beta,M,Z_frac),
+#     '0.1*tau/b','0.3*tau/b','0.5*tau/b','0.7*tau/b','1.0*tau/b')
 
 
-# Save time resolved energies to disk
-if canonical: # kinetic
-    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canK.dat"%(L,N,U,mu,t,dtau,beta,M),"w+") as data:
-        np.savetxt(data,tr_kinetic_list,delimiter=" ",fmt="%-20s",header=header_K) 
-if canonical: # diagonal
-    with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canV.dat"%(L,N,U,mu,t,dtau,beta,M),"w+") as data:
-        np.savetxt(data,tr_diagonal_list,delimiter=" ",fmt="%-20s",header=header_V)
+# # Save time resolved energies to disk
+# if canonical: # kinetic
+#     with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_canK.dat"%(L,N,U,mu,t,beta,M),"w+") as data:
+#         np.savetxt(data,tr_kinetic_list,delimiter=" ",fmt="%-20s",header=header_K) 
+# if canonical: # diagonal
+#     with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_canV.dat"%(L,N,U,mu,t,beta,M),"w+") as data:
+#         np.savetxt(data,tr_diagonal_list,delimiter=" ",fmt="%-20s",header=header_V)
 # if canonical:
-#     with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canN.dat"%(L,N,U,mu,t,dtau,beta,M),"w+") as data:
+#     with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canN.dat"%(L,N,U,mu,t,n_slices,beta,M),"w+") as data:
 #         np.savetxt(data,np.transpose(N_list),delimiter=" ",fmt="%-20s",header=header_K) 
         
 # # Save energies using original method to disk
 # header_og = '{0:^67s}\n{1:^6s} {2:^29s}'.format(
-#     "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,dtau=%.2f,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,dtau,beta,M,Z_frac),
+#     "L=%i,N=%i,U=%.4f,mu=%.4f,t=%.4f,eta=%.4f,n_slices=%.2f,beta=%.2f,M=%i,Z_frac=%.2f%%"%(L,N,U,mu,t,eta,n_slices,beta,M,Z_frac),
 # 'H_0/t','H_1/t')
 # if canonical: # kinetic
-#     with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canK_og.dat"%(L,N,U,mu,t,dtau,beta,M),"w+") as data:
+#     with open("%i_%i_%.4f_%.4f_%.4f_%.4f_%.4f_%i_canK_og.dat"%(L,N,U,mu,t,n_slices,beta,M),"w+") as data:
 #         np.savetxt(data,np.transpose([diagonal_og_list,kinetic_og_list]),delimiter=" ",fmt="%-20s",header=header_og) 
 
 

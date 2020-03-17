@@ -31,7 +31,7 @@ parser.add_argument("--eta",help="Worm end fugacity (default: 1/sqrt(<N_flats>)"
                     type=float,metavar='\b')
 parser.add_argument("--beta",help="Thermodynamic beta 1/(K_B*T) (default: 1.0)",
                     type=float,metavar='\b')
-parser.add_argument("--n-slices",help="Measurement window)",
+parser.add_argument("--n-slices",help="Measurement window",
                     type=int,metavar='\b')
 parser.add_argument("--M",help="Number of Monte Carlo steps (default: 1E+05)",
                     type=int,metavar='\b') 
@@ -47,6 +47,8 @@ parser.add_argument("--get-fock-state",help="Measure Fock state at beta (Default
                     action='store_true') 
 parser.add_argument("--rseed",help="Set the random number generator's seed (default: 0)",
                     type=int,metavar='\b') 
+parser.add_argument("--mfreq",help="Measurements made every other mfreq*L*beta steps (default: 2000)",
+                    type=int,metavar='\b')
 
 # Parse arguments
 args = parser.parse_args()
@@ -68,6 +70,7 @@ bin_size = 10 if not(args.bin_size) else args.bin_size
 no_energies = False if not(args.no_energies) else True
 get_fock_state = False if not(args.get_fock_state) else True
 rseed = int(0) if not(args.rseed) else args.rseed
+mfreq = int(2000) if not(args.mfreq) else args.mfreq
 
 # Set the random seed
 np.random.seed(rseed)
@@ -97,8 +100,8 @@ print("\nStarting pre-equilibration stage. Determining eta and mu...\n")
 
 print("  eta  |   mu   | N_calibration | N_target | Z_calibration")
 
-is_pre_equilibration = True
-need_eta = True
+is_pre_equilibration = True # CHANGE TO TRUE
+need_eta = True # CHANGE TO TRUE
 while(is_pre_equilibration):
 
     # Counters for acceptance and proposal of each move
@@ -114,7 +117,7 @@ while(is_pre_equilibration):
     for m in range(int(M_pre)):
         
         # assign a label to each update
-        label = np.random.randint(15) # There are 15 update functions
+        label = int(np.random.random()*15)
 
         # Non-Spaceshift moves
         if label == 0:
@@ -202,7 +205,7 @@ while(is_pre_equilibration):
         need_eta = False
 
     # Print the current set of parameters
-    print("%.4f | %.4f | %.1f | %i | %.2f"%(eta,mu,N_calibration,N,Z_calibration))
+    print("%.6f | %.4f | %.1f | %i | %.2f"%(eta,mu,N_calibration,N,Z_calibration))
     
     if N_calibration != N or (Z_calibration < Z or Z_calibration >= 1.2*Z):
         
@@ -304,9 +307,9 @@ dkat_data = [0,0]
 measurements = [0,0] # [made,attempted]
 
 # Randomly an update M times
-for m in range(int(M)):
+for m in range(int(M*L*beta)):
         
-    label = np.random.randint(15)
+    label = int(np.random.random()*15)
 
     # Non-Spaceshift moves
     if label == 0:
@@ -380,12 +383,12 @@ for m in range(int(M)):
                 
     # After 25% equilibration, measure every L*beta steps
     if beta < 1: 
-        if m%(int(1000*L)):
+        if m%(int(mfreq*L)):
             try_measure=True
         else:
             try_measure=False
     else:
-        if m%(int(1000*L*beta))==0:
+        if m%(int(mfreq*L*beta))==0:
             try_measure=True
         else:
             try_measure=False

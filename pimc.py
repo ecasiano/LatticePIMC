@@ -13,7 +13,7 @@ def random_boson_config(L,N):
 
     alpha = np.zeros(L,dtype=int) # Stores the random configuration of bosons
     for i in range(N):
-        r = np.random.randint(L)
+        r = int(np.random.random()*L)
         alpha[r] += 1
 
     return alpha
@@ -97,53 +97,53 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice):
 
 def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L):
     
-	'''Calculates the kinetic and diagonal energies'''
+    '''Calculates the kinetic and diagonal energies'''
 
-	# Generate tau slices (measurement centers)
-	tau_slices = np.linspace(0,beta,n_slices)
+    # Generate tau slices (measurement centers)
+    tau_slices = np.linspace(0,beta,n_slices)
 
-	# Set the measurement window
-	dtau = tau_slices[1]-tau_slices[0]
-	window_size = 2*dtau
+    # Set the measurement window
+    dtau = tau_slices[1]-tau_slices[0]
+    window_size = 2*dtau
 
-	# Generate bins
-	tau_slices_bins = tau_slices[::2]
+    # Generate bins
+    tau_slices_bins = tau_slices[::2]
 
-	# Initialize list that will store the kink times
-	kinks = []
+    # Initialize list that will store the kink times
+    kinks = []
 
-	# Initialize list that will contain Fock states at all tau_slices
-	alpha = [0]*L
-	alphas = [alpha for tau_slice in tau_slices]
+    # Initialize list that will contain Fock states at all tau_slices
+    alpha = [0]*L
+    alphas = [alpha for tau_slice in tau_slices]
 
-	# Kinetic
-	for i in range(L):
-	   for k in range(len(data_struct[i])):
+    # Kinetic
+    for i in range(L):
+       for k in range(len(data_struct[i])):
 
-	       # Get imaginary time at which kink happens
-	       tau = data_struct[i][k][0]
+           # Get imaginary time at which kink happens
+           tau = data_struct[i][k][0]
 
-	       if tau > 0: # Don't count initial element
-	           kinks.append(tau)
+           if tau > 0: # Don't count initial element
+               kinks.append(tau)
 
-	       else: pass
+           else: pass
 
-	# Generate histogram of kinks
-	kinks = np.array(kinks)
-	kinetic = -np.histogram(kinks,bins=tau_slices_bins)[0]/2 # correct kink overcount
-	kinetic /= window_size
+    # Generate histogram of kinks
+    kinks = np.array(kinks)
+    kinetic = -np.histogram(kinks,bins=tau_slices_bins)[0]/2 # correct kink overcount
+    kinetic /= window_size
 
-	# Diagonal
-	#     for i in range(L):
-	#         for k in range(len(data_struct[i])):
-	#             tau = data_struct[i][k][0]    
-	        # if tau <= tau_slice:
-	     #    n_i = data_struct[i][k][1] # no. of particles in the flat
-	     #    alpha[i] = n_i
+    # Diagonal
+    #     for i in range(L):
+    #         for k in range(len(data_struct[i])):
+    #             tau = data_struct[i][k][0]    
+            # if tau <= tau_slice:
+         #    n_i = data_struct[i][k][1] # no. of particles in the flat
+         #    alpha[i] = n_i
 
-	diagonal = np.zeros_like(tau_slices[1:-1][::2])
+    diagonal = np.zeros_like(tau_slices[1:-1][::2])
 
-	return np.array(kinetic),np.array(diagonal)
+    return np.array(kinetic),np.array(diagonal)
 
 '----------------------------------------------------------------------------------'
 
@@ -257,11 +257,11 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
     if head_loc or tail_loc: return None
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
-    i = np.random.randint(L)
+    i = int(np.random.random()*L)
 
     # Randomly select a flat tau interval at which to possibly insert worm
     N_flats = len(data_struct[i])            # Number of flats on site i
-    k = np.random.randint(N_flats)           # Index of lower bound of chosen flat
+    k = int(np.random.random()*N_flats)      # Index of lower bound of chosen flat
     tau_prev = data_struct[i][k][0]
     if k == N_flats - 1:
         tau_next = beta     # In case that the last flat is chosen
@@ -305,14 +305,6 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
     # Reject update if both worm ends are at the same tau
     if tau_h == tau_t : return False
 
-    # Build the worm end kinks to be inserted on i
-    if insert_worm: # worm
-        tail_kink = [tau_t,N_after_tail,(i,i)]
-        head_kink = [tau_h,N_after_head,(i,i)]
-    else: # antiworm
-        head_kink = [tau_h,N_after_head,(i,i)]
-        tail_kink = [tau_t,N_after_tail,(i,i)]
-
     # Determine the length of path to be modified
     l_path = abs(tau_h-tau_t)
 
@@ -335,6 +327,15 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
 
     # Metropolis sampling
     if np.random.random() < R: # Accept
+
+        # Build the worm end kinks to be inserted on i
+        if insert_worm: # worm
+            tail_kink = [tau_t,N_after_tail,(i,i)]
+            head_kink = [tau_h,N_after_head,(i,i)]
+        else: # antiworm
+            head_kink = [tau_h,N_after_head,(i,i)]
+            tail_kink = [tau_t,N_after_tail,(i,i)]
+
         # Insert worm
         if insert_worm:
             if k == N_flats - 1: # if selected flat is the last, use append
@@ -455,11 +456,6 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
     R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L * N_flats * tau_flat**2
     R = 1/R
 
-    name = str(int(N_after_tail))+'_'+str(int(N_after_head))+'_'
-    name += str(tau_prev)+'_'+str(tau_next)+'.pdf'
-    name=str(int(N_flats))+'.pdf'
-    #print(eta)
-    #view_worldlines(data_struct,beta,figure_name=name)
     # Metropolis sampling
     if np.random.random() < R:
 
@@ -627,7 +623,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     if head_loc and tail_loc: return None
 
     # Randomly select site i on which to insert a zero worm or antiworm
-    i = np.random.randint(L)
+    i = int(np.random.random()*L)
 
     # Determine the length of the first flat interval
     if len(data_struct[i]) == 1: # Worldline is flat throughout
@@ -695,14 +691,6 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
             else: # head was present and on first flat, deleteBeta can choose either end
                 p_wormend = 0.5
 
-    # Build the kinks to be inserted to the data structure if the move is accepted
-    if insert_worm:
-        worm_end_kink = [tau,N_after_head,(i,i)]    # kinks to be inserted to
-        first_flat = [0,N_after_tail,(i,i)]         # the data structure
-    else:
-        worm_end_kink = [tau,N_after_tail,(i,i)]
-        first_flat = [0,N_after_head,(i,i)]
-
     # Determine the length of path to be modified
     l_path = tau
 
@@ -757,6 +745,15 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     # Metropolis sampling
     if np.random.random() < R: # Accept
 
+        # Build the kinks to be inserted to the data structure if the move is accepted
+        if insert_worm:
+            worm_end_kink = [tau,N_after_head,(i,i)]    # kinks to be inserted to
+            first_flat = [0,N_after_tail,(i,i)]         # the data structure
+        else:
+            worm_end_kink = [tau,N_after_tail,(i,i)]
+            first_flat = [0,N_after_head,(i,i)]
+
+        # Insert the kinks
         if len(data_struct[i]) == 1: # Worldline is flat throughout
             data_struct[i].append(worm_end_kink)
         else:
@@ -983,7 +980,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     if head_loc and tail_loc: return None
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
-    i = np.random.randint(L)
+    i = int(np.random.random()*L)
 
     # Get the kink index of the last flat interval
     k_last = len(data_struct[i]) - 1
@@ -1056,12 +1053,6 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
             else: # head was present and on last flat, deleteBeta can choose either end
                 p_wormend = 0.5
 
-    # Build the kinks to be appended to the data structure if the move is accepted
-    if insert_worm:
-        worm_end_kink = [tau,N_after_tail,(i,i)]  # kinks to be inserted to
-    else: # antiworm
-        worm_end_kink = [tau,N_after_head,(i,i)]
-
     # Determine the length of path to be modified
     l_path = beta-tau
 
@@ -1115,6 +1106,14 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     # Metropolis sampling
     if np.random.random() < R: # Accept
+
+        # Build the kinks to be appended to the data structure if the move is accepted
+        if insert_worm:
+            worm_end_kink = [tau,N_after_tail,(i,i)]  # kinks to be inserted to
+        else: # antiworm
+            worm_end_kink = [tau,N_after_head,(i,i)]
+
+        # Insert structure
         data_struct[i].append(worm_end_kink)
 
         # Save head and tail locations (site index, kink index)
