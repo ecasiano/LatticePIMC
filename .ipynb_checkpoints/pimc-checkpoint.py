@@ -99,7 +99,7 @@ def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L):
     
     '''Calculates the kinetic and diagonal energies'''
 
-    # Generate tau slices (measurement centers)
+    # Generate tau slices (measurement centers, kind of)
     tau_slices = np.linspace(0,beta,n_slices)
 
     # Set the measurement window
@@ -111,38 +111,52 @@ def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L):
 
     # Initialize list that will store the kink times
     kinks = []
-
-    # Initialize list that will contain Fock states at all tau_slices
-    alpha = [0]*L
-    alphas = [alpha for tau_slice in tau_slices]
-
+    
+    # Actual measurement centers
+    tau_slices = tau_slices[1:-1][::2]
+    
+    # Initialize array that will contain Fock states at all tau_slices
+    alphas = np.zeros((len(tau_slices),L))
+    for col in range(L):
+        alphas[:,col]=tau_slices # for now, just store the tau_slices
+            
     # Kinetic
     for i in range(L):
        for k in range(len(data_struct[i])):
 
-           # Get imaginary time at which kink happens
-           tau = data_struct[i][k][0]
+            # Related to KINETIC energy calculation #
+        
+            # Get imaginary time at which kink happens
+            tau = data_struct[i][k][0]
 
-           if tau > 0: # Don't count initial element
+            if tau > 0: # Don't count initial element
                kinks.append(tau)
 
-           else: pass
+            else: pass
+        
+            # Related to DIAGONAL energy calculation #
+        
+            # Get number of particles on this site and flat
+            n_i = data_struct[i][k][1]
+            
+            # Determine the time of the next kink
+            if k!=len(data_struct[i])-1:
+                tau_next = data_struct[i][k+1][0]
+            else:
+                tau_next = beta
 
+            # Get Fock States at each time slice of the site
+            alphas[:,i][(alphas[:,i]>=tau)&(alphas[:,i]<tau_next)] = n_i
+        
     # Generate histogram of kinks
     kinks = np.array(kinks)
     kinetic = -np.histogram(kinks,bins=tau_slices_bins)[0]/2 # correct kink overcount
     kinetic /= window_size
-
+    
     # Diagonal
-    #     for i in range(L):
-    #         for k in range(len(data_struct[i])):
-    #             tau = data_struct[i][k][0]    
-            # if tau <= tau_slice:
-         #    n_i = data_struct[i][k][1] # no. of particles in the flat
-         #    alpha[i] = n_i
-
-    diagonal = np.zeros_like(tau_slices[1:-1][::2])
-
+    diagonal = (U/2)*alphas*(alphas-1) - mu*alphas
+    diagonal = np.sum(diagonal,axis=1)
+    
     return np.array(kinetic),np.array(diagonal)
 
 '----------------------------------------------------------------------------------'

@@ -100,8 +100,13 @@ print("\nStarting pre-equilibration stage. Determining eta and mu...\n")
 
 print("  eta  |   mu   | N_calibration | N_target | Z_calibration")
 
+# Redefine M to be an actual Monte Carlo step
+M_pre = M_pre*L*beta
+
+# Flags that check is equilibration is still needed
 is_pre_equilibration = True # CHANGE TO TRUE
 need_eta = True # CHANGE TO TRUE
+
 while(is_pre_equilibration):
 
     # Counters for acceptance and proposal of each move
@@ -306,8 +311,11 @@ dkat_data = [0,0]
 # Count measurements and measurement attempts
 measurements = [0,0] # [made,attempted]
 
+# Redefine M to be an actual Monte Carlo step
+M = M*L*beta
+
 # Randomly an update M times
-for m in range(int(M*L*beta)):
+for m in range(int(M)):
         
     label = int(np.random.random()*15)
 
