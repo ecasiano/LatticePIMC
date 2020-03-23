@@ -146,8 +146,11 @@ def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L):
                 tau_next = beta
 
             # Get Fock States at each time slice of the site
-            alphas[:,i][(alphas[:,i]>=tau)&(alphas[:,i]<tau_next)] = n_i
-        
+            alphas[:,i][(alphas[:,i]>=tau)&(alphas[:,i]<tau_next)&(alphas[:,i]>0)] = -n_i
+     
+    # Particles were saved as negatives to avoid replacing them with slicing (for speed)
+    alphas = -alphas # Make them all positive. 
+    
     # Generate histogram of kinks
     kinks = np.array(kinks)
     kinetic = -np.histogram(kinks,bins=tau_slices_bins)[0]/2 # correct kink overcount
@@ -272,7 +275,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
     i = int(np.random.random()*L)
-
+    
     # Randomly select a flat tau interval at which to possibly insert worm
     N_flats = len(data_struct[i])            # Number of flats on site i
     k = int(np.random.random()*N_flats)      # Index of lower bound of chosen flat

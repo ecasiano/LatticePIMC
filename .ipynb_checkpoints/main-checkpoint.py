@@ -210,7 +210,7 @@ while(is_pre_equilibration):
         need_eta = False
 
     # Print the current set of parameters
-    print("%.6f | %.4f | %.1f | %i | %.2f"%(eta,mu,N_calibration,N,Z_calibration))
+    print("%.14f | %.4f | %.1f | %i | %.2f"%(eta,mu,N_calibration,N,Z_calibration))
     
     if N_calibration != N or (Z_calibration < Z or Z_calibration >= 1.2*Z):
         
