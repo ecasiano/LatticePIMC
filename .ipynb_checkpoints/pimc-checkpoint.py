@@ -149,7 +149,7 @@ def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L):
             alphas[:,i][(alphas[:,i]>=tau)&(alphas[:,i]<tau_next)&(alphas[:,i]>0)] = -n_i
      
     # Particles were saved as negatives to avoid replacing them with slicing (for speed)
-    alphas = -alphas # Make them all positive. 
+    alphas *= -1 # Make them all positive. 
     
     # Generate histogram of kinks
     kinks = np.array(kinks)

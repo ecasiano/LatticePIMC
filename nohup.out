@@ -250687,3 +250687,327 @@ Z-fraction: 56.74% (2127913/3749999)
               IKAT: (68957701/208508221)
               DKAT: (68959738/104308116)
 
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:33179): Gdk-CRITICAL **: 22:26:43.046: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:33329): Gdk-CRITICAL **: 22:26:48.502: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:33519): Gdk-CRITICAL **: 22:26:55.608: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:33749): Gdk-CRITICAL **: 22:27:05.665: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Seed:  17
+
+Starting pre-equilibration stage. Determining eta and mu...
+
+  eta  |   mu   | N_calibration | N_target | Z_calibration
+0.02260000000000 | 1.7000 | 3.6 | 4 | 0.11
+0.02034000000000 | 1.8000 | 3.8 | 4 | 0.79
+0.01830600000000 | 1.9000 | 3.8 | 4 | 0.84
+0.02013660000000 | 2.0000 | 3.9 | 4 | 0.80
+0.02215026000000 | 2.1000 | 3.9 | 4 | 0.77
+0.01993523400000 | 2.2000 | 3.9 | 4 | 0.82
+0.02192875740000 | 2.3000 | 3.9 | 4 | 0.80
+0.02412163314000 | 2.4000 | 3.9 | 4 | 0.79
+0.02170946982600 | 2.5000 | 4.0 | 4 | 0.84
+Pre-Equilibration done.
+
+LatticePIMC started...
+
+0.00%
+10.00%
+20.00%
+30.00%
+40.00%
+50.00%
+60.00%
+70.00%
+80.00%
+90.00%
+100%%
+
+Lattice PIMC done.
+
+Ensemble: Canonical
+
+-------- Z-configuration fraction --------
+Z-fraction: 81.95% (122922/149999) 
+
+-------- Acceptance Ratios --------
+
+       Insert worm: (145683/43973767)
+       Delete worm: (141695/147640)
+
+       Insert anti: (178063/43963988)
+       Delete anti: (169463/173771)
+
+       Advance head: (4674718/4674718)
+        Recede head: (4674676/4674676)
+
+       Advance tail: (4685187/4685187)
+        Recede tail: (4683344/4683344)
+
+   InsertZero worm: (1274006/60536811)
+   DeleteZero worm: (1280362/1515578)
+
+   InsertZero anti: (1956959/44094998)
+   DeleteZero anti: (1963315/2319402)
+
+   InsertBeta worm: (1274286/60562367)
+   DeleteBeta worm: (1280518/1512310)
+
+   InsertBeta anti: (1954877/44076064)
+   DeleteBeta anti: (1961109/2321149)
+
+              IKBH: (3073363/10373082)
+              DKBH: (3072606/4731910)
+
+              IKAH: (2804669/10367531)
+              DKAH: (2805152/3948798)
+
+              IKBT: (2810452/10388300)
+              DKBT: (2810219/3950555)
+
+              IKAT: (3078111/10390816)
+              DKAT: (3078627/4744604)
+
+Seed:  0
+
+Starting pre-equilibration stage. Determining eta and mu...
+
+  eta  |   mu   | N_calibration | N_target | Z_calibration
+0.02260000000000 | 1.7000 | 3.6 | 4 | 0.11
+0.02034000000000 | 1.8000 | 3.8 | 4 | 0.80
+0.02237400000000 | 1.9000 | 3.8 | 4 | 0.76
+0.02013660000000 | 2.0000 | 3.9 | 4 | 0.80
+0.02215026000000 | 2.1000 | 3.9 | 4 | 0.79
+0.01993523400000 | 2.2000 | 3.9 | 4 | 0.82
+0.02192875740000 | 2.3000 | 3.9 | 4 | 0.79
+0.01973588166000 | 2.4000 | 4.0 | 4 | 0.84
+Pre-Equilibration done.
+
+LatticePIMC started...
+
+0.00%
+10.00%
+20.00%
+30.00%
+40.00%
+50.00%
+60.00%
+70.00%
+80.00%
+90.00%
+100%%
+
+Lattice PIMC done.
+
+Ensemble: Canonical
+
+-------- Z-configuration fraction --------
+Z-fraction: 82.84% (124266/149999) 
+
+-------- Acceptance Ratios --------
+
+       Insert worm: (120862/44344393)
+       Delete worm: (117137/124600)
+
+       Insert anti: (152983/44333600)
+       Delete anti: (145357/149047)
+
+       Advance head: (4500481/4500481)
+        Recede head: (4498929/4498929)
+
+       Advance tail: (4496489/4496489)
+        Recede tail: (4499354/4499354)
+
+   InsertZero worm: (1149907/60732508)
+   DeleteZero worm: (1155362/1413816)
+
+   InsertZero anti: (1839961/44142505)
+   DeleteZero anti: (1845416/2183267)
+
+   InsertBeta worm: (1146738/60725463)
+   DeleteBeta worm: (1152634/1412485)
+
+   InsertBeta anti: (1835490/44115994)
+   DeleteBeta anti: (1841386/2177110)
+
+              IKBH: (2909933/9891784)
+              DKBH: (2910893/4524782)
+
+              IKAH: (2739069/9894022)
+              DKAH: (2738166/3827707)
+
+              IKBT: (2742440/9902295)
+              DKBT: (2741335/3836337)
+
+              IKAT: (2915554/9900246)
+              DKAT: (2916601/4533764)
+
+Seed:  326
+
+Starting pre-equilibration stage. Determining eta and mu...
+
+  eta  |   mu   | N_calibration | N_target | Z_calibration
+0.02260000000000 | 1.7000 | 3.7 | 4 | 0.11
+0.02034000000000 | 1.8000 | 3.9 | 4 | 0.73
+0.01830600000000 | 1.9000 | 3.9 | 4 | 0.76
+0.01647540000000 | 2.0000 | 3.9 | 4 | 0.84
+0.01812294000000 | 2.1000 | 3.9 | 4 | 0.81
+0.01993523400000 | 2.2000 | 4.0 | 4 | 0.80
+Pre-Equilibration done.
+
+LatticePIMC started...
+
+0.00%
+10.00%
+20.00%
+30.00%
+40.00%
+50.00%
+60.00%
+70.00%
+80.00%
+90.00%
+100%%
+
+Lattice PIMC done.
+
+Ensemble: Canonical
+
+-------- Z-configuration fraction --------
+Z-fraction: 80.93% (121392/149999) 
+
+-------- Acceptance Ratios --------
+
+       Insert worm: (116295/43160668)
+       Delete worm: (113443/128524)
+
+       Insert anti: (160016/43156253)
+       Delete anti: (152375/157021)
+
+       Advance head: (5072784/5072784)
+        Recede head: (5077964/5077964)
+
+       Advance tail: (5103928/5103928)
+        Recede tail: (5100302/5100302)
+
+   InsertZero worm: (1131599/60385312)
+   DeleteZero worm: (1137064/1532272)
+
+   InsertZero anti: (1928311/44211263)
+   DeleteZero anti: (1933776/2319159)
+
+   InsertBeta worm: (1130139/60385858)
+   DeleteBeta worm: (1135167/1532305)
+
+   InsertBeta anti: (1919006/44210692)
+   DeleteBeta anti: (1924034/2307550)
+
+              IKBH: (3254175/11183970)
+              DKBH: (3252635/5134467)
+
+              IKAH: (3243132/11182517)
+              DKAH: (3243420/4492039)
+
+              IKBT: (3267126/11243437)
+              DKBT: (3267470/4519168)
+
+              IKAT: (3268178/11251099)
+              DKAT: (3269086/5166548)
+
+Seed:  1968
+
+Starting pre-equilibration stage. Determining eta and mu...
+
+  eta  |   mu   | N_calibration | N_target | Z_calibration
+0.02260000000000 | 1.7000 | 3.7 | 4 | 0.09
+0.02034000000000 | 1.8000 | 3.7 | 4 | 0.79
+0.01830600000000 | 1.9000 | 3.9 | 4 | 0.78
+0.01647540000000 | 2.0000 | 3.9 | 4 | 0.80
+0.01812294000000 | 2.1000 | 4.0 | 4 | 0.82
+Pre-Equilibration done.
+
+LatticePIMC started...
+
+0.00%
+10.00%
+20.00%
+30.00%
+40.00%
+50.00%
+60.00%
+70.00%
+80.00%
+90.00%
+100%%
+
+Lattice PIMC done.
+
+Ensemble: Canonical
+
+-------- Z-configuration fraction --------
+Z-fraction: 77.48% (116225/149999) 
+
+-------- Acceptance Ratios --------
+
+       Insert worm: (101720/43647473)
+       Delete worm: (98714/107405)
+
+       Insert anti: (132623/43648475)
+       Delete anti: (125891/129673)
+
+       Advance head: (4838713/4838713)
+        Recede head: (4845643/4845643)
+
+       Advance tail: (4843534/4843534)
+        Recede tail: (4841865/4841865)
+
+   InsertZero worm: (1106378/60933590)
+   DeleteZero worm: (1111081/1423010)
+
+   InsertZero anti: (1741195/43901180)
+   DeleteZero anti: (1745898/2097975)
+
+   InsertBeta worm: (1108729/60910781)
+   DeleteBeta worm: (1113764/1429587)
+
+   InsertBeta anti: (1742256/43913592)
+   DeleteBeta anti: (1747291/2098889)
+
+              IKBH: (3069628/10602550)
+              DKBH: (3069662/4882014)
+
+              IKAH: (3149301/10597830)
+              DKAH: (3149184/4342381)
+
+              IKBT: (3147026/10598150)
+              DKBT: (3145917/4338803)
+
+              IKAT: (3067974/10601391)
+              DKAT: (3069166/4872086)
+
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:22622): Gdk-CRITICAL **: 09:45:58.511: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:22851): Gdk-CRITICAL **: 09:46:07.036: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:22958): Gdk-CRITICAL **: 09:46:10.895: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:23113): Gdk-CRITICAL **: 09:46:16.123: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
