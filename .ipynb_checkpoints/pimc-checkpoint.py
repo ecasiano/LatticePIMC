@@ -1,4 +1,4 @@
-# Functions to be used in main file (lattice_pimc.py)
+# Load libraries
 import numpy as np
 import bisect
 import matplotlib.pyplot as plt
