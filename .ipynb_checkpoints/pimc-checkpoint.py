@@ -1,4 +1,4 @@
-# Load libraries
+# Functions to be used in main file (lattice_pimc.py)
 import numpy as np
 import bisect
 import matplotlib.pyplot as plt
@@ -8,35 +8,45 @@ import math
 from scipy.special import binom
 import sys
 
-def random_boson_config(L,N):
-    '''Generates a random configuration of N bosons in a 1D lattice of size L'''
+def random_boson_config(L,D,N):
+    '''Generates a random configuration of N bosons in a 1D lattice of size L**D'''
 
-    alpha = np.zeros(L,dtype=int) # Stores the random configuration of bosons
+    alpha = np.zeros(L**D,dtype=int) # Stores the random configuration of bosons
     for i in range(N):
-        r = int(np.random.random()*L)
+        r = int(np.random.random()*L**D)
         alpha[r] += 1
 
     return alpha
 
+# L=3
+# N=3
+# D=2
+# beta=1
+# alpha = random_boson_config(L,D,N)
+# print(alpha)
+
 '----------------------------------------------------------------------------------'
 
-def create_data_struct(alpha,L):
+def create_data_struct(alpha,L,D):
     '''Generate the [tau,N,(src,dest)] data_struct from the configuration'''
 
     data_struct = []
-    for i in range(L):
+    for i in range(L**D):
         data_struct.append([[0,alpha[i],(i,i)]])
 
     return data_struct
 
+# data_struct = create_data_struct(alpha,L,D)
+# print(data_struct)
+
 '----------------------------------------------------------------------------------'
 
-def N_tracker(data_struct,beta,L):
+def N_tracker(data_struct,beta,L,D):
     '''Count total particles in the worldline configuration'''
 
     # Add paths
     l = 0
-    for i in range(L):
+    for i in range(L**D):
         N_flats = len(data_struct[i]) # Number of flat intervals on the site
         for k in range(N_flats):
             if k < N_flats-1:
@@ -51,6 +61,8 @@ def N_tracker(data_struct,beta,L):
     N = l/beta
 
     return N
+
+# print(N_tracker(data_struct,beta,L,D))
 
 '----------------------------------------------------------------------------------'
 
@@ -95,7 +107,7 @@ def bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice):
 
 '----------------------------------------------------------------------------------'
 
-def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L):
+def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L,D):
     
     '''Calculates the kinetic and diagonal energies'''
 
@@ -116,12 +128,12 @@ def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L):
     tau_slices = tau_slices[1:-1][::2]
     
     # Initialize array that will contain Fock states at all tau_slices
-    alphas = np.zeros((len(tau_slices),L))
-    for col in range(L):
+    alphas = np.zeros((len(tau_slices),L**D))
+    for col in range(L**Ds):
         alphas[:,col]=tau_slices # for now, just store the tau_slices
             
     # Kinetic
-    for i in range(L):
+    for i in range(L**D):
        for k in range(len(data_struct[i])):
 
             # Related to KINETIC energy calculation #
@@ -149,7 +161,7 @@ def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L):
             alphas[:,i][(alphas[:,i]>=tau)&(alphas[:,i]<tau_next)&(alphas[:,i]>0)] = -n_i
      
     # Particles were saved as negatives to avoid replacing them with slicing (for speed)
-    alphas *= -1 # Make them all positive. 
+    alphas = -alphas # Make them all positive. 
     
     # Generate histogram of kinks
     kinks = np.array(kinks)
@@ -164,12 +176,12 @@ def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L):
 
 '----------------------------------------------------------------------------------'
 
-def get_fock_state_beta(data_struct,L):
+def get_fock_state_beta(data_struct,L,D):
     
     '''Get the Fock state at end of path (i.e, tau=beta)'''
     
-    alpha = np.zeros(L) # Stores Fock State
-    for i in range(L):
+    alpha = np.zeros(L**D) # Stores Fock State
+    for i in range(L**D):
         n_i = data_struct[i][-1][1]
         alpha[i]=n_i
     
@@ -265,16 +277,16 @@ def C_SF(N,L,alpha):
 
 '----------------------------------------------------------------------------------'
 
-def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-    insert_worm_data,insert_anti_data,N_flats_tracker):
+def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
+    insert_worm_data,insert_anti_data,N_flats_tracker,A):
 
     '''Inserts a worm or antiworm'''
 
     # Can only insert worm if there are NO wormends present
     if head_loc or tail_loc: return None
-
+    
     # Randomly select a lattice site i on which to insert a worm or antiworm
-    i = int(np.random.random()*L)
+    i = int(np.random.random()*L**D)
     
     # Randomly select a flat tau interval at which to possibly insert worm
     N_flats = len(data_struct[i])            # Number of flats on site i
@@ -340,7 +352,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
 
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 1,1       # tunable delete and insert probabilities
-    R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L * N_flats * tau_flat**2
+    R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
 
     # Metropolis sampling
     if np.random.random() < R: # Accept
@@ -397,8 +409,8 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
 
 '----------------------------------------------------------------------------------'
 
-def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-    delete_worm_data,delete_anti_data,N_flats_tracker):
+def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
+    delete_worm_data,delete_anti_data,N_flats_tracker,A):
 
     # Can only propose worm deletion if both worm ends are present
     if not(head_loc) or not(tail_loc) : return None
@@ -470,7 +482,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
 
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 1,1      # tunable delete and insert probabilities
-    R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L * N_flats * tau_flat**2
+    R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
     R = 1/R
 
     # Metropolis sampling
@@ -505,8 +517,8 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_trac
 
 '----------------------------------------------------------------------------------'
 
-def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,N_tracker,
-    advance_head_data,recede_head_data,advance_tail_data,recede_tail_data,N_flats_tracker):
+def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,D,N,canonical,N_tracker,
+    advance_head_data,recede_head_data,advance_tail_data,recede_tail_data,N_flats_tracker,A):
 
     # Reject update if there are is no worm end present
     if head_loc == [] and tail_loc == [] : return None
@@ -633,14 +645,14 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,N,canonical,N_track
 
 '----------------------------------------------------------------------------------'
 
-def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-    insertZero_worm_data,insertZero_anti_data,N_flats_tracker):
+def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
+    insertZero_worm_data,insertZero_anti_data,N_flats_tracker,A):
 
     # Cannot insert if there's two worm ends present
     if head_loc and tail_loc: return None
-
+    
     # Randomly select site i on which to insert a zero worm or antiworm
-    i = int(np.random.random()*L)
+    i = int(np.random.random()*L**D)
 
     # Determine the length of the first flat interval
     if len(data_struct[i]) == 1: # Worldline is flat throughout
@@ -723,7 +735,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     # Count the TOTAL number of particles at tau=0
     N_pre = 0
-    for f in range(L):
+    for f in range(L**D):
         N_pre += data_struct[f][0][1] # add particles at first flat of each site
     if insert_worm:
         N_post = N_pre+1
@@ -757,7 +769,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
-    R = W * (p_dz/p_iz) * L * p_wormend * tau_flat / p_type
+    R = W * (p_dz/p_iz) * L**D * p_wormend * tau_flat / p_type
 
     # Metropolis sampling
     if np.random.random() < R: # Accept
@@ -809,12 +821,12 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
 '----------------------------------------------------------------------------------'
 
-def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-    deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker):
+def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
+    deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker,A):
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
-
+    
     # Cannot delete if there are no worm ends near zero
     if head_loc and tail_loc: # both worm ends present
         if head_loc[1] != 1 and tail_loc[1] != 1:
@@ -910,11 +922,10 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
-    
-        
+          
     # Count the TOTAL number of particles at tau=0
     N_post = 0
-    for f in range(L):
+    for f in range(L**D):
         N_post += data_struct[f][0][1] # add particles at first flat of each site
     if delete_head: # delete worm
         N_pre = N_post-1
@@ -949,7 +960,7 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
-    R = W * (p_dz/p_iz) * L * p_wormend * tau_flat / p_type
+    R = W * (p_dz/p_iz) * L**D * p_wormend * tau_flat / p_type
     R = 1/R
 
     # Metropolis sampling
@@ -990,14 +1001,14 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
 '----------------------------------------------------------------------------------'
 
-def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-    insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker):
+def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
+    insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker,A):
 
     # Cannot insert if there's two worm end already present
     if head_loc and tail_loc: return None
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
-    i = int(np.random.random()*L)
+    i = int(np.random.random()*L**D)
 
     # Get the kink index of the last flat interval
     k_last = len(data_struct[i]) - 1
@@ -1085,7 +1096,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
     
     # Count the TOTAL number of particles at tau=0
     N_pre = 0
-    for f in range(L):
+    for f in range(L**D):
         N_pre += data_struct[f][-1][1] # add particles at first flat of each site
     if insert_worm:
         N_post = N_pre+1
@@ -1119,7 +1130,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5
-    R = W * (p_db/p_ib) * L * p_wormend * tau_flat / p_type
+    R = W * (p_db/p_ib) * L**D * p_wormend * tau_flat / p_type
 
     # Metropolis sampling
     if np.random.random() < R: # Accept
@@ -1156,8 +1167,8 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
 '----------------------------------------------------------------------------------'
 
-def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_tracker,
-    deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker):
+def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
+    deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker,A):
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -1261,7 +1272,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     # Count the TOTAL number of particles at tau=0
     N_post = 0
-    for f in range(L):
+    for f in range(L**D):
         N_post += data_struct[f][-1][1] # add particles at first flat of each site
     if delete_head: # delete anti
         N_pre = N_post+1
@@ -1295,7 +1306,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5
-    R = W * (p_db/p_ib) * L * p_wormend * tau_flat / p_type
+    R = W * (p_db/p_ib) * L**D * p_wormend * tau_flat / p_type
     R = 1/R
 
     # Metropolis sampling
@@ -1326,8 +1337,8 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,N,canonical,N_track
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-    N_tracker,ikbh_data,N_flats_tracker):
+def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
+    N_tracker,ikbh_data,N_flats_tracker,A):
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1342,16 +1353,15 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     i = head_loc[0]
     k = head_loc[1]
 
-    # Randomly choose destination site (j) of the head
-    if np.random.random() < 0.5:
-        j = i+1 # Hop head to the right
-        if j == L:
-            j = 0
-    else: # Head hops to the left
-        j = i-1
-        if j==-1:
-            j = L-1 # head hops to last site
-    p_site = 0.5
+   #!!!!!!!!! Here, we now need to draw random numbers from the adjacency matrix !!!!!!!!!!#
+    
+    # Build array of labels of nearest neighbor nodes to i
+    nearest_neighbors = np.nonzero(A[i])[0]
+    total_nn = len(nearest_neighbors)
+    
+    # Randomly choose a nearest neighbor node
+    j = np.random.choice(nearest_neighbors)
+    p_site = 1/total_nn
     
     # Retrieve the time of the worm head (and tail if present)
     tau_h = data_struct[i][k][0]
@@ -1432,8 +1442,8 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-    N_tracker,dkbh_data,N_flats_tracker):
+def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
+    N_tracker,dkbh_data,N_flats_tracker,A):
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1490,9 +1500,14 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     dkbh_data[1] += 1
 
     # Determine the lowest time at which the kink could've been inserted
-    tau_min = max(tau_prev_i,tau_prev_j)
-        
-    p_site = 0.5
+    tau_min = max(tau_prev_i,tau_prev_j)        
+
+    # Build array of labels of nearest neighbor nodes to i
+    nearest_neighbors = np.nonzero(A[i])[0]
+    total_nn = len(nearest_neighbors)
+    
+    # Probability of choosing the site where the worm end is
+    p_site = 1/total_nn
 
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1542,8 +1557,8 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-    N_tracker,ikah_data,N_flats_tracker):
+def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
+    N_tracker,ikah_data,N_flats_tracker,A):
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1557,18 +1572,14 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     # Retrieve worm head indices (i:site,k:kink)
     i = head_loc[0]
     k = head_loc[1]
-        
-    # Randomly choose destination site (j) of the head
-    if np.random.random() < 0.5:
-        j = i+1 # Hop head to the right
-        if j == L:
-            j = 0
-    else: # Head hops to the left
-        j = i-1
-        if j==-1:
-            j = L-1 # head hops to last site
-    p_site = 0.5
-
+    
+    # Build array of labels of nearest neighbor nodes to i
+    nearest_neighbors = np.nonzero(A[i])[0]
+    total_nn = len(nearest_neighbors)
+    
+    # Randomly choose a nearest neighbor node
+    j = np.random.choice(nearest_neighbors)
+    p_site = 1/total_nn
 
     # Retrieve the time of the worm head (and tail if present)
     tau_h = data_struct[i][k][0]
@@ -1663,8 +1674,8 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-    N_tracker,dkah_data,N_flats_tracker):
+def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
+    N_tracker,dkah_data,N_flats_tracker,A):
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1729,8 +1740,12 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     # Determine the highest time at which the kink could've been inserted
     tau_max = min(tau_next_i,tau_next_j)
 
-    p_site = 0.5
-
+    # Build array of labels of nearest neighbor nodes to i
+    nearest_neighbors = np.nonzero(A[i])[0]
+    total_nn = len(nearest_neighbors)
+    
+    # Probability of choosing the site where the worm end is
+    p_site = 1/total_nn
 
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -1780,8 +1795,8 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-    N_tracker,ikbt_data,N_flats_tracker):
+def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
+    N_tracker,ikbt_data,N_flats_tracker,A):
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1795,18 +1810,14 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     # Retrieve worm tail indices (i:site,k:kink)
     i = tail_loc[0]
     k = tail_loc[1]
-        
-    # Randomly choose destination site (j) of the head
-    if np.random.random() < 0.5:
-        j = i+1 # Hop head to the right
-        if j == L:
-            j = 0
-    else: # Head hops to the left
-        j = i-1
-        if j==-1:
-            j = L-1 # head hops to last site
-    p_site = 0.5
-
+    
+    # Build array of labels of nearest neighbor nodes to i
+    nearest_neighbors = np.nonzero(A[i])[0]
+    total_nn = len(nearest_neighbors)
+    
+    # Randomly choose a nearest neighbor node
+    j = np.random.choice(nearest_neighbors)
+    p_site = 1/total_nn
 
     # Retrieve the time of the worm tail (and head if present)
     tau_t = data_struct[i][k][0]
@@ -1890,8 +1901,8 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-    N_tracker,dkbt_data,N_flats_tracker):
+def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
+    N_tracker,dkbt_data,N_flats_tracker,A):
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1950,8 +1961,12 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
     # Determine the lowest time at which the kink could've been inserted
     tau_min = max(tau_prev_i,tau_prev_j)
 
-    p_site = 0.5
-
+    # Build array of labels of nearest neighbor nodes to i
+    nearest_neighbors = np.nonzero(A[i])[0]
+    total_nn = len(nearest_neighbors)
+    
+    # Probability of choosing the site where the worm end is
+    p_site = 1/total_nn
 
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
@@ -2001,8 +2016,8 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,ca
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-    N_tracker,ikat_data,N_flats_tracker):
+def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
+    N_tracker,ikat_data,N_flats_tracker,A):
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -2016,17 +2031,14 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     # Retrieve worm tail indices (i:site,k:kink)
     i = tail_loc[0]
     k = tail_loc[1] 
-        
-    # Randomly choose destination site (j) of the head
-    if np.random.random() < 0.5:
-        j = i+1 # Hop head to the right
-        if j == L:
-            j = 0
-    else: # Head hops to the left
-        j = i-1
-        if j==-1:
-            j = L-1 # head hops to last site
-    p_site = 0.5
+
+    # Build array of labels of nearest neighbor nodes to i
+    nearest_neighbors = np.nonzero(A[i])[0]
+    total_nn = len(nearest_neighbors)
+    
+    # Randomly choose a nearest neighbor node
+    j = np.random.choice(nearest_neighbors)
+    p_site = 1/total_nn
 
     # Retrieve the time of the worm tail (and head if present)
     tau_t = data_struct[i][k][0]
@@ -2120,8 +2132,8 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,canonical,
-    N_tracker,dkat_data,N_flats_tracker):
+def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
+    N_tracker,dkat_data,N_flats_tracker,A):
 
     # Update only possible if there is worm tail present
     if not(tail_loc): return None
@@ -2186,8 +2198,13 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     # Determine the highest time at which the kink could've been inserted
     tau_max = min(tau_next_i,tau_next_j)
 
-    p_site = 0.5
-
+    # Build array of labels of nearest neighbor nodes to i
+    nearest_neighbors = np.nonzero(A[i])[0]
+    total_nn = len(nearest_neighbors)
+    
+    # Probability of choosing the site where the worm end is
+    p_site = 1/total_nn
+    
     # Calculate the diagonal energy difference on both sites
     dV_i = (U/2)*(n_wi*(n_wi-1)-n_i*(n_i-1)) - mu*(n_wi-n_i)
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
@@ -2234,7 +2251,6 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,N,can
     else: # Reject
         return False
 
-'----------------------------------------------------------------------------------'
 '----------------------------------------------------------------------------------'
 
 # Visualize worldline configurations for Lattice Path Integral Monte Carlo (PIMC)
@@ -2328,29 +2344,61 @@ def view_worldlines(data_struct,beta,figure_name=None):
 
 '----------------------------------------------------------------------------------'
 
-def get_std_error(mc_data):
-    '''Input array and calculate standard error'''
-    N_bins = np.shape(mc_data)[0]
-    std_error = np.std(mc_data)/np.sqrt(N_bins)
-    
-    return std_error
+# Build the adjacency matrix of a 1D,2D,3D
+# Bose-Hubbard Lattice
 
-'----------------------------------------------------------------------------------'
+def build_adjacency_matrix(L,D,boundary_condition='pbc'):
 
-def get_binned_data(mc_data):
-    '''Return neighbor averaged data.'''
-    N_bins = np.shape(mc_data)[0]
-    start_bin = N_bins % 2
-    binned_mc_data = 0.5*(mc_data[start_bin::2]+mc_data[start_bin+1::2]) #Averages (A0,A1), (A2,A3), + ... A0 ignored if odd data
+    # Number of lattice sites
+    M = L**D
 
-    return binned_mc_data
+    # Define the basis vectors
+    a1_vec = np.array((1,0,0))
+    a2_vec = np.array((0,1,0))
+    a3_vec = np.array((0,0,1))
 
-'----------------------------------------------------------------------------------'
+    # Norms of basis vectors
+    a1 = np.linalg.norm(a1_vec)
+    a2 = np.linalg.norm(a2_vec)
+    a3 = np.linalg.norm(a3_vec)
 
-def get_autocorrelation_time(error_data):
-    '''Given an array of standard errors, calculates autocorrelation time'''
-    print(error_data[0],error_data[-2])
-    autocorr_time = 0.5*((error_data[-2]/error_data[0])**2 - 1)
-    return autocorr_time
+    # Initialize array that will store the lattice vectors
+    points = np.zeros(M,dtype=(float,D))
 
-'----------------------------------------------------------------------------------'
+    # Build the lattice vectors
+    ctr = 0 # iteration counter
+    if D == 1:
+        for i1 in range(L):
+            points[i1] = i1*a1
+    elif D == 2:
+        for i1 in range(L):
+            for i2 in range(L):
+                points[ctr] = np.array((i1*a1,i2*a2))
+                ctr += 1
+    else: # D == 3
+        for i1 in range(L):
+            for i2 in range(L):
+                for i3 in range(L):
+                    points[ctr] = np.array((i1*a1,i2*a2,i3*a3))
+                    ctr += 1
+
+    # Initialize adjacency matrix
+    A = np.zeros((M,M),dtype=int)
+
+    # Set Nearest-Neighbor (NN) distance
+    r_NN = a1
+
+    # Build the adjacency matrix by comparing internode distances
+    for i in range(M):
+        for j in range(i+1,M):
+
+            if boundary_condition=='pbc':
+                A[i,j] = (np.linalg.norm(points[i]-points[j]) <= r_NN \
+                or np.linalg.norm(points[i]-points[j]) == L-1)
+            elif boundary_condition=='obc':
+                A[i,j] = (np.linalg.norm(points[i]-points[j]) <= r_NN)
+
+            # Symmetric elements
+            A[j,i] = A[i,j]
+
+    return A
