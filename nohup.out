@@ -255827,3 +255827,19 @@ Unable to init server: Could not connect: Connection refused
 Unable to init server: Could not connect: Connection refused
 
 (main.py:7751): Gdk-CRITICAL **: 15:07:36.389: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:12765): Gdk-CRITICAL **: 15:11:02.737: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:13241): Gdk-CRITICAL **: 15:11:18.129: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:13877): Gdk-CRITICAL **: 15:11:44.223: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed
+Unable to init server: Could not connect: Connection refused
+Unable to init server: Could not connect: Connection refused
+
+(main.py:14107): Gdk-CRITICAL **: 15:11:51.900: gdk_cursor_new_for_display: assertion 'GDK_IS_DISPLAY (display)' failed

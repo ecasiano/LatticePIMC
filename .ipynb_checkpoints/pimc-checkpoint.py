@@ -129,7 +129,7 @@ def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L,D):
     
     # Initialize array that will contain Fock states at all tau_slices
     alphas = np.zeros((len(tau_slices),L**D))
-    for col in range(L**Ds):
+    for col in range(L**D):
         alphas[:,col]=tau_slices # for now, just store the tau_slices
             
     # Kinetic
