@@ -18,13 +18,6 @@ def random_boson_config(L,D,N):
 
     return alpha
 
-# L=3
-# N=3
-# D=2
-# beta=1
-# alpha = random_boson_config(L,D,N)
-# print(alpha)
-
 '----------------------------------------------------------------------------------'
 
 def create_data_struct(alpha,L,D):
@@ -35,9 +28,6 @@ def create_data_struct(alpha,L,D):
         data_struct.append([[0,alpha[i],(i,i)]])
 
     return data_struct
-
-# data_struct = create_data_struct(alpha,L,D)
-# print(data_struct)
 
 '----------------------------------------------------------------------------------'
 
@@ -61,8 +51,6 @@ def N_tracker(data_struct,beta,L,D):
     N = l/beta
 
     return N
-
-# print(N_tracker(data_struct,beta,L,D))
 
 '----------------------------------------------------------------------------------'
 
@@ -247,7 +235,6 @@ def get_binned_data(mc_data):
 
 def get_autocorrelation_time(error_data):
     '''Given an array of standard errors, calculates autocorrelation time'''
-    print(error_data[0],error_data[-2])
     autocorr_time = 0.5*((error_data[-2]/error_data[0])**2 - 1)
     return autocorr_time
 
