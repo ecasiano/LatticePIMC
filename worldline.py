@@ -111,51 +111,51 @@ class Worldline:
 
 '-----------------------------------------------------------'
 
-# Main
+# # Main
 
-# Create a kink object
-kink = Kink(0,1,0,0)
+# # Create a kink object
+# kink = Kink(0,1,0,0)
 
-print("A kink object is represented as",kink,'\n')
+# print("A kink object is represented as",kink,'\n')
 
-# Create a wordline object
-i = 0   # Worldline site
-n_i = 1 # Initial number of particles on site i  
-worldline = Worldline(n_i,i)
+# # Create a wordline object
+# i = 0   # Worldline site
+# n_i = 1 # Initial number of particles on site i  
+# worldline = Worldline(n_i,i)
 
-print("A worldline object is represented as",worldline,'\n')
+# print("A worldline object is represented as",worldline,'\n')
 
-# Insert kink after trivial kink
-tau_new,n_new,src_new,dest_new = 0.78,2,1,0
-worldline.insert(tau_new,n_new,src_new,dest_new)
+# # Insert kink after trivial kink
+# tau_new,n_new,src_new,dest_new = 0.78,2,1,0
+# worldline.insert(tau_new,n_new,src_new,dest_new)
 
-print("Kink insertion:",worldline,'\n') 
+# print("Kink insertion:",worldline,'\n') 
 
-# Insert a worm between the other two kinks
-worldline.insert(0.15*tau_new,n_i-1,i,i)
-worldline.insert(0.2*tau_new,n_i,i,i)
-print("Worm insertion:",worldline,'\n')
+# # Insert a worm between the other two kinks
+# worldline.insert(0.15*tau_new,n_i-1,i,i)
+# worldline.insert(0.2*tau_new,n_i,i,i)
+# print("Worm insertion:",worldline,'\n')
 
-# Insert kink at the end
-worldline.insert(1.1*tau_new,1,0,1)
-print("Insert kink at the end:",worldline,'\n')
+# # Insert kink at the end
+# worldline.insert(1.1*tau_new,1,0,1)
+# print("Insert kink at the end:",worldline,'\n')
 
-# Append:
-worldline.append(0.999999999,2,1,0)
-print("Append kink:",worldline,'\n')
+# # Append:
+# worldline.append(0.999999999,2,1,0)
+# print("Append kink:",worldline,'\n')
 
-# Delete the second to last kink
-worldline.remove(worldline.last.prev)
-print("Delete second to last kink: ", worldline,'\n')
+# # Delete the second to last kink
+# worldline.remove(worldline.last.prev)
+# print("Delete second to last kink: ", worldline,'\n')
 
-# Delete the worm head
-worm_head = worldline.first.next
-worldline.remove(worm_head)
-print("Delete worm head kink: ", worldline,'\n')
+# # Delete the worm head
+# worm_head = worldline.first.next
+# worldline.remove(worm_head)
+# print("Delete worm head kink: ", worldline,'\n')
 
-# Retrieve the first and last kinks
-print("The first kink of the worldline is:",worldline.first,'\n')
-print("The last kink of the worldline is:",worldline.last,'\n')
+# # Retrieve the first and last kinks
+# print("The first kink of the worldline is:",worldline.first,'\n')
+# print("The last kink of the worldline is:",worldline.last,'\n')
 
-first_kink = worldline.first
-print(worldline.first==first_kink)
+# first_kink = worldline.first
+# print(worldline.first==first_kink)

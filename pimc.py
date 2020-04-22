@@ -7,9 +7,10 @@ from scipy.stats import truncexpon
 import math
 from scipy.special import binom
 import sys
+import worldline as wl
 
 def random_boson_config(L,D,N):
-    '''Generates a random configuration of N bosons in a 1D lattice of size L**D'''
+    '''Generates random config. of N bosons in 1D lattice of size L**D'''
 
     alpha = np.zeros(L**D,dtype=int) # Stores the random configuration of bosons
     for i in range(N):
@@ -20,14 +21,17 @@ def random_boson_config(L,D,N):
 
 '----------------------------------------------------------------------------------'
 
-def create_data_struct(alpha,L,D):
+def create_worldlines(alpha,L,D,replicas=2):
     '''Generate the [tau,N,(src,dest)] data_struct from the configuration'''
 
-    data_struct = []
-    for i in range(L**D):
-        data_struct.append([[0,alpha[i],(i,i)]])
+    worldlines = []
+    for site in range(L**D):
+        worldlines.append([])
+        for replica in range(replicas):
+            n_site = alpha[site]
+            worldlines[site].append(wl.Worldline(n_site,site))
 
-    return data_struct
+    return worldlines
 
 '----------------------------------------------------------------------------------'
 
@@ -2389,3 +2393,16 @@ def build_adjacency_matrix(L,D,boundary_condition='pbc'):
             A[j,i] = A[i,j]
 
     return A
+
+'----------------------------------------------------------------------------------'
+
+# Test updates using linked list wordline structure
+L = 2
+D = 1 
+N = L
+alpha = random_boson_config(L,D,N) # Initial Fock State
+print("|alpha> = ",alpha,'\n')
+
+# Create configuration of worldlines
+worldlines = create_worldlines(alpha,L,D,replicas=2)
+print("worldlines: ",worldlines,'\n')
