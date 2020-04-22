@@ -21,7 +21,7 @@ def random_boson_config(L,D,N):
 
 '----------------------------------------------------------------------------------'
 
-def create_worldlines(alpha,L,D,replicas=2):
+def create_worldlines(alpha,L,D,replicas):
     '''Generate the [tau,N,(src,dest)] data_struct from the configuration'''
 
     worldlines = []
@@ -32,70 +32,6 @@ def create_worldlines(alpha,L,D,replicas=2):
             worldlines[site].append(wl.Worldline(n_site,site))
 
     return worldlines
-
-'----------------------------------------------------------------------------------'
-
-def N_tracker(data_struct,beta,L,D):
-    '''Count total particles in the worldline configuration'''
-
-    # Add paths
-    l = 0
-    for i in range(L**D):
-        N_flats = len(data_struct[i]) # Number of flat intervals on the site
-        for k in range(N_flats):
-            if k < N_flats-1:
-                dtau = data_struct[i][k+1][0]-data_struct[i][k][0]
-            else: # time difference between beta and last kink on the site
-                dtau = beta-data_struct[i][k][0]
-
-            n = data_struct[i][k][1] # particles in flat interval
-            l += n*dtau
-
-    # Track the total number of particles (must be between N-1 and N+1)
-    N = l/beta
-
-    return N
-
-'----------------------------------------------------------------------------------'
-
-def bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice):
-
-    '''Calculates the kinetic and diagonal energies'''
-
-    # Stores the configuration at tau_slice (need for diagonal energy)
-    alpha = [0]*L
-
-    # Iterate over every site to get Fock state at tau_slice and kinks near it.
-    N_kinks = 0 # number of kinks
-    for i in range(L):
-        N_flats = len(data_struct[i]) # Number of flats on site i
-        for k in range(N_flats): # Ignore the initial value "kinks"
-
-            # Count the kinks in the interval: [tau_slice-dtau,tau_slice]
-            tau = data_struct[i][k][0] # time of the kink
-            if tau >= tau_slice-dtau and tau <= tau_slice+dtau:
-                if k!=0: # Don't add the initial value kink of each site
-                    N_kinks += 1
-
-            # Store the Fock state at tau_slice (to calculate diagonal energy)
-            if tau <= tau_slice:
-                n_i = data_struct[i][k][1] # no. of particles in the flat
-                alpha[i] = n_i
-
-            # Exit inner loop after tau_slice+dtau. Go to next site's loop.
-            if tau > tau_slice+dtau: break
-
-    # Calculate kinetic energy estimator
-    N_kinks /= 2 # Kinks counted at source and destination site. This corrects.
-    kinetic = -1*N_kinks/(2*dtau)
-
-    # Calculate diagonal energy
-    diagonal = 0
-    for i in range(L):
-        n_i = alpha[i]
-        diagonal += ( (U/2)*n_i*(n_i-1)-mu*n_i )
-
-    return kinetic,diagonal
 
 '----------------------------------------------------------------------------------'
 
@@ -2404,5 +2340,73 @@ alpha = random_boson_config(L,D,N) # Initial Fock State
 print("|alpha> = ",alpha,'\n')
 
 # Create configuration of worldlines
-worldlines = create_worldlines(alpha,L,D,replicas=2)
+replicas = 2
+worldlines = create_worldlines(alpha,L,D,replicas)
 print("worldlines: ",worldlines,'\n')
+
+
+# '----------------------Possibly Garbage----------------------------------'
+
+# Possibly garbage #
+
+# def N_tracker(data_struct,beta,L,D):
+#     '''Count total particles in the worldline configuration'''
+
+#     # Add paths
+#     l = 0
+#     for i in range(L**D):
+#         N_flats = len(data_struct[i]) # Number of flat intervals on the site
+#         for k in range(N_flats):
+#             if k < N_flats-1:
+#                 dtau = data_struct[i][k+1][0]-data_struct[i][k][0]
+#             else: # time difference between beta and last kink on the site
+#                 dtau = beta-data_struct[i][k][0]
+
+#             n = data_struct[i][k][1] # particles in flat interval
+#             l += n*dtau
+
+#     # Track the total number of particles (must be between N-1 and N+1)
+#     N = l/beta
+
+#     return N
+
+# '----------------------------------------------------------------------------------'
+
+# def bh_egs(data_struct,beta,dtau,U,mu,t,L,tau_slice):
+
+#     '''Calculates the kinetic and diagonal energies'''
+
+#     # Stores the configuration at tau_slice (need for diagonal energy)
+#     alpha = [0]*L
+
+#     # Iterate over every site to get Fock state at tau_slice and kinks near it.
+#     N_kinks = 0 # number of kinks
+#     for i in range(L):
+#         N_flats = len(data_struct[i]) # Number of flats on site i
+#         for k in range(N_flats): # Ignore the initial value "kinks"
+
+#             # Count the kinks in the interval: [tau_slice-dtau,tau_slice]
+#             tau = data_struct[i][k][0] # time of the kink
+#             if tau >= tau_slice-dtau and tau <= tau_slice+dtau:
+#                 if k!=0: # Don't add the initial value kink of each site
+#                     N_kinks += 1
+
+#             # Store the Fock state at tau_slice (to calculate diagonal energy)
+#             if tau <= tau_slice:
+#                 n_i = data_struct[i][k][1] # no. of particles in the flat
+#                 alpha[i] = n_i
+
+#             # Exit inner loop after tau_slice+dtau. Go to next site's loop.
+#             if tau > tau_slice+dtau: break
+
+#     # Calculate kinetic energy estimator
+#     N_kinks /= 2 # Kinks counted at source and destination site. This corrects.
+#     kinetic = -1*N_kinks/(2*dtau)
+
+#     # Calculate diagonal energy
+#     diagonal = 0
+#     for i in range(L):
+#         n_i = alpha[i]
+#         diagonal += ( (U/2)*n_i*(n_i-1)-mu*n_i )
+
+#     return kinetic,diagonal
