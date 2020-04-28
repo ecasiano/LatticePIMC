@@ -30,8 +30,8 @@ paths = []
 
 # Initialize list that will store kink handles (helper_kinks)
 max_num_kinks = int(1E+07)
-num_kinks = 0 # Kinks in use
-helper_kinks = [Kink(-1,-1,-1,-1,-1)] * max_num_kinks
+num_kinks = 0 # Kinks IN USE
+helper_kinks = [Kink(None,None,None,None,None)] * max_num_kinks
 
 # Fill out paths and helper kinks with each site's initial kinks
 for site,n in enumerate(alpha_0):
@@ -42,3 +42,7 @@ for site,n in enumerate(alpha_0):
 end = time.time()
 
 print("Paths and helper list creation: %.2f seconds"%(end-start))
+
+print(helper_kinks[:10])
+
+

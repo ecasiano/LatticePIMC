@@ -45,56 +45,11 @@ class Worldline:
             curr = curr.next
         return '<' + ', '.join(nodes) + '>'
 
-    def insert(self,tau_new,n_new,src_new,dest_new,label_new): 
+    def insert(self,prev_kink,tau_new,n_new,src_new,dest_new,label_new): 
         '''Insert a new kink at time tau_new'''
-      
-        # Create the kink to be inserted
-        new_kink = Kink(tau_new,n_new,src_new,dest_new,label_new)
-
-        # Get the initial/trivial kink
-        first_kink = self.first
-
-        # Get kink preceding the one to be inserted
-        prev_kink = first_kink
-        while (prev_kink.next is not None) and (prev_kink.next.tau < tau_new):
-            prev_kink = prev_kink.next
-
-        # Get kink following the one to be inserted
-        if prev_kink.next is not None:
-            next_kink = prev_kink.next
-        else: next_kink = None
-
-        # Connect new_kink to preceding kink
-        new_kink.prev = prev_kink
-        prev_kink.next = new_kink
-
-        # Connect new kink to following kink
-        if next_kink is not None:
-            new_kink.next = next_kink
-            next_kink.prev = new_kink
-
-        # If nothing after the new kink, set it as worldline.last
-        if new_kink.next is None:
-            self.last = new_kink
-
-        # Increase number of flats by one
-        self.N_flats += 1
-
-        return new_kink
-
-    def test_insert(self,tau_new,n_new,src_new,dest_new,label_new): 
-        '''Insert a new kink at time tau_new'''
-      
-        # Random kink index
-        r = int(np.random.random()*self.N_flats)
 
         # Create the kink to be inserted
         new_kink = Kink(tau_new,n_new,src_new,dest_new,label_new)
-
-        # Initialize kink previous to insertion
-        prev_kink = self.first
-        for k in range(r):
-            prev_kink = prev_kink.next
 
         # Connect next of new kink to next_kink
         new_kink.next = prev_kink.next
@@ -105,16 +60,16 @@ class Worldline:
         # Conect prev of new_kink to prev_kink
         new_kink.prev = prev_kink 
   
-        # 7. Change previous of next_kink
+        # Change previous of next_kink
         if new_kink.next is not None: 
             new_kink.next.prev = new_kink
         else: # New kink inserted at the end
             self.last = new_kink
 
-        # Increase number of flats by one
+        # Increase number of flats in the worldline by one
         self.N_flats += 1
 
-        return new_kink
+        # return new_kink
 
     def append(self,tau_new,n_new,src_new,dest_new):
         '''Insert a kink at the end of the worldline'''
