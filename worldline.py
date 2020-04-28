@@ -2,34 +2,39 @@
 # insertion methods 
 # References: https://www.geeksforgeeks.org/doubly-linked-list/,
 #              https://dbader.org/blog/python-linked-list
+
+import numpy as np
+
+class Kink: 
   
+    def __init__(self,tau,n,src,dest,label): 
+        '''Kink constructor'''
+        self.tau = tau
+        self.n = n
+        self.src = src
+        self.dest = dest
+        self.label = label
+        self.next = None
+        self.prev = None
+
+    def __repr__(self):
+        '''Return string representation of kink'''
+        return f"Kink({self.tau},{self.n},{self.src},{self.dest},{self.label})"
+
+
 class Worm:
 
     def __init__(self):
         self.head = None
         self.tail = None
 
-class Kink: 
-  
-    def __init__(self,tau,n,src,dest): 
-        '''Kink constructor'''
-        self.tau = tau
-        self.n = n
-        self.src = src
-        self.dest = dest
-        self.next = None
-        self.prev = None
-
-    def __repr__(self):
-        '''Return string representation of kink'''
-        return f"Kink({self.tau},{self.n},{self.src},{self.dest})"
-
 class Worldline:
 
     def __init__(self,n,site):
         '''Initialize worldline'''
-        self.first = Kink(0,n,site,site)
+        self.first = Kink(0,n,site,site,site) # last site is the label
         self.last = self.first
+        self.flats = 1
 
     def __repr__(self):
         '''String representation of worldline'''
@@ -40,11 +45,11 @@ class Worldline:
             curr = curr.next
         return '<' + ', '.join(nodes) + '>'
 
-    def insert(self,tau_new,n_new,src_new,dest_new): 
+    def insert(self,tau_new,n_new,src_new,dest_new,label_new): 
         '''Insert a new kink at time tau_new'''
       
         # Create the kink to be inserted
-        new_kink = Kink(tau_new,n_new,src_new,dest_new)
+        new_kink = Kink(tau_new,n_new,src_new,dest_new,label_new)
 
         # Get the initial/trivial kink
         first_kink = self.first
@@ -72,6 +77,45 @@ class Worldline:
         if new_kink.next is None:
             self.last = new_kink
 
+        # Increase number of flats by one
+        self.N_flats += 1
+
+        return new_kink
+
+    def test_insert(self,tau_new,n_new,src_new,dest_new,label_new): 
+        '''Insert a new kink at time tau_new'''
+      
+        # Random kink index
+        r = int(np.random.random()*self.N_flats)
+
+        # Create the kink to be inserted
+        new_kink = Kink(tau_new,n_new,src_new,dest_new,label_new)
+
+        # Initialize kink previous to insertion
+        prev_kink = self.first
+        for k in range(r):
+            prev_kink = prev_kink.next
+
+        # Connect next of new kink to next_kink
+        new_kink.next = prev_kink.next
+  
+        # Connect next of prev_kink to new_kink
+        prev_kink.next = new_kink 
+  
+        # Conect prev of new_kink to prev_kink
+        new_kink.prev = prev_kink 
+  
+        # 7. Change previous of next_kink
+        if new_kink.next is not None: 
+            new_kink.next.prev = new_kink
+        else: # New kink inserted at the end
+            self.last = new_kink
+
+        # Increase number of flats by one
+        self.N_flats += 1
+
+        return new_kink
+
     def append(self,tau_new,n_new,src_new,dest_new):
         '''Insert a kink at the end of the worldline'''
 
@@ -89,6 +133,9 @@ class Worldline:
         new_kink.next = None
         self.last = new_kink
 
+        # Increase number of flats by one
+        self.N_flats += 1
+
     def remove(self,kink_to_remove):
         '''Delete a specific kink'''
 
@@ -101,13 +148,17 @@ class Worldline:
 
         # Disconnect undesired kink from next kink
         if next_kink is not None:
-         next_kink.prev = prev_kink
+            next_kink.prev = prev_kink
+        else:
+            self.last = prev_kink
 
         # Delete undesired kink to avoid potential memory issues
-        del kink_to_remove
+        # del kink_to_remove
 
         # Set the new last kink of the worldline
-        self.last = next_kink 
+
+        # Decrease number of flats by one
+        self.N_flats -= 1
 
 '-----------------------------------------------------------'
 
@@ -131,9 +182,12 @@ class Worldline:
 
 # print("Kink insertion:",worldline,'\n') 
 
+# # Initialize worm
+# worm = Worm()
+
 # # Insert a worm between the other two kinks
-# worldline.insert(0.15*tau_new,n_i-1,i,i)
-# worldline.insert(0.2*tau_new,n_i,i,i)
+# worm.head = worldline.insert(0.15*tau_new,n_i-1,i,i)  # head
+# worm.tail = worldline.insert(0.2*tau_new,n_i,i,i)     # tail
 # print("Worm insertion:",worldline,'\n')
 
 # # Insert kink at the end
