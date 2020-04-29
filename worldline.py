@@ -45,11 +45,8 @@ class Worldline:
             curr = curr.next
         return '<' + ', '.join(nodes) + '>'
 
-    def insert(self,prev_kink,tau_new,n_new,src_new,dest_new,label_new): 
+    def insert(self,prev_kink,new_kink): 
         '''Insert a new kink at time tau_new'''
-
-        # Create the kink to be inserted
-        new_kink = Kink(tau_new,n_new,src_new,dest_new,label_new)
 
         # Connect next of new kink to next_kink
         new_kink.next = prev_kink.next
@@ -67,53 +64,46 @@ class Worldline:
             self.last = new_kink
 
         # Increase number of flats in the worldline by one
-        self.N_flats += 1
+        self.flats += 1
 
         # return new_kink
 
-    def append(self,tau_new,n_new,src_new,dest_new):
-        '''Insert a kink at the end of the worldline'''
-
-        # Create the kink to be appended
-        new_kink = Kink(tau_new,n_new,src_new,dest_new)
-
-        # Get the last kink of the worldline
-        last_kink = self.last
-
-        # Connect last kink to new_kink
-        last_kink.next = new_kink
-        new_kink.prev = last_kink
-
-        # Make the appended kink the last one
-        new_kink.next = None
-        self.last = new_kink
-
-        # Increase number of flats by one
-        self.N_flats += 1
-
-    def remove(self,kink_to_remove):
+    def delete(self,kink_to_remove):
         '''Delete a specific kink'''
 
-        # Get the neighbors of the undesired kink
-        prev_kink = kink_to_remove.prev
-        next_kink = kink_to_remove.next
-
-        # Disconnect undesired kink from previous kink
-        prev_kink.next = next_kink
-
-        # Disconnect undesired kink from next kink
-        if next_kink is not None:
-            next_kink.prev = prev_kink
+        if kink_to_remove.next is not None:
+            kink_to_remove.next.prev = kink_to_remove.prev
+            kink_to_remove.prev.next = kink_to_remove.next
         else:
-            self.last = prev_kink
+            kink_to_remove.prev.next = None
+            self.last = kink_to_remove.prev
 
-        # Delete undesired kink to avoid potential memory issues
+        # Unlink undesired kink
+        kink_to_remove.next = None
+        kink_to_remove.prev = None
         # del kink_to_remove
 
-        # Set the new last kink of the worldline
-
         # Decrease number of flats by one
-        self.N_flats -= 1
+        self.flats -= 1
+
+    # def append(self,new_kink):
+    #     '''Insert a kink at the end of the worldline'''
+
+    #     # Get the last kink of the worldline
+    #     last_kink = self.last
+
+    #     # Connect last kink to new_kink
+    #     last_kink.next = new_kink
+    #     new_kink.prev = last_kink
+
+    #     # Make the appended kink the last one
+    #     new_kink.next = None
+    #     self.last = new_kink
+
+    #     # Increase number of flats by one
+    #     self.N_flats += 1
+
+
 
 '-----------------------------------------------------------'
 
