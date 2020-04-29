@@ -71,16 +71,18 @@ class Worldline:
     def delete(self,kink_to_remove):
         '''Delete a specific kink'''
 
-        if kink_to_remove.next is not None:
+        if kink_to_remove.next is not None: # check if it is last kink
             kink_to_remove.next.prev = kink_to_remove.prev
-            kink_to_remove.prev.next = kink_to_remove.next
         else:
-            kink_to_remove.prev.next = None
+            # kink_to_remove.prev.next = None
             self.last = kink_to_remove.prev
+            
+        kink_to_remove.prev.next = kink_to_remove.next
+
 
         # Unlink undesired kink
-        kink_to_remove.next = None
-        kink_to_remove.prev = None
+        # kink_to_remove.next = None
+        # kink_to_remove.prev = None
         # del kink_to_remove
 
         # Decrease number of flats by one
