@@ -1,5 +1,7 @@
 # Calculate BoseHubbard ground state energy at fixed U/t, but varying beta
 
+# Just testing if I'm in the correct branch
+
 import pimc # custom module
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,7 +15,7 @@ importlib.reload(pimc)
 import pickle
 import random
 import datetime
-import worldline
+from timeit import default_timer as timer
 
 # -------- Set command line arguments -------- #
 
@@ -99,6 +101,8 @@ tail_loc = []
 # Trackers
 N_tracker = [N]         # Total particles
 N_flats_tracker = [L]   # Total flat regions
+N_zero = [N]
+N_beta = [N]
 
   
 # ---------------- Pre-Equilibration ---------------- #
@@ -135,65 +139,65 @@ while(is_pre_equilibration):
         # Non-Spaceshift moves
         if label == 0:
             pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,dummy_data,N_flats_tracker,A)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker,A,N_zero,N_beta)
 
         elif label == 1:
             pimc.worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,dummy_data,N_flats_tracker,A)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker,A,N_zero,N_beta)
 
         elif label == 2:
             #pass
             pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,D,N,canonical,
-                N_tracker,dummy_data,dummy_data,dummy_data,dummy_data,N_flats_tracker,A)
+                N_tracker,dummy_data,dummy_data,dummy_data,dummy_data,N_flats_tracker,A,N_zero,N_beta)
 
         elif label == 3:
             pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,dummy_data,N_flats_tracker,A)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker,A,N_zero,N_beta)
 
         elif label == 4:
             pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,dummy_data,N_flats_tracker,A)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker,A,N_zero,N_beta)
 
         elif label == 5:
             pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,dummy_data,N_flats_tracker,A)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker,A,N_zero,N_beta)
 
         elif label == 6:
             pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,dummy_data,N_flats_tracker,A)
+                N_tracker,dummy_data,dummy_data,N_flats_tracker,A,N_zero,N_beta)
 
         # Spaceshift moves   
         elif label == 7:
             pimc.insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,N_flats_tracker,A)  
+                N_tracker,dummy_data,N_flats_tracker,A,N_zero,N_beta)  
 
         elif label == 8:
             pimc.delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,N_flats_tracker,A) 
+                N_tracker,dummy_data,N_flats_tracker,A,N_zero,N_beta) 
 
         elif label == 9:
             pimc.insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,N_flats_tracker,A)   
+                N_tracker,dummy_data,N_flats_tracker,A,N_zero,N_beta)   
 
         elif label == 10:
             pimc.delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,N_flats_tracker,A)
+                N_tracker,dummy_data,N_flats_tracker,A,N_zero,N_beta)
 
         elif label == 11:
             pimc.insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,N_flats_tracker,A)  
+                N_tracker,dummy_data,N_flats_tracker,A,N_zero,N_beta)  
 
         elif label == 12:
             pimc.delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,N_flats_tracker,A) 
+                N_tracker,dummy_data,N_flats_tracker,A,N_zero,N_beta) 
 
         elif label == 13:
             pimc.insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,N_flats_tracker,A)   
+                N_tracker,dummy_data,N_flats_tracker,A,N_zero,N_beta)   
 
         else:
             pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-                N_tracker,dummy_data,N_flats_tracker,A)
+                N_tracker,dummy_data,N_flats_tracker,A,N_zero,N_beta)
               
         # Count <N_flats> and <N>
         trash_percent = 0.25
@@ -246,10 +250,11 @@ print("Pre-Equilibration done.\n")
 
 # ---------------- Lattice PIMC ---------------- #
 
+start = timer()
+
 # Open files that will save data
 if canonical: # kinetic
-    
-    
+        
     if not(no_energies):
         kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_canK.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
         diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_canV.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
@@ -260,9 +265,6 @@ if canonical: # kinetic
 # Create a label for the Fock State files
 time = datetime.datetime.now()
 timeID = int((str(time).split(":")[1]+str(time).split(":")[2]).replace('.',''))
-
-# We may want to save data in binary via the Pickle package
-is_pickled = False
 
 print("LatticePIMC started...\n")
 
@@ -331,72 +333,71 @@ for m in range(int(M)):
     if label == 0:
         pimc.worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
             N_tracker,
-            insert_worm_data,insert_anti_data,N_flats_tracker,A)
+            insert_worm_data,insert_anti_data,N_flats_tracker,A,N_zero,N_beta)
 
     elif label == 1:
         pimc.worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
-            N_tracker,delete_worm_data,delete_anti_data,N_flats_tracker,A)
+            N_tracker,delete_worm_data,delete_anti_data,N_flats_tracker,A,N_zero,N_beta)
 
     elif label == 2:
         pimc.worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,D,N,canonical,
             N_tracker,advance_head_data,recede_head_data,
-            advance_tail_data,recede_tail_data,N_flats_tracker,A)
+            advance_tail_data,recede_tail_data,N_flats_tracker,A,N_zero,N_beta)
 
     elif label == 3:
         pimc.insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
-            N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker,A)
+            N_tracker,insertZero_worm_data,insertZero_anti_data,N_flats_tracker,A,N_zero,N_beta)
 
     elif label == 4:
         pimc.deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
-            N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker,A)
+            N_tracker,deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker,A,N_zero,N_beta)
 
     elif label == 5:
         pimc.insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
-            N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker,A)
+            N_tracker,insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker,A,N_zero,N_beta)
 
     elif label == 6:
         pimc.deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,
-            N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker,A)
+            N_tracker,deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker,A,N_zero,N_beta)
 
     # Spaceshift moves   
     elif label == 7:
         pimc.insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-            N_tracker,ikbh_data,N_flats_tracker,A)  
+            N_tracker,ikbh_data,N_flats_tracker,A,N_zero,N_beta)  
 
     elif label == 8:
         pimc.delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-            N_tracker,dkbh_data,N_flats_tracker,A) 
+            N_tracker,dkbh_data,N_flats_tracker,A,N_zero,N_beta) 
 
     elif label == 9:
         pimc.insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-            N_tracker,ikah_data,N_flats_tracker,A)   
+            N_tracker,ikah_data,N_flats_tracker,A,N_zero,N_beta)   
 
     elif label == 10:
         pimc.delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-            N_tracker,dkah_data,N_flats_tracker,A)
+            N_tracker,dkah_data,N_flats_tracker,A,N_zero,N_beta)
 
     elif label == 11:
         pimc.insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-            N_tracker,ikbt_data,N_flats_tracker,A)  
+            N_tracker,ikbt_data,N_flats_tracker,A,N_zero,N_beta)  
 
     elif label == 12:
         pimc.delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-            N_tracker,dkbt_data,N_flats_tracker,A) 
+            N_tracker,dkbt_data,N_flats_tracker,A,N_zero,N_beta) 
 
     elif label == 13:
         pimc.insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-            N_tracker,ikat_data,N_flats_tracker,A)   
+            N_tracker,ikat_data,N_flats_tracker,A,N_zero,N_beta)   
 
     else:
         pimc.delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-            N_tracker,dkat_data,N_flats_tracker,A)
+            N_tracker,dkat_data,N_flats_tracker,A,N_zero,N_beta)
     
     # Print completion percent
     if m%(int(M/10))==0:        
         print("%.2f%%"%(100*m/M))
     else: pass
-                 
-                
+                                
     # After 25% equilibration, measure every L*beta steps
     if beta < 1: 
         if m%(int(mfreq*L)):
@@ -495,7 +496,11 @@ if get_fock_state:
 # Save diagonal fraction obtained from main loop
 Z_frac = 100*measurements[0]/measurements[1]
 print("100%%")
-print("\nLattice PIMC done.")
+print("\nLattice PIMC done.\n")
+
+end = timer()
+
+print("Time elapsed: %.2f seconds"%(end-start))
 
 
 # ---------------- Format data and save to disk ---------------- #
@@ -588,3 +593,7 @@ print("              DKBT: (%d/%d)\n"%(dkbt_data[0],dkbt_data[1]))
 
 print("              IKAT: (%d/%d)"%(ikat_data[0],ikat_data[1])) 
 print("              DKAT: (%d/%d)\n"%(dkat_data[0],dkat_data[1])) 
+
+
+# print(end-start)
+# print("Time elapsed: %.2f seconds"%(end-start))
