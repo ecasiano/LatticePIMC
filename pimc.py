@@ -223,8 +223,7 @@ def C_SF(N,L,alpha):
 
 '----------------------------------------------------------------------------------'
 
-def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
-    insert_worm_data,insert_anti_data,N_flats_tracker,A,N_zero,N_beta):
+def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
         
     '''Inserts a worm or antiworm'''
 
@@ -256,11 +255,11 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tr
     else: # antiworm
         insert_worm = False
 
-    # Add to worm/antiworm PROPOSAL counters
-    if insert_worm:
-        insert_worm_data[1] += 1
-    else:
-        insert_anti_data[1] += 1
+#     # Add to worm/antiworm PROPOSAL counters
+#     if insert_worm:
+#         insert_worm_data[1] += 1
+#     else:
+#         insert_anti_data[1] += 1
 
     # Determine the no. of particles after each worm end
     n_i = data_struct[i][k][1]  # initial number of particles in the flat interval
@@ -337,11 +336,11 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tr
             head_loc.extend([i,k+1])
             tail_loc.extend([i,k+2])
 
-        # Add to ACCEPTANCE counters
-        if insert_worm:
-            insert_worm_data[0] += 1
-        else: # insert antiworm
-            insert_anti_data[0] += 1
+#         # Add to ACCEPTANCE counters
+#         if insert_worm:
+#             insert_worm_data[0] += 1
+#         else: # insert antiworm
+#             insert_anti_data[0] += 1
 
         # Modify N and total N_flats trackers
         N_tracker[0] += dN
@@ -355,8 +354,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tr
 
 '----------------------------------------------------------------------------------'
 
-def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
-    delete_worm_data,delete_anti_data,N_flats_tracker,A,N_zero,N_beta):
+def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
     
     # Can only propose worm deletion if both worm ends are present
     if not(head_loc) or not(tail_loc) : return None
@@ -404,11 +402,11 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tr
     # Calculate the length of the flat interval and the length of the worm/antiworm
     tau_flat = tau_next - tau_prev
 
-    # Add to delete worm/antiworm PROPOSAL counters
-    if is_worm:
-        delete_worm_data[1] += 1
-    else: # delete antiworm
-        delete_anti_data[1] += 1
+#     # Add to delete worm/antiworm PROPOSAL counters
+#     if is_worm:
+#         delete_worm_data[1] += 1
+#     else: # delete antiworm
+#         delete_anti_data[1] += 1
 
     # Determine the length of path to be modified
     l_path = abs(tau_h-tau_t)
@@ -434,11 +432,11 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tr
     # Metropolis sampling
     if np.random.random() < R:
 
-        # Add to delete ACCEPTANCE counters
-        if is_worm:
-            delete_worm_data[0] += 1
-        else: # delete antiworm
-            delete_anti_data[0] += 1
+#         # Add to delete ACCEPTANCE counters
+#         if is_worm:
+#             delete_worm_data[0] += 1
+#         else: # delete antiworm
+#             delete_anti_data[0] += 1
 
         # Delete the worm ends
         if is_worm: # worm
@@ -463,8 +461,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tr
 
 '----------------------------------------------------------------------------------'
 
-def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,D,N,canonical,N_tracker,
-    advance_head_data,recede_head_data,advance_tail_data,recede_tail_data,N_flats_tracker,A,N_zero,N_beta):     
+def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
 
     # Reject update if there are is no worm end present
     if head_loc == [] and tail_loc == [] : return None
@@ -545,21 +542,21 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,D,N,canonical,N_tra
         else:
             tau_new = tau_prev + r
 
-    # Add to ACCEPTANCE and PROPOSAL counter
-    if shift_head:
-        if tau_new > tau_h: # advance head
-            advance_head_data[0] += 1 # acceptance
-            advance_head_data[1] += 1 # proposal
-        else: # recede head
-            recede_head_data[0] += 1
-            recede_head_data[1] += 1
-    else: # shift tail
-        if tau_new > tau_t: # advance tail
-            advance_tail_data[0] += 1
-            advance_tail_data[1] += 1
-        else: # recede tail
-            recede_tail_data[0] += 1
-            recede_tail_data[1] += 1
+#     # Add to ACCEPTANCE and PROPOSAL counter
+#     if shift_head:
+#         if tau_new > tau_h: # advance head
+#             advance_head_data[0] += 1 # acceptance
+#             advance_head_data[1] += 1 # proposal
+#         else: # recede head
+#             recede_head_data[0] += 1
+#             recede_head_data[1] += 1
+#     else: # shift tail
+#         if tau_new > tau_t: # advance tail
+#             advance_tail_data[0] += 1
+#             advance_tail_data[1] += 1
+#         else: # recede tail
+#             recede_tail_data[0] += 1
+#             recede_tail_data[1] += 1
 
     # Determine the length of path to be modified
     tau_old = data_struct[x][k][0] # original time of the worm end
@@ -591,8 +588,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,U,mu,L,D,N,canonical,N_tra
 
 '----------------------------------------------------------------------------------'
 
-def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
-    insertZero_worm_data,insertZero_anti_data,N_flats_tracker,A,N_zero,N_beta):     
+def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
 
     # Cannot insert if there's two worm ends present
     if head_loc and tail_loc: return None
@@ -613,18 +609,18 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
     if not(head_loc) and not(tail_loc): # No worm ends present
         if n_i == 0: # can only insert worm if there's no particles
             insert_worm = True
-            insertZero_worm_data[1] += 1 # insert worm PROPOSAL counter
+#             insertZero_worm_data[1] += 1 # insert worm PROPOSAL counter
             p_type = 1
         else: # insert worm or antiworm randomly
             if np.random.random() < 0.5:
                 insert_worm = True
-                insertZero_worm_data[1] += 1
+#                 insertZero_worm_data[1] += 1
             else: # antiworm
                 insert_worm = False
-                insertZero_anti_data[1] += 1  # insert anti PROPOSAL counter
+#                 insertZero_anti_data[1] += 1  # insert anti PROPOSAL counter
             p_type = 0.5
     elif head_loc: # only worm head present, can only insert tail (antiworm)
-        insertZero_anti_data[1] += 1
+#         insertZero_anti_data[1] += 1
         if n_i == 0:
             return False # can't insert antiworm if no particles on flat
         else: # n_i != 0
@@ -632,7 +628,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
             p_type = 1
     else: # only tail present, can only insert head (worm)
        insert_worm = True
-       insertZero_worm_data[1] += 1
+#        insertZero_worm_data[1] += 1
        p_type = 1
 
     # Randomly choose where to insert worm end on the flat interval
@@ -730,11 +726,11 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
 
         # Add to insertZero ACCEPTANCE counters
         if insert_worm:
-            insertZero_worm_data[0] += 1
             N_zero[0] += 1
+#             insertZero_worm_data[0] += 1
         else: # insert antiworm
-            insertZero_anti_data[0] += 1
             N_zero[0] -= 1
+#             insertZero_anti_data[0] += 1
             
         # Modify N and total N_flats trackers
         N_tracker[0] += dN
@@ -747,8 +743,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
 
 '----------------------------------------------------------------------------------'
 
-def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
-    deleteZero_worm_data,deleteZero_anti_data,N_flats_tracker,A,N_zero,N_beta):    
+def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):    
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -827,11 +822,11 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
         else: # If there were particles on the flat, either head or tail could've been inserted.
             p_type = 1/2
 
-    # Add to deleteZero PROPOSAL counters
-    if delete_head: # delete head (delete worm)
-        deleteZero_worm_data[1] += 1
-    else: # delete tail (delete antiworm)
-        deleteZero_anti_data[1] += 1
+#     # Add to deleteZero PROPOSAL counters
+#     if delete_head: # delete head (delete worm)
+#         deleteZero_worm_data[1] += 1
+#     else: # delete tail (delete antiworm)
+#         deleteZero_anti_data[1] += 1
 
     # Determine the length of path to be modified
     l_path = tau
@@ -893,13 +888,13 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
                     head_loc[1] -= 1
             del tail_loc[:]
 
-        # Add to deleteZero ACCEPTANCE counters
+#         # Add to deleteZero ACCEPTANCE counters
         if delete_head: # delete worm
-            deleteZero_worm_data[0] += 1
             N_zero[0] -= 1
+#             deleteZero_worm_data[0] += 1
         else: # delete antiworm
             N_zero[0] += 1
-            deleteZero_anti_data[0] += 1
+#             deleteZero_anti_data[0] += 1
 
         # Modify N and total N_flats trackers
         N_tracker[0] += dN
@@ -912,8 +907,7 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
 
 '----------------------------------------------------------------------------------'
 
-def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
-    insertBeta_worm_data,insertBeta_anti_data,N_flats_tracker,A,N_zero,N_beta):     
+def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
 
     # Cannot insert if there's two worm end already present
     if head_loc and tail_loc: return None
@@ -937,18 +931,18 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
     if not(head_loc) and not(tail_loc): # No worm ends present
         if n_i == 0: # can only insert worm if there's no particles
             insert_worm = True
-            insertBeta_worm_data[1] += 1 # insert worm PROPOSAL counter
+#             insertBeta_worm_data[1] += 1 # insert worm PROPOSAL counter
             p_type = 1
         else: # if there's particles, insert worm or antiworm randomly
             if np.random.random() < 0.5:
                 insert_worm = True
-                insertBeta_worm_data[1] += 1
+#                 insertBeta_worm_data[1] += 1
             else:
                 insert_worm = False
-                insertBeta_anti_data[1] += 1  # insert anti PROPOSAL counter
+#                 insertBeta_anti_data[1] += 1  # insert anti PROPOSAL counter
             p_type = 0.5
     elif tail_loc: # only worm tail present, can only insert head (antiworm)
-        insertBeta_anti_data[1] += 1  # insert anti PROPOSAL counter
+#         insertBeta_anti_data[1] += 1  # insert anti PROPOSAL counter
         if n_i == 0:
             return False
         else: # if there's particles, insert the antiworm
@@ -956,7 +950,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
             p_type = 1
     else: # only head present, can only insert tail (worm)
        insert_worm = True
-       insertBeta_worm_data[1] += 1
+#        insertBeta_worm_data[1] += 1
        p_type = 1
 
     # Randomly choose where to insert worm end on the flat interval
@@ -1041,10 +1035,10 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
 
         # Add to insertZero ACCEPTANCE counters
         if insert_worm:
-            insertBeta_worm_data[0] += 1
+#             insertBeta_worm_data[0] += 1
             N_beta[0] += 1
         else: # insert antiworm
-            insertBeta_anti_data[0] += 1
+#             insertBeta_anti_data[0] += 1
             N_beta[0] -= 1
 
         # Modify N and total N_flats trackers
@@ -1058,8 +1052,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
 
 '----------------------------------------------------------------------------------'
 
-def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tracker,
-    deleteBeta_worm_data,deleteBeta_anti_data,N_flats_tracker,A,N_zero,N_beta):     
+def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -1139,11 +1132,11 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
         else: # If there were particles on the flat, either head or tail could've been inserted.
             p_type = 1/2
 
-    # Add to deleteBeta PROPOSAL counters
-    if delete_head: # delete head (antiworm)
-        deleteBeta_anti_data[1] += 1
-    else: # delete tail (worm)
-        deleteBeta_worm_data[1] += 1
+#     # Add to deleteBeta PROPOSAL counters
+#     if delete_head: # delete head (antiworm)
+#         deleteBeta_anti_data[1] += 1
+#     else: # delete tail (worm)
+#         deleteBeta_worm_data[1] += 1
 
     # Determine the length of path to be modified
     l_path = beta-tau
@@ -1196,11 +1189,11 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
 
         # Add to deleteBeta ACCEPTANCE counters
         if delete_head: # delete antiworm
-            deleteBeta_anti_data[0] += 1
+#             deleteBeta_anti_data[0] += 1
             N_beta[0] += 1
         else: # delete worm
             N_beta[0] -= 1
-            deleteBeta_worm_data[0] += 1
+#             deleteBeta_worm_data[0] += 1
 
         # Modify N and total N_flats trackers
         N_tracker[0] += dN
@@ -1213,8 +1206,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,U,mu,eta,L,D,N,canonical,N_tra
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-    N_tracker,ikbh_data,N_flats_tracker,A,N_zero,N_beta):    
+def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):    
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1223,7 +1215,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if L <= 1: return None
 
     # Add to PROPOSAL counter
-    ikbh_data[1] += 1
+#     ikbh_data[1] += 1
 
     # Retrieve worm head indices (i:site,k:kink)
     i = head_loc[0]
@@ -1284,7 +1276,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-        ikbh_data[0] += 1
+#         ikbh_data[0] += 1
 
         # Delete the worm end from site i
         del data_struct[i][k]
@@ -1318,8 +1310,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-    N_tracker,dkbh_data,N_flats_tracker,A,N_zero,N_beta):     
+def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1373,7 +1364,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if tau_h >= tau_next_i: return None
 
     # Add to PROPOSAL counter
-    dkbh_data[1] += 1
+#     dkbh_data[1] += 1
 
     # Determine the lowest time at which the kink could've been inserted
     tau_min = max(tau_prev_i,tau_prev_j)
@@ -1401,7 +1392,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-        dkbh_data[0] += 1
+#         dkbh_data[0] += 1
 
         # Delete the kink structure on both sites
         del data_struct[j][k] # deletes the worm head from j
@@ -1433,8 +1424,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-    N_tracker,ikah_data,N_flats_tracker,A,N_zero,N_beta):    
+def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):    
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1443,7 +1433,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if len(data_struct) <= 1: return None
 
     # Add to PROPOSAL counter
-    ikah_data[1] += 1
+#     ikah_data[1] += 1
 
     # Retrieve worm head indices (i:site,k:kink)
     i = head_loc[0]
@@ -1516,7 +1506,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-        ikah_data[0] += 1
+#         ikah_data[0] += 1
 
         # Delete the worm end from site i
         del data_struct[i][k]
@@ -1550,8 +1540,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-    N_tracker,dkah_data,N_flats_tracker,A,N_zero,N_beta):     
+def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1605,7 +1594,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if tau_h <= tau_prev_i: return None
 
     # Add to PROPOSAL counter
-    dkah_data[1] += 1
+#     dkah_data[1] += 1
 
     # Determine tau_next_i
     if tau_prev_i_idx+1 == len(data_struct[i])-1:
@@ -1639,7 +1628,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-        dkah_data[0] += 1
+#         dkah_data[0] += 1
 
         # Delete the kink structure on both sites
         del data_struct[j][k+1] # deletes the kink from j
@@ -1671,8 +1660,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-    N_tracker,ikbt_data,N_flats_tracker,A,N_zero,N_beta):     
+def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1681,7 +1669,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if len(data_struct) <= 1: return None
 
     # Add to PROPOSAL counter
-    ikbt_data[1] += 1
+#     ikbt_data[1] += 1
 
     # Retrieve worm tail indices (i:site,k:kink)
     i = tail_loc[0]
@@ -1743,7 +1731,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-        ikbt_data[0] += 1
+#         ikbt_data[0] += 1
 
         # Delete the worm end from site i
         del data_struct[i][k]
@@ -1777,8 +1765,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-    N_tracker,dkbt_data,N_flats_tracker,A,N_zero,N_beta):
+def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
      
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1832,7 +1819,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if tau_t >= tau_next_i: return None
 
     # Add to PROPOSAL counter
-    dkbt_data[1] += 1
+#     dkbt_data[1] += 1
 
     # Determine the lowest time at which the kink could've been inserted
     tau_min = max(tau_prev_i,tau_prev_j)
@@ -1860,7 +1847,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-        dkbt_data[0] += 1
+#         dkbt_data[0] += 1
 
         # Delete the kink structure on both sites
         del data_struct[j][k] # deletes the worm tail from j
@@ -1892,8 +1879,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-    N_tracker,ikat_data,N_flats_tracker,A,N_zero,N_beta):     
+def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1902,7 +1888,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if L <= 1: return None
 
     # Add to PROPOSAL counter
-    ikat_data[1] += 1
+#     ikat_data[1] += 1
 
     # Retrieve worm tail indices (i:site,k:kink)
     i = tail_loc[0]
@@ -1974,7 +1960,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-        ikat_data[0] += 1
+#         ikat_data[0] += 1
 
         # Delete the worm end from site i
         del data_struct[i][k]
@@ -2008,8 +1994,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,
-    N_tracker,dkat_data,N_flats_tracker,A,N_zero,N_beta):     
+def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
 
     # Update only possible if there is worm tail present
     if not(tail_loc): return None
@@ -2063,7 +2048,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if tau_t <= tau_prev_i: return None
 
     # Add to PROPOSAL counter
-    dkat_data[1] += 1
+#     dkat_data[1] += 1
 
     # Determine tau_next_i
     if tau_prev_i_idx+1 == len(data_struct[i])-1:
@@ -2097,7 +2082,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-        dkat_data[0] += 1
+#         dkat_data[0] += 1
 
         # Delete the kink structure on both sites
         del data_struct[j][k+1] # deletes the kink from j
