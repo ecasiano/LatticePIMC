@@ -2,11 +2,8 @@
 import numpy as np
 import bisect
 import matplotlib.pyplot as plt
-from copy import deepcopy
 from scipy.stats import truncexpon
 import math
-from scipy.special import binom
-import sys
 
 def random_boson_config(L,D,N):
     '''Generates a random configuration of N bosons in a 1D lattice of size L**D'''
@@ -235,7 +232,7 @@ def C_SF(N,L,alpha):
 
 '----------------------------------------------------------------------------------'
 
-def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):
             
     '''Inserts a worm or antiworm'''
 
@@ -243,7 +240,8 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
     if head_loc or tail_loc: return None
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
-    i = int(np.random.random()*L**D)
+    #i = int(np.random.random()*L**D)
+    i = insertion_site
 
     # Randomly select a flat tau interval at which to possibly insert worm
     N_flats = len(data_struct[i])            # Number of flats on site i
@@ -366,7 +364,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
 '----------------------------------------------------------------------------------'
 
-def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):
     
     # Can only propose worm deletion if both worm ends are present
     if not(head_loc) or not(tail_loc) : return None
@@ -473,7 +471,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
 '----------------------------------------------------------------------------------'
 
-def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
+def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):     
 
     # Reject update if there are is no worm end present
     if head_loc == [] and tail_loc == [] : return None
@@ -600,13 +598,14 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical
 
 '----------------------------------------------------------------------------------'
 
-def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
+def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):     
 
     # Cannot insert if there's two worm ends present
     if head_loc and tail_loc: return None
 
     # Randomly select site i on which to insert a zero worm or antiworm
-    i = int(np.random.random()*L**D)
+    #i = int(np.random.random()*L**D)
+    i = insertion_site
 
     # Determine the length of the first flat interval
     if len(data_struct[i]) == 1: # Worldline is flat throughout
@@ -755,7 +754,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
 '----------------------------------------------------------------------------------'
 
-def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):    
+def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):    
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -919,13 +918,14 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
 '----------------------------------------------------------------------------------'
 
-def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
+def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):     
 
     # Cannot insert if there's two worm end already present
     if head_loc and tail_loc: return None
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
-    i = int(np.random.random()*L**D)
+    # i = int(np.random.random()*L**D)
+    i = insertion_site
 
     # Get the kink index of the last flat interval
     k_last = len(data_struct[i]) - 1
@@ -1064,7 +1064,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
 '----------------------------------------------------------------------------------'
 
-def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
+def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):     
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -1218,7 +1218,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):    
+def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):    
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1322,7 +1322,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
+def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):     
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1436,7 +1436,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):    
+def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):    
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1552,7 +1552,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
+def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):     
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1672,7 +1672,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
+def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):     
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1777,7 +1777,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):
      
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1891,7 +1891,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
+def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):     
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -2006,7 +2006,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):     
+def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):     
 
     # Update only possible if there is worm tail present
     if not(tail_loc): return None
