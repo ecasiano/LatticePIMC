@@ -54,6 +54,18 @@ def N_tracker(data_struct,beta,L,D):
 
 '----------------------------------------------------------------------------------'
 
+def count_kinks(data_struct,beta,n_slices,U,mu,t,L,D):
+    
+    kinks = np.zeros(L**D)
+    for i in range(L**D):
+        kinks[i] += len(data_struct[i])
+        
+    return kinks
+
+'----------------------------------------------------------------------------------'
+    
+    
+    
 def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L,D):
 
     '''Calculates the kinetic and diagonal energies'''
@@ -224,7 +236,7 @@ def C_SF(N,L,alpha):
 '----------------------------------------------------------------------------------'
 
 def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
-        
+            
     '''Inserts a worm or antiworm'''
 
     # Can only insert worm if there are NO wormends present
