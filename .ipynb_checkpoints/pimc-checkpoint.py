@@ -61,8 +61,6 @@ def count_kinks(data_struct,beta,n_slices,U,mu,t,L,D):
 
 '----------------------------------------------------------------------------------'
     
-    
-    
 def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L,D):
 
     '''Calculates the kinetic and diagonal energies'''
