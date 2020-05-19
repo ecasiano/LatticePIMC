@@ -8,10 +8,10 @@ import math
 def random_boson_config(L,D,N):
     '''Generates a random configuration of N bosons in a 1D lattice of size L**D'''
 
-    alpha = np.zeros(L**D,dtype=int) # Stores the random configuration of bosons
-    for i in range(N):
-        r = int(np.random.random()*L**D)
-        alpha[r] += 1
+    alpha = np.zeros(L**D,dtype=np.int32) # Stores the random configuration of bosons
+    for n in range(N): # Distribute particles on sites randomly one by one
+        site = int(np.random.random()*L**D)
+        alpha[site] += 1
 
     return alpha
 
@@ -231,15 +231,15 @@ def C_SF(N,L,alpha):
 '----------------------------------------------------------------------------------'
 
 def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):
-            
+           
     '''Inserts a worm or antiworm'''
 
     # Can only insert worm if there are NO wormends present
     if head_loc or tail_loc: return None
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
-    #i = int(np.random.random()*L**D)
-    i = insertion_site
+    i = int(np.random.random()*L**D)
+    #i = insertion_site
 
     # Randomly select a flat tau interval at which to possibly insert worm
     N_flats = len(data_struct[i])            # Number of flats on site i
@@ -602,8 +602,8 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     if head_loc and tail_loc: return None
 
     # Randomly select site i on which to insert a zero worm or antiworm
-    #i = int(np.random.random()*L**D)
-    i = insertion_site
+    i = int(np.random.random()*L**D)
+    #i = insertion_site
 
     # Determine the length of the first flat interval
     if len(data_struct[i]) == 1: # Worldline is flat throughout
@@ -922,8 +922,8 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     if head_loc and tail_loc: return None
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
-    # i = int(np.random.random()*L**D)
-    i = insertion_site
+    i = int(np.random.random()*L**D)
+    #i = insertion_site
 
     # Get the kink index of the last flat interval
     k_last = len(data_struct[i]) - 1
