@@ -217,19 +217,6 @@ def check_worm(head_loc,tail_loc):
 
 '----------------------------------------------------------------------------------'
 
-def C_SF(N,L,alpha):
-
-    '''Return coefficient of flat state of N bosons on L sites'''
-
-    den = 1 # denominator
-    for n_i in alpha:
-        den *= math.factorial(n_i)
-
-#     return np.sqrt(math.factorial(N)/den)
-    return 1
-
-'----------------------------------------------------------------------------------'
-
 def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site):
            
     '''Inserts a worm or antiworm'''
@@ -238,8 +225,8 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
     if head_loc or tail_loc: return None
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
-    i = int(np.random.random()*L**D)
-    #i = insertion_site
+    #i = int(np.random.random()*L**D)
+    i = insertion_site
 
     # Randomly select a flat tau interval at which to possibly insert worm
     N_flats = len(data_struct[i])            # Number of flats on site i
@@ -602,8 +589,8 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     if head_loc and tail_loc: return None
 
     # Randomly select site i on which to insert a zero worm or antiworm
-    i = int(np.random.random()*L**D)
-    #i = insertion_site
+    #i = int(np.random.random()*L**D)
+    i = insertion_site
 
     # Determine the length of the first flat interval
     if len(data_struct[i]) == 1: # Worldline is flat throughout
@@ -691,9 +678,11 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 #     C = 1 # Ratio of trial wavefn coefficients post/pre update
     if insert_worm:
         C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
+        C = 1
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
     else: # antiworm
         C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = 1
         W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
 
     # Build the Metropolis Ratio  (R)
@@ -866,8 +855,10 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     if delete_head: # delete worm
         C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
+        C = 1
     else: # delete antiworm
         C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = 1
         W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
 
 
@@ -922,8 +913,8 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     if head_loc and tail_loc: return None
 
     # Randomly select a lattice site i on which to insert a worm or antiworm
-    i = int(np.random.random()*L**D)
-    #i = insertion_site
+    #i = int(np.random.random()*L**D)
+    i = insertion_site
 
     # Get the kink index of the last flat interval
     k_last = len(data_struct[i]) - 1
@@ -1016,9 +1007,11 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 #     C = 1  # C_pre/C_post
     if insert_worm:
         C = np.sqrt(N_b +1)/np.sqrt(n_i+1)
+        C = 1
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
     else: # antiworm
         C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = 1
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
@@ -1176,9 +1169,11 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 #     C = 1 # C_post/C_pre
     if not(delete_head): # delete tail (worm)
         C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
+        C = 1
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
     else: # delete head (antiworm)
         C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = 1
         W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
