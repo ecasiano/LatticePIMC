@@ -108,7 +108,9 @@ print("Pre-equilibration started. Determining mu...")
 pre_equilibration = int(M_pre*L**D*beta)
 N_frac = 0
 need_mu = True
-while need_mu:
+while need_mu and False:
+    
+    insertion_site = int(np.random.random()*L**D)
     
     data_struct = pimc.create_data_struct(alpha,L,D)
     
@@ -200,8 +202,14 @@ N_zero = [N]
 N_beta = [N]
 
 # Open files that will save data        
-kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_canK.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
-diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_canV.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+if canonical:
+    kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_K.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+    diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_V.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+    N_file  = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_N.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+else:
+    kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_K.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+    diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_V.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+    N_file  = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_N.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
 
 print("Equilibration started...")
 
@@ -258,6 +266,10 @@ m = 0
 exact = -32.35035032591378
 E_std = 100
 
+# Total particle number bins
+N_bins = np.arange(101)
+N_data = []
+
 # Randomly an update M times
 for m in range(equilibration,M+equilibration): 
 #while E_mean < alps-0.01 or E_mean > alps+0.01:
@@ -290,16 +302,54 @@ for m in range(equilibration,M+equilibration):
         if not(pimc.check_worm(head_loc,tail_loc)):    
             
             Z_sector_ctr += 1
-                
-            # Measure the total n
-            N_mean += N_tracker[0]
             
-            # Check if in correct N-sector
-            # if round(N_tracker[0],12)==N:
-            if N-N_tracker[0] > -1.0E-12 and N-N_tracker[0] < 1.0E-12:
-                         
-                N_sector_ctr += 1
+            if canonical:
+                # Check if in correct N-sector for canonical simulations.
+                if N-N_tracker[0] > -1.0E-12 and N-N_tracker[0] < 1.0E-12:
+                    
+                    # Measure the total n
+                    N_mean += N_tracker[0]
+                    N_sector_ctr += 1
 
+                    # Measurement just performed, will not measure again in at least mfreq sweeps
+                    skip_ctr = int(mfreq*L**D*beta)
+                    try_measurement = False
+
+                    # Binning average counter
+                    bin_ctr += 1
+
+                    # Add to MEASUREMENTS MADE counter
+                    measurements[0] += 1
+
+                    # Energies, but measured at different tau slices (time resolved)
+                    tr_kinetic,tr_diagonal = pimc.tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L,D)
+                    tr_kinetic_list += tr_kinetic # cumulative sum
+                    tr_diagonal_list += tr_diagonal # cumulative sum
+
+                    # Take the binned average of the time resolved energies
+                    if bin_ctr == bin_size:
+
+                        tr_kinetic_list /= bin_size
+                        tr_diagonal_list /= bin_size
+
+                        # Write to file(s)
+                        np.savetxt(kinetic_file,np.reshape(tr_kinetic_list,(1,data_len)),fmt="%.16f",delimiter=" ")
+                        np.savetxt(diagonal_file,np.reshape(tr_diagonal_list,(1,data_len)),fmt="%.16f",delimiter=" ")
+
+                        # Reset bin_ctr and time resolved energies arrays
+                        bin_ctr = 0
+                        tr_kinetic_list *= 0
+                        tr_diagonal_list *= 0
+                    
+                else: # Worldline doesn't have target particle number
+                    pass
+                
+            else: # Grand canonical simulation
+                                
+                # Measure the total n
+                N_mean += N_tracker[0]
+                N_sector_ctr += 1
+                
                 # Measurement just performed, will not measure again in at least mfreq sweeps
                 skip_ctr = int(mfreq*L**D*beta)
                 try_measurement = False
@@ -320,12 +370,6 @@ for m in range(equilibration,M+equilibration):
 
                     tr_kinetic_list /= bin_size
                     tr_diagonal_list /= bin_size
-                    
-#                     E_list.append(tr_kinetic_list[10]+tr_diagonal_list[10]+mu*N)
-#                     E_mean = np.mean(E_list)
-#                     E_std = np.std(E_list)
-                    
-#                     print(E_mean,E_std)
 
                     # Write to file(s)
                     np.savetxt(kinetic_file,np.reshape(tr_kinetic_list,(1,data_len)),fmt="%.16f",delimiter=" ")
@@ -336,18 +380,23 @@ for m in range(equilibration,M+equilibration):
                     tr_kinetic_list *= 0
                     tr_diagonal_list *= 0
                     
-            else: # Worldline doesn't have target particle number
-                pass
+                    # Array of measured total particle number. Needed for mu determination.
+                    #np.savetxt(N_file,N_tracker[0],fmt="%.16f",delimiter=" ")
+                    #N_file.write(str(N_tracker[0])+'\n')
+                    data_to_write = str(N_tracker[0])
+                    N_file.write(data_to_write+'\n')
+                    #N_data.append(N_tracker[0])
 
-        else: # There's a worm in the worldline configuration
+        else: # Not a diagonal configuration. There's a worm end.
             pass
 
-    else: # We  only measure every L*beta steps
+    else: # We  only measure every L**D*beta iterations
         pass
 
 # Close the data files
 kinetic_file.close()
 diagonal_file.close()
+N_file.close()
 
 # Save diagonal fraction obtained from main loop
 print("Lattice PIMC done.\n")
@@ -367,5 +416,6 @@ else:
 print("-------- Z-configuration fraction --------")
 print("Z-fraction: %.2f%% (%d/%d) "%(100*Z_sector_ctr/measurements[1],Z_sector_ctr,measurements[1]))
 
-print("-------- N-configuration fraction --------")
-print("N-fraction: %.2f%% (%d/%d) "%(100*N_sector_ctr/measurements[1],N_sector_ctr,measurements[1]))
+if canonical:
+    print("-------- N-configuration fraction --------")
+    print("N-fraction: %.2f%% (%d/%d) "%(100*N_sector_ctr/measurements[1],N_sector_ctr,measurements[1]))
