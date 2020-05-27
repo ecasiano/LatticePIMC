@@ -9,6 +9,7 @@ importlib.reload(pimc)
 import random
 import datetime
 import time
+import fastrand
 
 # -------- Set command line arguments -------- #
 
@@ -74,8 +75,9 @@ equilibration = 100000 if not(args.equilibration) else args.equilibration
 
 # Set the random seed
 np.random.seed(rseed)
+fastrand.pcg32_seed(rseed)
 
-# # Pool of worm algorithm updates
+# Pool of worm algorithm updates
 pool = [ pimc.worm_insert, # 0
          pimc.worm_delete,
          pimc.worm_timeshift,
@@ -217,9 +219,6 @@ print("Equilibration started...")
 M *= int(L**D*beta)
 equilibration *= int(L**D*beta)
 
-# Pre-allocate the random move labels
-labels = (np.random.random(M+equilibration)*15).astype(np.ushort)
-
 # Pre-allocate random site indices for insert type moves
 insertion_sites = (np.random.random(M+equilibration)*L**D).astype(np.uint32)
 
@@ -227,7 +226,8 @@ insertion_sites = (np.random.random(M+equilibration)*L**D).astype(np.uint32)
 for m in range(equilibration): 
     
     # Propose move from pool of worm algorithm updates
-    pool[labels[m]](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_sites[m])
+    label = fastrand.pcg32bounded(15)
+    pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_sites[m])
     
 print("Equilibration done...\n")
       
@@ -283,7 +283,8 @@ for m in range(equilibration,M+equilibration):
     
     # Pool of worm algorithm updates
     #pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,-1) 
-    pool[labels[m]](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_sites[m]) 
+    label = fastrand.pcg32bounded(15)
+    pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_sites[m]) 
 
     
     # When counter reaches zero, the next Z-configuration that occurs will be measured 
