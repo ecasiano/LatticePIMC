@@ -108,7 +108,7 @@ print("Pre-equilibration started. Determining mu...")
 pre_equilibration = int(M_pre*L**D*beta)
 N_frac = 0
 need_mu = True
-while need_mu and False:
+while need_mu and False :
     
     insertion_site = int(np.random.random()*L**D)
     
