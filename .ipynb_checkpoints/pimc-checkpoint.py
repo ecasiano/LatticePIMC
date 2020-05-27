@@ -9,7 +9,7 @@ def random_boson_config(L,D,N):
 
     alpha = np.zeros(L**D,dtype=np.int32) # Stores the random configuration of bosons
     for n in range(N): # Distribute particles on sites randomly one by one
-        site = int(np.random.random()*L**D)
+        site = fastrand.pcg32bounded(L**D)
         alpha[site] += 1
 
     return alpha
@@ -228,7 +228,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
     # Randomly select a flat tau interval at which to possibly insert worm
     N_flats = len(data_struct[i])            # Number of flats on site i
-    k = int(np.random.random()*N_flats)      # Index of lower bound of chosen flat
+    k = fastrand.pcg32bounded(N_flats)       # Index of lower bound of chosen flat
     tau_prev = data_struct[i][k][0]
     if k == N_flats - 1:
         tau_next = beta     # In case that the last flat is chosen
