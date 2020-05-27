@@ -1229,7 +1229,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     total_nn = len(nearest_neighbors)
 
     # Randomly choose a nearest neighbor node
-    j = np.random.choice(nearest_neighbors)
+    j = nearest_neighbors[fastrand.pcg32bounded(total_nn)]
     p_site = 1/total_nn
 
     # Retrieve the time of the worm head (and tail if present)
@@ -1443,9 +1443,10 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     # Build array of labels of nearest neighbor nodes to i
     nearest_neighbors = np.nonzero(A[i])[0]
     total_nn = len(nearest_neighbors)
-
+    
     # Randomly choose a nearest neighbor node
-    j = np.random.choice(nearest_neighbors)
+    #j = nearest_neighbors[fastrand.pcg32bounded(total_nn)]
+    j = nearest_neighbors[fastrand.pcg32bounded(total_nn)]
     p_site = 1/total_nn
 
     # Retrieve the time of the worm head (and tail if present)
@@ -1681,7 +1682,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     total_nn = len(nearest_neighbors)
 
     # Randomly choose a nearest neighbor node
-    j = np.random.choice(nearest_neighbors)
+    j = nearest_neighbors[fastrand.pcg32bounded(total_nn)]
     p_site = 1/total_nn
 
     # Retrieve the time of the worm tail (and head if present)
@@ -1900,7 +1901,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     total_nn = len(nearest_neighbors)
 
     # Randomly choose a nearest neighbor node
-    j = np.random.choice(nearest_neighbors)
+    j = nearest_neighbors[fastrand.pcg32bounded(total_nn)]
     p_site = 1/total_nn
 
     # Retrieve the time of the worm tail (and head if present)
