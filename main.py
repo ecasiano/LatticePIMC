@@ -44,7 +44,7 @@ parser.add_argument("--mfreq",help="Measurements made every other mfreq*L*beta s
                     type=int,metavar='\b')
 parser.add_argument("--D",help="Lattice dimension (default: 1)",
                     type=int,metavar='\b')
-parser.add_argument("--equilibration",help="Number of Monte Carlo steps given to system to equilibrate",
+parser.add_argument("--M-equil",help="Number of Monte Carlo steps given to system to equilibrate",
                     type=int,metavar='\b')
 
 # Parse arguments
@@ -69,7 +69,7 @@ rseed = int(0) if not(args.rseed) else args.rseed
 mfreq = int(2000) if not(args.mfreq) else args.mfreq
 D = int(1) if not(args.D) else args.D
 eta = 1/(L**D*beta)**1.75 if not(args.eta) else args.eta
-equilibration = 100000 if not(args.equilibration) else args.equilibration
+M_equil = 100000 if not(args.M_equil) else args.M_equil
 
 # Set the random seed
 np.random.seed(rseed)
@@ -101,92 +101,21 @@ data_struct = pimc.create_data_struct(alpha,L,D)
 # Build the adjacency matrix
 A = pimc.build_adjacency_matrix(L,D,'pbc')
 
-# ---------------- Pre-equilibration (determine mu) ---------------- #
-
-print("Pre-equilibration started. Determining mu...")
-
-pre_equilibration = int(M_pre*L**D*beta)
-N_frac = 0
-need_mu = True
-while need_mu and False :
-    
-    insertion_site = int(np.random.random()*L**D)
-    
-    data_struct = pimc.create_data_struct(alpha,L,D)
-    
-    # List that will contain site and kink indices of worm head and tail
-    head_loc = []
-    tail_loc = []
-
-    # Trackers
-    N_tracker = [N]         # Total particles
-    N_flats_tracker = [L]   # Total flat regions
-    N_zero = [N]
-    N_beta = [N]
-    
-    measurements = [0,0]
-
-    # Initialize counter of target N sector and the number Z sector configs
-    N_sector_ctr = 0
-    Z_sector_ctr = 0
-    N_frac = 0
-    
-    skip_ctr = int(mfreq*L**D*beta)
-    try_measurement = True
-    
-    for m in range(pre_equilibration):
-
-        # When counter reaches zero, the next Z-configuration that occurs will be measured 
-        if skip_ctr <= 0:
-            try_measurement = True
-        else:
-            #try_measurement = False
-            skip_ctr -= 1 
-            
-        if try_measurement:
-            
-            # Randomly choose move label and insertion site
-            label = int(np.random.random()*15)
-            if label == 0 or label == 3 or label == 5: 
-                insertion_site = int(np.random.random()*L**D)
-
-            # Propose move from pool of worm algorithm updates
-            pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
-
-            measurements[1] += 1 # measurement attempts
-
-            # Make measurement if no worm ends present
-            if not(pimc.check_worm(head_loc,tail_loc)): 
-
-                Z_sector_ctr += 1
-
-                if N-N_tracker[0] > -1.0E-12 and N-N_tracker[0] < 1.0E-12:
-
-                    N_sector_ctr += 1
-
-                    # Measurement just performed, will not measure again in at least mfreq sweeps
-                    skip_ctr = int(mfreq*L**D*beta)
-                    try_measurement = False
-            
-    # Calculate N-sector and Z-sector fractions
-    N_frac = N_sector_ctr/measurements[1]
-    Z_frac = Z_sector_ctr/measurements[1]
-        
-    # Print mu and N_frac to screen
-    print("mu = %.4f | N_frac = %.2f (%d/%d) | Z_frac = %.2f (%d/%d)"%(mu,N_frac,N_sector_ctr,measurements[1],Z_frac,Z_sector_ctr,measurements[1]))
-    
-    # If below desired N-sector fraction, increase mu
-    if N_frac < 0.3:
-        need_mu = True
-        mu -= (0.001)
-    else:
-        need_mu = False
-
-print("Pre-equilibration done...\n")
+# ---------------- Pre-M_equil (determine mu) ---------------- #
 
 # ---------------- Lattice PIMC ---------------- #
-
+    
 start = time.time()
+
+# Open files that will save data        
+if canonical:
+    kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_K.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+    diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_V.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+    N_file  = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_N.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+else:
+    kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_K.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+    diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_V.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+    N_file  = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_N.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
 
 # Data structure containing the worldlines
 data_struct = pimc.create_data_struct(alpha,L,D)
@@ -201,32 +130,23 @@ N_flats_tracker = [L]   # Total flat regions
 N_zero = [N]
 N_beta = [N]
 
-# Open files that will save data        
-if canonical:
-    kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_K.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
-    diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_V.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
-    N_file  = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_N.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
-else:
-    kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_K.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
-    diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_V.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
-    N_file  = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_N.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
-
 print("Equilibration started...")
 
 # Redefine M to be an actual Monte Carlo step (a sweep)
 M *= int(L**D*beta)
-equilibration *= int(L**D*beta)
+M_equil *= int(L**D*beta)
 
-# Equilibration loop
-for m in range(equilibration): 
+# M_equil loop
+for m in range(M_equil): 
     
     # Propose move from pool of worm algorithm updates
     label = fastrand.pcg32bounded(15)
     pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
     
 print("Equilibration done...\n")
-      
-      
+    
+# ---------------- Lattice PIMC ---------------- #
+
 print("LatticePIMC started...")
 
 # Initialize values to be measured
@@ -253,20 +173,11 @@ N_sector_ctr = 0 # Configurations in N-sector
 skip_ctr = int(mfreq*L**D*beta)
 try_measurement = True
 
-# ALPS comparison
-E_list = []
-alps = -4.70820381667-3.1*9
-E_mean = 0
-m = 0
-exact = -32.35035032591378
-E_std = 100
-
 # Total particle number bins
-N_bins = np.arange(101)
 N_data = []
 
 # Randomly an update M times
-for m in range(equilibration,M+equilibration): 
+for m in range(M_equil,M+M_equil): 
 #while E_mean < alps-0.01 or E_mean > alps+0.01:
 #while E_mean < exact-0.0001 or E_mean > exact+0.0001:
 
@@ -414,3 +325,87 @@ print("Z-fraction: %.2f%% (%d/%d) "%(100*Z_sector_ctr/measurements[1],Z_sector_c
 if canonical:
     print("-------- N-configuration fraction --------")
     print("N-fraction: %.2f%% (%d/%d) "%(100*N_sector_ctr/measurements[1],N_sector_ctr,measurements[1]))
+    
+    
+    
+    
+# print("Pre-equilibration started. Determining mu...")
+
+# pre_equilibration = int(M_pre*L**D*beta)
+# N_frac = 0
+# need_mu = True
+# while need_mu and False :
+    
+#     insertion_site = int(np.random.random()*L**D)
+    
+#     data_struct = pimc.create_data_struct(alpha,L,D)
+    
+#     # List that will contain site and kink indices of worm head and tail
+#     head_loc = []
+#     tail_loc = []
+
+#     # Trackers
+#     N_tracker = [N]         # Total particles
+#     N_flats_tracker = [L]   # Total flat regions
+#     N_zero = [N]
+#     N_beta = [N]
+    
+#     measurements = [0,0]
+
+#     # Initialize counter of target N sector and the number Z sector configs
+#     N_sector_ctr = 0
+#     Z_sector_ctr = 0
+#     N_frac = 0
+    
+#     skip_ctr = int(mfreq*L**D*beta)
+#     try_measurement = True
+    
+#     for m in range(pre_equilibration):
+
+#         # When counter reaches zero, the next Z-configuration that occurs will be measured 
+#         if skip_ctr <= 0:
+#             try_measurement = True
+#         else:
+#             #try_measurement = False
+#             skip_ctr -= 1 
+            
+#         if try_measurement:
+            
+#             # Randomly choose move label and insertion site
+#             label = int(np.random.random()*15)
+#             if label == 0 or label == 3 or label == 5: 
+#                 insertion_site = int(np.random.random()*L**D)
+
+#             # Propose move from pool of worm algorithm updates
+#             pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
+
+#             measurements[1] += 1 # measurement attempts
+
+#             # Make measurement if no worm ends present
+#             if not(pimc.check_worm(head_loc,tail_loc)): 
+
+#                 Z_sector_ctr += 1
+
+#                 if N-N_tracker[0] > -1.0E-12 and N-N_tracker[0] < 1.0E-12:
+
+#                     N_sector_ctr += 1
+
+#                     # Measurement just performed, will not measure again in at least mfreq sweeps
+#                     skip_ctr = int(mfreq*L**D*beta)
+#                     try_measurement = False
+            
+#     # Calculate N-sector and Z-sector fractions
+#     N_frac = N_sector_ctr/measurements[1]
+#     Z_frac = Z_sector_ctr/measurements[1]
+        
+#     # Print mu and N_frac to screen
+#     print("mu = %.4f | N_frac = %.2f (%d/%d) | Z_frac = %.2f (%d/%d)"%(mu,N_frac,N_sector_ctr,measurements[1],Z_frac,Z_sector_ctr,measurements[1]))
+    
+#     # If below desired N-sector fraction, increase mu
+#     if N_frac < 0.3:
+#         need_mu = True
+#         mu -= (0.001)
+#     else:
+#         need_mu = False
+
+# print("Pre-equilibration done...\n")
