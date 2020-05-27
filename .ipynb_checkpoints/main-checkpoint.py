@@ -177,7 +177,7 @@ try_measurement = True
 N_data = []
 
 # Randomly an update M times
-for m in range(M_equil,M+M_equil): 
+for m in range(M): 
 #while E_mean < alps-0.01 or E_mean > alps+0.01:
 #while E_mean < exact-0.0001 or E_mean > exact+0.0001:
 
