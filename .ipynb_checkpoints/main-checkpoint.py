@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 import importlib
 import argparse
 importlib.reload(pimc)
-import random
-import datetime
 import time
 import fastrand
 
@@ -153,7 +151,7 @@ while need_mu and False :
                 insertion_site = int(np.random.random()*L**D)
 
             # Propose move from pool of worm algorithm updates
-            pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_site)
+            pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
 
             measurements[1] += 1 # measurement attempts
 
@@ -219,15 +217,12 @@ print("Equilibration started...")
 M *= int(L**D*beta)
 equilibration *= int(L**D*beta)
 
-# Pre-allocate random site indices for insert type moves
-insertion_sites = (np.random.random(M+equilibration)*L**D).astype(np.uint32)
-
 # Equilibration loop
 for m in range(equilibration): 
     
     # Propose move from pool of worm algorithm updates
     label = fastrand.pcg32bounded(15)
-    pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_sites[m])
+    pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
     
 print("Equilibration done...\n")
       
@@ -284,9 +279,8 @@ for m in range(equilibration,M+equilibration):
     # Pool of worm algorithm updates
     #pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,-1) 
     label = fastrand.pcg32bounded(15)
-    pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertion_sites[m]) 
-
-    
+    pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta) 
+  
     # When counter reaches zero, the next Z-configuration that occurs will be measured 
     if skip_ctr <= 0:
         try_measurement = True
