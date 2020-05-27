@@ -140,8 +140,7 @@ M_equil *= int(L**D*beta)
 for m in range(M_equil): 
     
     # Propose move from pool of worm algorithm updates
-    label = fastrand.pcg32bounded(15)
-    pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
+    pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
     
 print("Equilibration done...\n")
     
@@ -178,19 +177,9 @@ N_data = []
 
 # Randomly an update M times
 for m in range(M): 
-#while E_mean < alps-0.01 or E_mean > alps+0.01:
-#while E_mean < exact-0.0001 or E_mean > exact+0.0001:
-
-    #m += 1
-    
-    #insertion_site = int(np.random.random()*L**D)
-    #label = int(np.random.random()*15)
-
     
     # Pool of worm algorithm updates
-    #pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,-1) 
-    label = fastrand.pcg32bounded(15)
-    pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta) 
+    pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta) 
   
     # When counter reaches zero, the next Z-configuration that occurs will be measured 
     if skip_ctr <= 0:
@@ -205,16 +194,27 @@ for m in range(M):
         measurements[1] += 1
         
         # Make measurement if no worm ends present
-        if not(pimc.check_worm(head_loc,tail_loc)):    
+        if not(pimc.check_worm(head_loc,tail_loc)):  
             
+            N_data.append(round(N_tracker[0]))
+
+            # Update diagonal fraction counter
             Z_sector_ctr += 1
             
+            # Update N accumulator
+            N_mean += N_tracker[0]
+            
             if canonical:
-                # Check if in correct N-sector for canonical simulations.
-                if N-N_tracker[0] > -1.0E-12 and N-N_tracker[0] < 1.0E-12:
-                    
-                    # Measure the total n
-                    N_mean += N_tracker[0]
+                
+                #print(N_tracker[0])
+                # Check if in correct N-sector for canonical simulations
+                if N-N_tracker[0] > -1.0E-12 and N-N_tracker[0] < +1.0E-12:
+                #if round(N_tracker[0])==4.0:
+                #if True:
+        
+                    #print(round(N_tracker[0]))
+                   
+                    # Update the N-sector counter
                     N_sector_ctr += 1
 
                     # Measurement just performed, will not measure again in at least mfreq sweeps
@@ -248,13 +248,10 @@ for m in range(M):
                         tr_diagonal_list *= 0
                     
                 else: # Worldline doesn't have target particle number
+                    #print(N_tracker[0])
                     pass
                 
             else: # Grand canonical simulation
-                                
-                # Measure the total n
-                N_mean += N_tracker[0]
-                N_sector_ctr += 1
                 
                 # Measurement just performed, will not measure again in at least mfreq sweeps
                 skip_ctr = int(mfreq*L**D*beta)
@@ -287,11 +284,7 @@ for m in range(M):
                     tr_diagonal_list *= 0
                     
                     # Array of measured total particle number. Needed for mu determination.
-                    #np.savetxt(N_file,N_tracker[0],fmt="%.16f",delimiter=" ")
-                    #N_file.write(str(N_tracker[0])+'\n')
-                    data_to_write = str(N_tracker[0])
-                    N_file.write(data_to_write+'\n')
-                    #N_data.append(N_tracker[0])
+                    N_file.write(str(N_tracker[0])+'\n')
 
         else: # Not a diagonal configuration. There's a worm end.
             pass
@@ -324,11 +317,9 @@ print("Z-fraction: %.2f%% (%d/%d) "%(100*Z_sector_ctr/measurements[1],Z_sector_c
 
 if canonical:
     print("-------- N-configuration fraction --------")
-    print("N-fraction: %.2f%% (%d/%d) "%(100*N_sector_ctr/measurements[1],N_sector_ctr,measurements[1]))
-    
-    
-    
-    
+    print("N-fraction: %.2f%% (%d/%d) "%(100*N_sector_ctr/Z_sector_ctr,N_sector_ctr,Z_sector_ctr))
+   
+print(f'\nP(3)={N_data.count(3)/Z_sector_ctr} P(4)={N_data.count(4)/Z_sector_ctr} P(5)={N_data.count(5)/Z_sector_ctr} sum[P(N)]={(N_data.count(3)+N_data.count(4)+N_data.count(5))/Z_sector_ctr} {len(N_data)}')
 # print("Pre-equilibration started. Determining mu...")
 
 # pre_equilibration = int(M_pre*L**D*beta)
