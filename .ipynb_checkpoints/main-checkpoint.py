@@ -181,14 +181,8 @@ for m in range(M):
     # Pool of worm algorithm updates
     pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta) 
   
-    # When counter reaches zero, the next Z-configuration that occurs will be measured 
-    if skip_ctr <= 0:
-        try_measurement = True
-    else:
-        #try_measurement = False
-        skip_ctr -= 1 
-            
-    if try_measurement:  
+    # Only attempt measurements every other mfreq sweeps
+    if m%(mfreq*L**D*beta)==0:  
         
         # Add to measurement ATTEMPTS counter
         measurements[1] += 1
@@ -208,18 +202,15 @@ for m in range(M):
                 
                 #print(N_tracker[0])
                 # Check if in correct N-sector for canonical simulations
-                if N-N_tracker[0] > -1.0E-12 and N-N_tracker[0] < +1.0E-12:
-                #if round(N_tracker[0])==4.0:
+                #if N-N_tracker[0] > -1.0E-08 and N-N_tracker[0] < +1.0E-08:
+                if round(N_tracker[0])==4.0:
                 #if True:
+                #if m%2==0:
         
                     #print(round(N_tracker[0]))
                    
                     # Update the N-sector counter
                     N_sector_ctr += 1
-
-                    # Measurement just performed, will not measure again in at least mfreq sweeps
-                    skip_ctr = int(mfreq*L**D*beta)
-                    try_measurement = False
 
                     # Binning average counter
                     bin_ctr += 1
@@ -252,10 +243,6 @@ for m in range(M):
                     pass
                 
             else: # Grand canonical simulation
-                
-                # Measurement just performed, will not measure again in at least mfreq sweeps
-                skip_ctr = int(mfreq*L**D*beta)
-                try_measurement = False
 
                 # Binning average counter
                 bin_ctr += 1
