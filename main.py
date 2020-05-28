@@ -172,23 +172,33 @@ N_sector_ctr = 0 # Configurations in N-sector
 skip_ctr = int(mfreq*L**D*beta)
 try_measurement = True
 
-# Total particle number bins
+# Total particle number sectors
 N_data = []
+
+# Count sweeps since last measurement occured
+skip_ctr = 0
 
 # Randomly an update M times
 for m in range(M): 
     
     # Pool of worm algorithm updates
     pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta) 
-  
-    # Only attempt measurements every other mfreq sweeps
-    if m%(mfreq*L**D*beta)==0:  
+    
+    # In this iteration, measurement still correlated. Won't try to measure.
+    if skip_ctr%(mfreq*L**D*beta)!=0:
+       skip_ctr += 1
+        
+    # Only attempt measurements mfreq sweeps after the last Z-sector visit
+    else:          
         
         # Add to measurement ATTEMPTS counter
         measurements[1] += 1
         
         # Make measurement if no worm ends present
         if not(pimc.check_worm(head_loc,tail_loc)):  
+            
+            # Reset skipped measurement counter
+            skip_ctr = 1  
             
             N_data.append(round(N_tracker[0]))
 
@@ -200,13 +210,9 @@ for m in range(M):
             
             if canonical:
                 
-                #print(N_tracker[0])
                 # Check if in correct N-sector for canonical simulations
-                #if N-N_tracker[0] > -1.0E-08 and N-N_tracker[0] < +1.0E-08:
-                if round(N_tracker[0])==4.0:
-                #if True:
-                #if m%2==0:
-        
+                if N-N_tracker[0] > -1.0E-08 and N-N_tracker[0] < +1.0E-08: 
+                
                     #print(round(N_tracker[0]))
                    
                     # Update the N-sector counter
@@ -275,9 +281,6 @@ for m in range(M):
 
         else: # Not a diagonal configuration. There's a worm end.
             pass
-
-    else: # We  only measure every L**D*beta iterations
-        pass
 
 # Close the data files
 kinetic_file.close()
