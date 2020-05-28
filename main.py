@@ -180,6 +180,7 @@ skip_ctr = 0
 
 # Randomly an update M times
 for m in range(M): 
+#while Z_sector_ctr < int(M/(L**D*beta)):
     
     # Pool of worm algorithm updates
     pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta) 
@@ -200,7 +201,7 @@ for m in range(M):
             # Reset skipped measurement counter
             skip_ctr = 1  
             
-            N_data.append(round(N_tracker[0]))
+#             N_data.append(round(N_tracker[0]))
 
             # Update diagonal fraction counter
             Z_sector_ctr += 1
@@ -309,7 +310,8 @@ if canonical:
     print("-------- N-configuration fraction --------")
     print("N-fraction: %.2f%% (%d/%d) "%(100*N_sector_ctr/Z_sector_ctr,N_sector_ctr,Z_sector_ctr))
    
-print(f'\nP(3)={N_data.count(3)/Z_sector_ctr} P(4)={N_data.count(4)/Z_sector_ctr} P(5)={N_data.count(5)/Z_sector_ctr} sum[P(N)]={(N_data.count(3)+N_data.count(4)+N_data.count(5))/Z_sector_ctr} {len(N_data)}')
+#print(f'\nP(3)={N_data.count(3)/Z_sector_ctr} P(4)={N_data.count(4)/Z_sector_ctr} P(5)={N_data.count(5)/Z_sector_ctr} sum[P(N)]={(N_data.count(3)+N_data.count(4)+N_data.count(5))/Z_sector_ctr} {len(N_data)}')
+
 # print("Pre-equilibration started. Determining mu...")
 
 # pre_equilibration = int(M_pre*L**D*beta)
