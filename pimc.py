@@ -274,13 +274,15 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
     if tau_h == tau_t : return False
 
     # Determine the length of path to be modified
-    l_path = abs(tau_h-tau_t)
+#     l_path = abs(tau_h-tau_t)
+    l_path = tau_h-tau_t
 
     # Determine the total particle change based on worm type
-    if insert_worm:
-        dN = +1 * l_path / beta
-    else: # antiworm
-        dN = -1 * l_path / beta
+#     if insert_worm:
+#         dN = +1 * l_path / beta
+#     else: # antiworm
+#         dN = -1 * l_path / beta
+    dN = l_path/beta
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
@@ -403,13 +405,15 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 #         delete_anti_data[1] += 1
 
     # Determine the length of path to be modified
-    l_path = abs(tau_h-tau_t)
+    #l_path = abs(tau_h-tau_t)
+    l_path = tau_h-tau_t
 
     # Determine the total particle change based on worm type
-    if is_worm: # Delete worm
-        dN = -1 * l_path / beta
-    else: # Delete anti
-        dN = +1 * l_path / beta
+#     if is_worm: # Delete worm
+#         dN = -1 * l_path / beta
+#     else: # Delete anti
+#         dN = +1 * l_path / beta
+    dN = -l_path/beta
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
