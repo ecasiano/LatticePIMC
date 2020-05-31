@@ -3,7 +3,7 @@ import numpy as np
 # import matplotlib.pyplot as plt
 from scipy.stats import truncexpon
 import fastrand
-from math import exp
+from math import exp,sqrt
 
 def random_boson_config(L,D,N):
     '''Generates a random configuration of N bosons in a 1D lattice of size L**D'''
@@ -183,7 +183,7 @@ def n_i_pimc(data_struct,beta,L):
 def get_std_error(mc_data):
     '''Input array and calculate standard error'''
     N_bins = np.shape(mc_data)[0]
-    std_error = np.std(mc_data,axis=0)/np.sqrt(N_bins)
+    std_error = np.std(mc_data,axis=0)/sqrt(N_bins)
 
     return std_error
 
@@ -675,13 +675,13 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weigh ratio W'/W
 #     C = 1 # Ratio of trial wavefn coefficients post/pre update
     if insert_worm:
-        C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
+        C = sqrt(N_b+1)/sqrt(n_i+1)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*tau)
+        W = eta * sqrt(N_after_tail) * C * exp(-dV*tau)
     else: # antiworm
-        C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = sqrt(n_i)/sqrt(N_b)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * exp(dV*tau)
+        W = eta * sqrt(N_after_tail) * C * exp(dV*tau)
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
@@ -851,13 +851,13 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weigh ratio W'/W
 #     C = 1 # C_post/C_pre
     if delete_head: # delete worm
-        C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
-        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*tau)
+        C = sqrt(N_b+1)/sqrt(n_i+1)
+        W = eta * sqrt(N_after_tail) * C * exp(-dV*tau)
         C = 1
     else: # delete antiworm
-        C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = sqrt(n_i)/sqrt(N_b)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * exp(dV*tau)
+        W = eta * sqrt(N_after_tail) * C * exp(dV*tau)
 
 
     # Build the Metropolis Ratio  (R)
@@ -1003,13 +1003,13 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weight ratio W'/W
 #     C = 1  # C_pre/C_post
     if insert_worm:
-        C = np.sqrt(N_b +1)/np.sqrt(n_i+1)
+        C = sqrt(N_b +1)/sqrt(n_i+1)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*(beta-tau))
+        W = eta * sqrt(N_after_tail) * C * exp(-dV*(beta-tau))
     else: # antiworm
-        C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = sqrt(n_i)/sqrt(N_b)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*(tau-beta))
+        W = eta * sqrt(N_after_tail) * C * exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5
@@ -1165,13 +1165,13 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weight ratio W'/W
 #     C = 1 # C_post/C_pre
     if not(delete_head): # delete tail (worm)
-        C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
+        C = sqrt(N_b+1)/sqrt(n_i+1)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*(beta-tau))
+        W = eta * sqrt(N_after_tail) * C * exp(-dV*(beta-tau))
     else: # delete head (antiworm)
-        C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = sqrt(n_i)/sqrt(N_b)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*(tau-beta))
+        W = eta * sqrt(N_after_tail) * C * exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5
