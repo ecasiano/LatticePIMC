@@ -2,12 +2,9 @@
 
 import pimc # custom module
 import numpy as np
-import matplotlib.pyplot as plt
-import importlib
 import argparse
-importlib.reload(pimc)
-import time
 import fastrand
+import random
 
 # -------- Set command line arguments -------- #
 
@@ -74,6 +71,7 @@ M_equil = 100000 if not(args.M_equil) else args.M_equil
 # Set the random seed
 np.random.seed(rseed)
 fastrand.pcg32_seed(rseed)
+random.seed(rseed)
 
 # Pool of worm algorithm updates
 pool = [ pimc.worm_insert, # 0
@@ -105,7 +103,7 @@ A = pimc.build_adjacency_matrix(L,D,'pbc')
 
 # ---------------- Lattice PIMC ---------------- #
     
-start = time.time()
+# start = time.time()
 
 # Open files that will save data        
 if canonical:
@@ -293,9 +291,9 @@ print("Lattice PIMC done.\n")
 
 print("<N> = %.12f"%(N_mean/Z_sector_ctr))
 
-end = time.time()
+# end = time.time()
 
-print("Time elapsed: %.2f seconds"%(end-start))
+# print("Time elapsed: %.2f seconds"%(end-start))
 
 # ---------------- Print acceptance ratios ---------------- #
 

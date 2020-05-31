@@ -1,8 +1,9 @@
 # Functions to be used in main file (lattice_pimc.py)
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from scipy.stats import truncexpon
 import fastrand
+from math import exp
 
 def random_boson_config(L,D,N):
     '''Generates a random configuration of N bosons in a 1D lattice of size L**D'''
@@ -290,7 +291,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 1,1       # tunable delete and insert probabilities
-    R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
+    R = eta**2 * N_after_tail * exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
 
     # Metropolis sampling
     if np.random.random() < R: # Accept
@@ -419,7 +420,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 1,1      # tunable delete and insert probabilities
-    R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
+    R = eta**2 * N_after_tail * exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
     R = 1/R
 
     # Metropolis sampling
@@ -676,11 +677,11 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     if insert_worm:
         C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
+        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*tau)
     else: # antiworm
         C = np.sqrt(n_i)/np.sqrt(N_b)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
+        W = eta * np.sqrt(N_after_tail) * C * exp(dV*tau)
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
@@ -851,12 +852,12 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 #     C = 1 # C_post/C_pre
     if delete_head: # delete worm
         C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
+        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*tau)
         C = 1
     else: # delete antiworm
         C = np.sqrt(n_i)/np.sqrt(N_b)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
+        W = eta * np.sqrt(N_after_tail) * C * exp(dV*tau)
 
 
     # Build the Metropolis Ratio  (R)
@@ -1004,11 +1005,11 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     if insert_worm:
         C = np.sqrt(N_b +1)/np.sqrt(n_i+1)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
+        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*(beta-tau))
     else: # antiworm
         C = np.sqrt(n_i)/np.sqrt(N_b)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
+        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5
@@ -1166,11 +1167,11 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     if not(delete_head): # delete tail (worm)
         C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
+        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*(beta-tau))
     else: # delete head (antiworm)
         C = np.sqrt(n_i)/np.sqrt(N_b)
         C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
+        W = eta * np.sqrt(N_after_tail) * C * exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5
@@ -1267,7 +1268,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * n_wj * exp((dV_i-dV_j)*(tau_h-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1382,7 +1383,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * n_wj * exp((dV_i-dV_j)*(tau_h-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1498,7 +1499,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * n_wj * exp((-dV_i+dV_j)*(tau_kink-tau_h))
 
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1619,7 +1620,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * n_wj * exp((-dV_i+dV_j)*(tau_kink-tau_h))
 
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1723,7 +1724,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * n_wj * exp((-dV_i+dV_j)*(tau_t-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1838,7 +1839,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * n_wj * exp((-dV_i+dV_j)*(tau_t-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1952,7 +1953,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * n_wj * exp((dV_i-dV_j)*(tau_kink-tau_t))
 
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
@@ -2073,7 +2074,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * n_wj * exp((dV_i-dV_j)*(tau_kink-tau_t))
 
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
@@ -2116,94 +2117,94 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 
 '----------------------------------------------------------------------------------'
 
-# Visualize worldline configurations for Lattice Path Integral Monte Carlo (PIMC)
-def view_worldlines(data_struct,beta,figure_name=None):
-    import matplotlib.pyplot as plt
+# # Visualize worldline configurations for Lattice Path Integral Monte Carlo (PIMC)
+# def view_worldlines(data_struct,beta,figure_name=None):
+#     import matplotlib.pyplot as plt
 
-    # Set initial configuration
-    # Number of lattice sites
-    L = len(data_struct)
+#     # Set initial configuration
+#     # Number of lattice sites
+#     L = len(data_struct)
 
-    # Number of total particles in the lattice
-    # N = 0
-    # for site_idx in range(L):
-    #     N += data_struct[site_idx][-1][1] # taulist[list[(tau,N,jump_dir)]]
+#     # Number of total particles in the lattice
+#     # N = 0
+#     # for site_idx in range(L):
+#     #     N += data_struct[site_idx][-1][1] # taulist[list[(tau,N,jump_dir)]]
 
-    # Stores the initial particle configuration
-    x = []
-    for i in range(L):
-        x.append(data_struct[i][0][1])
+#     # Stores the initial particle configuration
+#     x = []
+#     for i in range(L):
+#         x.append(data_struct[i][0][1])
 
-    # Spread tau,N,dir data to different arrays (hopefully will help with visualization???)
-    # Store kink times, particles after kinks, and kink directions for each site i
-    tau_list = []
-    N_list = []
-    dirs_list = []
-    for i in range(L):
-        tau_i = []
-        N_i = []
-        dirs_i = []
-        events = len(data_struct[i]) # Number of kinks at site i (includes initial config.)
-        for e in range(events):
-            tau_i.append(data_struct[i][e][0])
-            N_i.append(data_struct[i][e][1])
-            dirs_i.append(data_struct[i][e][2])
-        tau_list.append(tau_i)
-        N_list.append(N_i)
-        dirs_list.append(dirs_i)
+#     # Spread tau,N,dir data to different arrays (hopefully will help with visualization???)
+#     # Store kink times, particles after kinks, and kink directions for each site i
+#     tau_list = []
+#     N_list = []
+#     dirs_list = []
+#     for i in range(L):
+#         tau_i = []
+#         N_i = []
+#         dirs_i = []
+#         events = len(data_struct[i]) # Number of kinks at site i (includes initial config.)
+#         for e in range(events):
+#             tau_i.append(data_struct[i][e][0])
+#             N_i.append(data_struct[i][e][1])
+#             dirs_i.append(data_struct[i][e][2])
+#         tau_list.append(tau_i)
+#         N_list.append(N_i)
+#         dirs_list.append(dirs_i)
 
-    # Initialize figure
-    plt.figure()
+#     # Initialize figure
+#     plt.figure()
 
-    # Plot (loop over sites, then loop over kinks)
-    for i in range(L):
-        L_tau = len(tau_list[i]) # Number of "kinks" on site i including initial config
-        for j in range(L_tau):
-            tau_initial = tau_list[i][j]
-            if j + 1 < L_tau: # To avoid running out of range
-                tau_final = tau_list[i][j+1]
-            else:
-                tau_final = beta
+#     # Plot (loop over sites, then loop over kinks)
+#     for i in range(L):
+#         L_tau = len(tau_list[i]) # Number of "kinks" on site i including initial config
+#         for j in range(L_tau):
+#             tau_initial = tau_list[i][j]
+#             if j + 1 < L_tau: # To avoid running out of range
+#                 tau_final = tau_list[i][j+1]
+#             else:
+#                 tau_final = beta
 
-            n = N_list[i][j] # Occupation of the i_th site at the j_th "kink"
-            if n == 0: ls,lw = ':',1
-            else: ls,lw = '-',n
+#             n = N_list[i][j] # Occupation of the i_th site at the j_th "kink"
+#             if n == 0: ls,lw = ':',1
+#             else: ls,lw = '-',n
 
-            src_site = dirs_list[i][j][0]    # Index of source site
-            dest_site = dirs_list[i][j][1]  # Index of destination site
+#             src_site = dirs_list[i][j][0]    # Index of source site
+#             dest_site = dirs_list[i][j][1]  # Index of destination site
 
-            # Draw flat regions
-            plt.vlines(i,tau_initial,tau_final,linestyle=ls,linewidth=lw)
-            # Draw worm ends
-            if src_site == dest_site and tau_initial != 0:
-                #plt.plot(i,tau_initial,marker='_',ms=5,lw=5)
-                plt.hlines(tau_initial,i-0.06,i+0.06,lw=1)
+#             # Draw flat regions
+#             plt.vlines(i,tau_initial,tau_final,linestyle=ls,linewidth=lw)
+#             # Draw worm ends
+#             if src_site == dest_site and tau_initial != 0:
+#                 #plt.plot(i,tau_initial,marker='_',ms=5,lw=5)
+#                 plt.hlines(tau_initial,i-0.06,i+0.06,lw=1)
 
-            # Wrap around the spatial direction axis if kink connects the first and last sites
-            if (src_site == 0 and dest_site == L-1):
-                plt.hlines(tau_list[i][j],-0.5,0,linewidth=1)
-                plt.hlines(tau_list[i][j],L-1,L-1+0.5,linewidth=1)
+#             # Wrap around the spatial direction axis if kink connects the first and last sites
+#             if (src_site == 0 and dest_site == L-1):
+#                 plt.hlines(tau_list[i][j],-0.5,0,linewidth=1)
+#                 plt.hlines(tau_list[i][j],L-1,L-1+0.5,linewidth=1)
 
-            elif (src_site == L-1 and dest_site == 0):
-                plt.hlines(tau_list[i][j],-0.5,0,linewidth=1)
-                plt.hlines(tau_list[i][j],L-1,L-1+0.5,linewidth=1)
+#             elif (src_site == L-1 and dest_site == 0):
+#                 plt.hlines(tau_list[i][j],-0.5,0,linewidth=1)
+#                 plt.hlines(tau_list[i][j],L-1,L-1+0.5,linewidth=1)
 
-            else:
-                plt.hlines(tau_list[i][j],src_site,dest_site,linewidth=1)
+#             else:
+#                 plt.hlines(tau_list[i][j],src_site,dest_site,linewidth=1)
 
-    plt.xticks(range(0,L))
-    plt.xlim(-0.5,L-1+0.5)
-    plt.ylim(0,1)
-    plt.tick_params(axis='y',which='both',left=False,right=False)
-    plt.tick_params(axis='x',which='both',top=False,bottom=False)
-    plt.xlabel(r"$i$")
-    plt.ylabel(r"$\tau/\beta$")
-    plt.show()
-    if figure_name != None:
-        plt.savefig(figure_name)
-    #plt.close()
+#     plt.xticks(range(0,L))
+#     plt.xlim(-0.5,L-1+0.5)
+#     plt.ylim(0,1)
+#     plt.tick_params(axis='y',which='both',left=False,right=False)
+#     plt.tick_params(axis='x',which='both',top=False,bottom=False)
+#     plt.xlabel(r"$i$")
+#     plt.ylabel(r"$\tau/\beta$")
+#     plt.show()
+#     if figure_name != None:
+#         plt.savefig(figure_name)
+#     #plt.close()
 
-    return None
+#     return None
 
 '----------------------------------------------------------------------------------'
 
