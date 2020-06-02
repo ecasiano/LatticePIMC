@@ -2,9 +2,10 @@
 
 import pimc # custom module
 import numpy as np
-import argparse
 import fastrand
 import random
+import argparse
+import time
 
 # -------- Set command line arguments -------- #
 
@@ -103,7 +104,7 @@ A = pimc.build_adjacency_matrix(L,D,'pbc')
 
 # ---------------- Lattice PIMC ---------------- #
     
-# start = time.time()
+start = time.time()
 
 # Open files that will save data        
 if canonical:
@@ -177,8 +178,8 @@ N_data = []
 skip_ctr = 0
 
 # Randomly an update M times
-for m in range(M): 
-#while Z_sector_ctr < int(M/(L**D*beta)):
+# for m in range(M): 
+while measurements[0] < int(M/(L**D*beta)):
     
     # Pool of worm algorithm updates
     pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta) 
@@ -210,7 +211,7 @@ for m in range(M):
             if canonical:
                 
                 # Check if in correct N-sector for canonical simulations
-                if N-N_tracker[0] > -1.0E-08 and N-N_tracker[0] < +1.0E-08: 
+                if N-N_tracker[0] > -1.0E-12 and N-N_tracker[0] < +1.0E-12: 
                 
                     #print(round(N_tracker[0]))
                    
@@ -291,9 +292,9 @@ print("Lattice PIMC done.\n")
 
 print("<N> = %.12f"%(N_mean/Z_sector_ctr))
 
-# end = time.time()
+end = time.time()
 
-# print("Time elapsed: %.2f seconds"%(end-start))
+print("Time elapsed: %.2f seconds"%(end-start))
 
 # ---------------- Print acceptance ratios ---------------- #
 

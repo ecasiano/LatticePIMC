@@ -73,7 +73,7 @@ def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L,D):
     window_size = 2*dtau
 
     # Generate bins
-    tau_slices_bins = tau_slices[::2]
+    tau_slices_bins = tau_slices[::1][::2]
 
     # Initialize list that will store the kink times
     kinks = []
@@ -351,7 +351,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
     if not(head_loc) or not(tail_loc) : return None
 
     # Only delete if worm ends are on the same site and on the same flat interval
-    if head_loc[0] != tail_loc[0] or int(abs(head_loc[1]-tail_loc[1])) != 1: return None
+    if head_loc[0] != tail_loc[0] or abs(head_loc[1]-tail_loc[1]) != 1.0: return None
 
     # Retrieve the site and tau indices of where ira and masha are located
     # head_loc = [site_idx,tau_idx]
@@ -553,16 +553,8 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical
 
     # Determine the total particle change based on wormend to be shifted
     if shift_head:
-#         if tau_new > tau_old: # advance head
-#             dN = +1 * l_path / beta
-#         else: # recede head
-#             dN = -1 * l_path / beta
         dN = l_path/beta
     else: # shift tail
-#         if tau_new > tau_old: # advance tail
-#             dN = -1 * l_path / beta
-#         else: # recede tail
-#             dN = +1 * l_path / beta
         dN = -l_path/beta
 
     if canonical:
@@ -670,14 +662,14 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     N_b = N_zero[0] 
         
     # Build the weigh ratio W'/W
-#     C = 1 # Ratio of trial wavefn coefficients post/pre update
+#     # C = 1 # Ratio of trial wavefn coefficients post/pre update
     if insert_worm:
         C = sqrt(N_b+1)/sqrt(n_i+1)
-        C = 1
+        # C = 1
         W = eta * sqrt(N_after_tail) * C * exp(-dV*tau)
     else: # antiworm
         C = sqrt(n_i)/sqrt(N_b)
-        C = 1
+        # C = 1
         W = eta * sqrt(N_after_tail) * C * exp(dV*tau)
 
     # Build the Metropolis Ratio  (R)
@@ -846,16 +838,15 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
         N_b = N_post+1
     
     # Build the weigh ratio W'/W
-#     C = 1 # C_post/C_pre
+#     # C = 1 # C_post/C_pre
     if delete_head: # delete worm
         C = sqrt(N_b+1)/sqrt(n_i+1)
+        # C = 1
         W = eta * sqrt(N_after_tail) * C * exp(-dV*tau)
-        C = 1
     else: # delete antiworm
         C = sqrt(n_i)/sqrt(N_b)
-        C = 1
+        # C = 1
         W = eta * sqrt(N_after_tail) * C * exp(dV*tau)
-
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
@@ -998,14 +989,14 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     N_b = N_beta[0]
 
     # Build the weight ratio W'/W
-#     C = 1  # C_pre/C_post
+#     # C = 1  # C_pre/C_post
     if insert_worm:
         C = sqrt(N_b +1)/sqrt(n_i+1)
-        C = 1
+        # C = 1
         W = eta * sqrt(N_after_tail) * C * exp(-dV*(beta-tau))
     else: # antiworm
         C = sqrt(n_i)/sqrt(N_b)
-        C = 1
+        # C = 1
         W = eta * sqrt(N_after_tail) * C * exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
@@ -1160,14 +1151,14 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
         N_b = N_post+1
 
     # Build the weight ratio W'/W
-#     C = 1 # C_post/C_pre
+#     # C = 1 # C_post/C_pre
     if not(delete_head): # delete tail (worm)
         C = sqrt(N_b+1)/sqrt(n_i+1)
-        C = 1
+        # C = 1
         W = eta * sqrt(N_after_tail) * C * exp(-dV*(beta-tau))
     else: # delete head (antiworm)
         C = sqrt(n_i)/sqrt(N_b)
-        C = 1
+        # C = 1
         W = eta * sqrt(N_after_tail) * C * exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
@@ -2224,7 +2215,10 @@ def build_adjacency_matrix(L,D,boundary_condition='pbc'):
     a3 = np.linalg.norm(a3_vec)
 
     # Initialize array that will store the lattice vectors
-    points = np.zeros(M,dtype=(float,D))
+    if D > 1:
+        points = np.zeros(M,dtype=(float,D))
+    else:
+        points = np.zeros(M) # dtype=(float,1) is deprecated
 
     # Build the lattice vectors
     ctr = 0 # iteration counter
