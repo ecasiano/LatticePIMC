@@ -3,13 +3,15 @@ import numpy as np
 from scipy.stats import truncexpon
 import fastrand
 import time
+import numba as nb
 
+@nb.jit(nopython=True,parallel=True)
 def random_boson_config(L,D,N):
     '''Generates a random configuration of N bosons in a 1D lattice of size L**D'''
 
     alpha = np.zeros(L**D,dtype=np.int32) # Stores the random configuration of bosons
     for n in range(N): # Distribute particles on sites randomly one by one
-        site = fastrand.pcg32bounded(L**D)
+        site = int(np.random.random()*L**D)
         alpha[site] += 1
 
     return alpha
@@ -2260,7 +2262,7 @@ def build_adjacency_matrix(L,D,boundary_condition='pbc'):
 '------------------------------ Main Function (supposedly )------------------------------------------'
 
 def main(L,D,N,canonical,U,t,mu,beta,M,rseed,M_equil,M_pre,eta,n_slices,mfreq,bin_size):
-    
+
     # Pool of worm algorithm updates
     pool = [ worm_insert, # 0
              worm_delete,
@@ -2283,6 +2285,9 @@ def main(L,D,N,canonical,U,t,mu,beta,M,rseed,M_equil,M_pre,eta,n_slices,mfreq,bi
 
     # Create worldline data structure
     data_struct = create_data_struct(alpha,L,D)
+    
+    print(data_struct)
+    return 0
 
     # Build the adjacency matrix
     A = build_adjacency_matrix(L,D,'pbc')
