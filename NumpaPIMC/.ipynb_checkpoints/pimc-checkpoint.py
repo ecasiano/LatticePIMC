@@ -1,9 +1,8 @@
 # Functions to be used in main file (lattice_pimc.py)
 import numpy as np
-# import matplotlib.pyplot as plt
 from scipy.stats import truncexpon
 import fastrand
-from math import exp,sqrt
+import time
 
 def random_boson_config(L,D,N):
     '''Generates a random configuration of N bosons in a 1D lattice of size L**D'''
@@ -183,7 +182,7 @@ def n_i_pimc(data_struct,beta,L):
 def get_std_error(mc_data):
     '''Input array and calculate standard error'''
     N_bins = np.shape(mc_data)[0]
-    std_error = np.std(mc_data,axis=0)/sqrt(N_bins)
+    std_error = np.std(mc_data,axis=0)/np.sqrt(N_bins)
 
     return std_error
 
@@ -288,7 +287,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 1,1       # tunable delete and insert probabilities
-    R = eta**2 * N_after_tail * exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
+    R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
 
     # Metropolis sampling
     if np.random.random() < R: # Accept
@@ -414,7 +413,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 1,1      # tunable delete and insert probabilities
-    R = eta**2 * N_after_tail * exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
+    R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
     R = 1/R
 
     # Metropolis sampling
@@ -664,13 +663,13 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weigh ratio W'/W
 #     # C = 1 # Ratio of trial wavefn coefficients post/pre update
     if insert_worm:
-        C = sqrt(N_b+1)/sqrt(n_i+1)
+        C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
         # C = 1
-        W = eta * sqrt(N_after_tail) * C * exp(-dV*tau)
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
     else: # antiworm
-        C = sqrt(n_i)/sqrt(N_b)
+        C = np.sqrt(n_i)/np.sqrt(N_b)
         # C = 1
-        W = eta * sqrt(N_after_tail) * C * exp(dV*tau)
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
@@ -840,13 +839,13 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weigh ratio W'/W
 #     # C = 1 # C_post/C_pre
     if delete_head: # delete worm
-        C = sqrt(N_b+1)/sqrt(n_i+1)
+        C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
         # C = 1
-        W = eta * sqrt(N_after_tail) * C * exp(-dV*tau)
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
     else: # delete antiworm
-        C = sqrt(n_i)/sqrt(N_b)
+        C = np.sqrt(n_i)/np.sqrt(N_b)
         # C = 1
-        W = eta * sqrt(N_after_tail) * C * exp(dV*tau)
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
@@ -991,13 +990,13 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weight ratio W'/W
 #     # C = 1  # C_pre/C_post
     if insert_worm:
-        C = sqrt(N_b +1)/sqrt(n_i+1)
+        C = np.sqrt(N_b +1)/np.sqrt(n_i+1)
         # C = 1
-        W = eta * sqrt(N_after_tail) * C * exp(-dV*(beta-tau))
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
     else: # antiworm
-        C = sqrt(n_i)/sqrt(N_b)
+        C = np.sqrt(n_i)/np.sqrt(N_b)
         # C = 1
-        W = eta * sqrt(N_after_tail) * C * exp(-dV*(tau-beta))
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5
@@ -1153,13 +1152,13 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weight ratio W'/W
 #     # C = 1 # C_post/C_pre
     if not(delete_head): # delete tail (worm)
-        C = sqrt(N_b+1)/sqrt(n_i+1)
+        C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
         # C = 1
-        W = eta * sqrt(N_after_tail) * C * exp(-dV*(beta-tau))
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
     else: # delete head (antiworm)
-        C = sqrt(n_i)/sqrt(N_b)
+        C = np.sqrt(n_i)/np.sqrt(N_b)
         # C = 1
-        W = eta * sqrt(N_after_tail) * C * exp(-dV*(tau-beta))
+        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5
@@ -1256,7 +1255,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1371,7 +1370,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1487,7 +1486,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
 
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1608,7 +1607,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
 
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1712,7 +1711,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1827,7 +1826,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1941,7 +1940,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
 
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
@@ -2062,7 +2061,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
 
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
@@ -2257,3 +2256,327 @@ def build_adjacency_matrix(L,D,boundary_condition='pbc'):
             A[j,i] = A[i,j]
 
     return A
+
+'------------------------------ Main Function (supposedly )------------------------------------------'
+
+def main(L,D,N,canonical,U,t,mu,beta,M,rseed,M_equil,M_pre,eta):
+    
+    # Pool of worm algorithm updates
+    pool = [ worm_insert, # 0
+             worm_delete,
+             worm_timeshift,
+             insertZero, # 3
+             deleteZero,
+             insertBeta, # 5
+             deleteBeta,
+             insert_kink_before_head,
+             delete_kink_before_head,
+             insert_kink_after_head,
+             delete_kink_after_head,
+             insert_kink_before_tail,
+             delete_kink_before_tail,
+             insert_kink_after_tail,
+             delete_kink_after_tail ]
+
+    # Initialize Fock state
+    alpha = random_boson_config(L,D,N)
+
+    # Create worldline data structure
+    data_struct = create_data_struct(alpha,L,D)
+
+    # Build the adjacency matrix
+    A = build_adjacency_matrix(L,D,'pbc')
+
+    # ---------------- Pre-M_equil (determine mu) ---------------- #
+
+    # ---------------- Lattice PIMC ---------------- #
+
+    start = time.time()
+
+    # Open files that will save data        
+    if canonical:
+        kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_K.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+        diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_V.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+        N_file  = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_can_N.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+    else:
+        kinetic_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_K.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+        diagonal_file = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_V.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+        N_file  = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_N.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+
+    # Data structure containing the worldlines
+    data_struct = create_data_struct(alpha,L,D)
+
+    # List that will contain site and kink indices of worm head and tail
+    head_loc = []
+    tail_loc = []
+
+    # Trackers
+    N_tracker = [N]         # Total particles
+    N_flats_tracker = [L]   # Total flat regions
+    N_zero = [N]
+    N_beta = [N]
+
+    print("Equilibration started...")
+
+    # Redefine M to be an actual Monte Carlo step (a sweep)
+    M *= int(L**D*beta)
+    M_equil *= int(L**D*beta)
+
+    # M_equil loop
+    for m in range(M_equil): 
+
+        # Propose move from pool of worm algorithm updates
+        pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
+
+    print("Equilibration done...\n")
+
+    # ---------------- Lattice PIMC ---------------- #
+
+    print("LatticePIMC started...")
+
+    # Initialize values to be measured
+    bin_ctr = 0
+    tau_slices = np.linspace(0,beta,n_slices)[1:-1][::2] # slices were observables are measured
+    tr_kinetic_list = np.zeros_like(tau_slices)
+    tr_diagonal_list = np.zeros_like(tau_slices)
+    N_list = [] 
+
+    # Length of energies arrays (needed for reshape later down)
+    data_len = len(tr_kinetic_list)
+
+    # Count measurements and measurement attempts
+    measurements = [0,0] # [made,attempted]
+
+    # Observables
+    N_mean = 0
+
+    # Other quantities to measure
+    Z_sector_ctr = 0 # Configurations in Z-sector
+    N_sector_ctr = 0 # Configurations in N-sector
+
+    # Measure every other mfreq sweeps
+    skip_ctr = int(mfreq*L**D*beta)
+    try_measurement = True
+
+    # Total particle number sectors
+    N_data = []
+
+    # Count sweeps since last measurement occured
+    skip_ctr = 0
+
+    # Randomly an update M times
+    # for m in range(M): 
+    while measurements[0] < int(M/(L**D*beta)):
+
+        # Pool of worm algorithm updates
+        pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta) 
+
+        # In this iteration, measurement still correlated. Won't try to measure.
+        if skip_ctr%(mfreq*L**D*beta)!=0:
+           skip_ctr += 1
+
+        # Only attempt measurements mfreq sweeps after the last Z-sector visit
+        else:          
+
+            # Add to measurement ATTEMPTS counter
+            measurements[1] += 1
+
+            # Make measurement if no worm ends present
+            if not(pimc.check_worm(head_loc,tail_loc)):  
+
+                # Reset skipped measurement counter
+                skip_ctr = 1  
+
+    #             N_data.append(round(N_tracker[0]))
+
+                # Update diagonal fraction counter
+                Z_sector_ctr += 1
+
+                # Update N accumulator
+                N_mean += N_tracker[0]
+
+                if canonical:
+
+                    # Check if in correct N-sector for canonical simulations
+                    if N-N_tracker[0] > -1.0E-12 and N-N_tracker[0] < +1.0E-12: 
+
+                        #print(round(N_tracker[0]))
+
+                        # Update the N-sector counter
+                        N_sector_ctr += 1
+
+                        # Binning average counter
+                        bin_ctr += 1
+
+                        # Add to MEASUREMENTS MADE counter
+                        measurements[0] += 1
+
+                        # Energies, but measured at different tau slices (time resolved)
+                        tr_kinetic,tr_diagonal = tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L,D)
+                        tr_kinetic_list += tr_kinetic # cumulative sum
+                        tr_diagonal_list += tr_diagonal # cumulative sum
+
+                        # Take the binned average of the time resolved energies
+                        if bin_ctr == bin_size:
+
+                            tr_kinetic_list /= bin_size
+                            tr_diagonal_list /= bin_size
+
+                            # Write to file(s)
+                            np.savetxt(kinetic_file,np.reshape(tr_kinetic_list,(1,data_len)),fmt="%.16f",delimiter=" ")
+                            np.savetxt(diagonal_file,np.reshape(tr_diagonal_list,(1,data_len)),fmt="%.16f",delimiter=" ")
+
+                            # Reset bin_ctr and time resolved energies arrays
+                            bin_ctr = 0
+                            tr_kinetic_list *= 0
+                            tr_diagonal_list *= 0
+
+                    else: # Worldline doesn't have target particle number
+                        #print(N_tracker[0])
+                        pass
+
+                else: # Grand canonical simulation
+
+                    # Binning average counter
+                    bin_ctr += 1
+
+                    # Add to MEASUREMENTS MADE counter
+                    measurements[0] += 1
+
+                    # Energies, but measured at different tau slices (time resolved)
+                    tr_kinetic,tr_diagonal = tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L,D)
+                    tr_kinetic_list += tr_kinetic # cumulative sum
+                    tr_diagonal_list += tr_diagonal # cumulative sum
+
+                    # Take the binned average of the time resolved energies
+                    if bin_ctr == bin_size:
+
+                        tr_kinetic_list /= bin_size
+                        tr_diagonal_list /= bin_size
+
+                        # Write to file(s)
+                        np.savetxt(kinetic_file,np.reshape(tr_kinetic_list,(1,data_len)),fmt="%.16f",delimiter=" ")
+                        np.savetxt(diagonal_file,np.reshape(tr_diagonal_list,(1,data_len)),fmt="%.16f",delimiter=" ")
+
+                        # Reset bin_ctr and time resolved energies arrays
+                        bin_ctr = 0
+                        tr_kinetic_list *= 0
+                        tr_diagonal_list *= 0
+
+                        # Array of measured total particle number. Needed for mu determination.
+                        N_file.write(str(N_tracker[0])+'\n')
+
+            else: # Not a diagonal configuration. There's a worm end.
+                pass
+
+    # Close the data files
+    kinetic_file.close()
+    diagonal_file.close()
+    N_file.close()
+
+    # Save diagonal fraction obtained from main loop
+    print("Lattice PIMC done.\n")
+
+    print("<N> = %.12f"%(N_mean/Z_sector_ctr))
+
+    end = time.time()
+
+    print("Time elapsed: %.2f seconds"%(end-start))
+
+    # ---------------- Print acceptance ratios ---------------- #
+
+    if canonical:
+        print("\nEnsemble: Canonical\n")
+    else:
+        print("\nEnsemble: Grand Canonical\n")
+    print("-------- Z-configuration fraction --------")
+    print("Z-fraction: %.2f%% (%d/%d) "%(100*Z_sector_ctr/measurements[1],Z_sector_ctr,measurements[1]))
+
+    if canonical:
+        print("-------- N-configuration fraction --------")
+        print("N-fraction: %.2f%% (%d/%d) "%(100*N_sector_ctr/Z_sector_ctr,N_sector_ctr,Z_sector_ctr))
+
+    #print(f'\nP(3)={N_data.count(3)/Z_sector_ctr} P(4)={N_data.count(4)/Z_sector_ctr} P(5)={N_data.count(5)/Z_sector_ctr} sum[P(N)]={(N_data.count(3)+N_data.count(4)+N_data.count(5))/Z_sector_ctr} {len(N_data)}')
+
+    # print("Pre-equilibration started. Determining mu...")
+
+    # pre_equilibration = int(M_pre*L**D*beta)
+    # N_frac = 0
+    # need_mu = True
+    # while need_mu and False :
+
+    #     insertion_site = int(np.random.random()*L**D)
+
+    #     data_struct = pimc.create_data_struct(alpha,L,D)
+
+    #     # List that will contain site and kink indices of worm head and tail
+    #     head_loc = []
+    #     tail_loc = []
+
+    #     # Trackers
+    #     N_tracker = [N]         # Total particles
+    #     N_flats_tracker = [L]   # Total flat regions
+    #     N_zero = [N]
+    #     N_beta = [N]
+
+    #     measurements = [0,0]
+
+    #     # Initialize counter of target N sector and the number Z sector configs
+    #     N_sector_ctr = 0
+    #     Z_sector_ctr = 0
+    #     N_frac = 0
+
+    #     skip_ctr = int(mfreq*L**D*beta)
+    #     try_measurement = True
+
+    #     for m in range(pre_equilibration):
+
+    #         # When counter reaches zero, the next Z-configuration that occurs will be measured 
+    #         if skip_ctr <= 0:
+    #             try_measurement = True
+    #         else:
+    #             #try_measurement = False
+    #             skip_ctr -= 1 
+
+    #         if try_measurement:
+
+    #             # Randomly choose move label and insertion site
+    #             label = int(np.random.random()*15)
+    #             if label == 0 or label == 3 or label == 5: 
+    #                 insertion_site = int(np.random.random()*L**D)
+
+    #             # Propose move from pool of worm algorithm updates
+    #             pool[label](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
+
+    #             measurements[1] += 1 # measurement attempts
+
+    #             # Make measurement if no worm ends present
+    #             if not(pimc.check_worm(head_loc,tail_loc)): 
+
+    #                 Z_sector_ctr += 1
+
+    #                 if N-N_tracker[0] > -1.0E-12 and N-N_tracker[0] < 1.0E-12:
+
+    #                     N_sector_ctr += 1
+
+    #                     # Measurement just performed, will not measure again in at least mfreq sweeps
+    #                     skip_ctr = int(mfreq*L**D*beta)
+    #                     try_measurement = False
+
+    #     # Calculate N-sector and Z-sector fractions
+    #     N_frac = N_sector_ctr/measurements[1]
+    #     Z_frac = Z_sector_ctr/measurements[1]
+
+    #     # Print mu and N_frac to screen
+    #     print("mu = %.4f | N_frac = %.2f (%d/%d) | Z_frac = %.2f (%d/%d)"%(mu,N_frac,N_sector_ctr,measurements[1],Z_frac,Z_sector_ctr,measurements[1]))
+
+    #     # If below desired N-sector fraction, increase mu
+    #     if N_frac < 0.3:
+    #         need_mu = True
+    #         mu -= (0.001)
+    #     else:
+    #         need_mu = False
+
+    # print("Pre-equilibration done...\n")
+
+'------------------------------ Main Function (supposedly )------------------------------------------'
