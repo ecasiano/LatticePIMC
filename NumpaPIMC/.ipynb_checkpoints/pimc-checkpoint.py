@@ -2259,7 +2259,7 @@ def build_adjacency_matrix(L,D,boundary_condition='pbc'):
 
 '------------------------------ Main Function (supposedly )------------------------------------------'
 
-def main(L,D,N,canonical,U,t,mu,beta,M,rseed,M_equil,M_pre,eta):
+def main(L,D,N,canonical,U,t,mu,beta,M,rseed,M_equil,M_pre,eta,n_slices,mfreq,bin_size):
     
     # Pool of worm algorithm updates
     pool = [ worm_insert, # 0
@@ -2382,7 +2382,7 @@ def main(L,D,N,canonical,U,t,mu,beta,M,rseed,M_equil,M_pre,eta):
             measurements[1] += 1
 
             # Make measurement if no worm ends present
-            if not(pimc.check_worm(head_loc,tail_loc)):  
+            if not(check_worm(head_loc,tail_loc)):  
 
                 # Reset skipped measurement counter
                 skip_ctr = 1  

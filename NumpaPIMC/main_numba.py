@@ -73,4 +73,4 @@ M_equil = 100000 if not(args.M_equil) else args.M_equil
 np.random.seed(rseed)
 fastrand.pcg32_seed(rseed)
 
-pimc.main(L,D,N,canonical,U,t,mu,beta,M,rseed,M_equil,M_pre,eta)
+pimc.main(L,D,N,canonical,U,t,mu,beta,M,rseed,M_equil,M_pre,eta,n_slices,mfreq,bin_size)
