@@ -23,9 +23,9 @@ def create_data_struct(alpha,L,D):
 
     data_struct = []
     for i in range(L**D):
-        data_struct.append([[0,alpha[i],(i,i)]])
+        data_struct.append([[0,alpha[i],i,i]])
 
-    return data_struct
+    return np.array(data_struct)
 
 '----------------------------------------------------------------------------------'
 
@@ -2286,7 +2286,7 @@ def main(L,D,N,canonical,U,t,mu,beta,M,rseed,M_equil,M_pre,eta,n_slices,mfreq,bi
     # Create worldline data structure
     data_struct = create_data_struct(alpha,L,D)
     
-    print(data_struct)
+    print(data_struct[0],data_struct[1])
     return 0
 
     # Build the adjacency matrix

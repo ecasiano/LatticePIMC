@@ -3,7 +3,6 @@
 import pimc # custom module
 import numpy as np
 import fastrand
-import random
 import argparse
 import time
 
@@ -72,7 +71,6 @@ M_equil = 100000 if not(args.M_equil) else args.M_equil
 # Set the random seed
 np.random.seed(rseed)
 fastrand.pcg32_seed(rseed)
-random.seed(rseed)
 
 # Pool of worm algorithm updates
 pool = [ pimc.worm_insert, # 0
