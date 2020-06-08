@@ -26,39 +26,6 @@ def create_data_struct(alpha,L,D):
 
 '----------------------------------------------------------------------------------'
 
-def N_tracker(data_struct,beta,L,D):
-    '''Count total particles in the worldline configuration'''
-
-    # Add paths
-    l = 0
-    for i in range(L**D):
-        N_flats = len(data_struct[i]) # Number of flat intervals on the site
-        for k in range(N_flats):
-            if k < N_flats-1:
-                dtau = data_struct[i][k+1][0]-data_struct[i][k][0]
-            else: # time difference between beta and last kink on the site
-                dtau = beta-data_struct[i][k][0]
-
-            n = data_struct[i][k][1] # particles in flat interval
-            l += n*dtau
-
-    # Track the total number of particles (must be between N-1 and N+1)
-    N = l/beta
-
-    return N
-
-'----------------------------------------------------------------------------------'
-
-def count_kinks(data_struct,beta,n_slices,U,mu,t,L,D):
-
-    kinks = np.zeros(L**D)
-    for i in range(L**D):
-        kinks[i] += len(data_struct[i])
-
-    return kinks
-
-'----------------------------------------------------------------------------------'
-
 def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L,D):
 
     '''Calculates the kinetic and diagonal energies'''
@@ -71,7 +38,7 @@ def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L,D):
     window_size = 2*dtau
 
     # Generate bins
-    tau_slices_bins = tau_slices[::1][::2]
+    tau_slices_bins = tau_slices[::2]
 
     # Initialize list that will store the kink times
     kinks = []
