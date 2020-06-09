@@ -109,6 +109,8 @@ N_zero = [N]
 N_beta = [N]
 
 # ---------------- Pre-equilibration 1: mu calibration ---------------- #
+N_file_pre = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_N_pre.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
+mu_file_pre = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_mu_pre.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
 
 print("Pre-equilibration (1/2): Determining mu...")
 
@@ -155,7 +157,12 @@ for i in range(2):
 
                     N_data.append(round(N_tracker[0]))
                     
-                    skip_ctr = 1
+                    skip_ctr = 1                    
+
+                    # Array of measured total particle number. Needed for mu determination.
+                    N_file_pre.write(str(N_tracker[0])+'\n')
+                    mu_file_pre.write(str(mu)+'\n')
+
 
         # Promote list to numpy array
         N_data = np.array(N_data)
@@ -169,21 +176,39 @@ for i in range(2):
 
         # Save the index at which the N target bin is
         N_target = N # target number of particles
-        N_idx = np.where(N_bins==N_target)[0][0] # Index of bin corresponding to N_target
-
-        # Stop the loop if the peak is P(N)
-        if can_flag == False:
-            if P_N.max() == P_N[N_idx]: break
-        else:
-            if P_N.max() == P_N[N_idx]: break
+        
+        if N_target in N_bins:
+            N_idx = np.where(N_bins==N_target)[0][0] # Index of bin corresponding to N_target
             
-        # Determine mu via Eq. 15 in: https://arxiv.org/pdf/1312.6177.pdf
-        mu_gc = mu   
+            # Stop the loop if the peak is P(N)
+            if P_N.max() == P_N[N_idx]: break
 
-        mu_right = mu_gc - (1/beta)*np.log(P_N[N_idx+1]/P_N[N_idx]) # Target chemical potential
-        mu_left = mu_gc - (1/beta)*np.log(P_N[N_idx]/P_N[N_idx-1]) # Target chemical potential
-        mu = (mu_left + mu_right)/2
 
+            # Determine mu via Eq. 15 in: https://arxiv.org/pdf/1312.6177.pdf
+            mu_gc = mu   
+
+            if N_target-1 in N_bins and N_target+1 in N_bins:
+                mu_right = mu_gc - (1/beta)*np.log(P_N[N_idx+1]/P_N[N_idx])
+                mu_left = mu_gc - (1/beta)*np.log(P_N[N_idx]/P_N[N_idx-1])
+                mu = (mu_left + mu_right)/2 # target mu
+            elif N_target-1 in N-bins:
+                mu_left = mu_gc - (1/beta)*np.log(P_N[N_idx]/P_N[N_idx-1])
+                mu = mu_left
+            else:
+                mu_right = mu_gc - (1/beta)*np.log(P_N[N_idx+1]/P_N[N_idx])
+                mu = mu_right               
+            
+        else:
+            peak_idx = np.argmax(P_N)
+            N_max = N_bins[peak_idx]
+            
+            if N_max > N_target:                
+                mu -= 1
+            else:          
+                mu += 1
+                
+N_file_pre.close()
+mu_file_pre.close()
 # ---------------- Pre-equilibration 2: eta calibration  ---------------- #
 print("\nPre-equilibration (2/2): Determining eta...")
 
@@ -205,14 +230,14 @@ while True:
     for m in range(M_equil):
         
         # Pool of worm algorithm updates
-        pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,can_flag,N_tracker,N_flats_tracker,A,N_zero,N_beta)
+        pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
     
     Z_frac = 0
     N_data = []
     for m in range(M_pre):
         
         # Pool of worm algorithm updates
-        pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,can_flag,N_tracker,N_flats_tracker,A,N_zero,N_beta)
+        pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
         
         # Make measurement if no worm ends present
         if not(pimc.check_worm(head_loc,tail_loc)):
@@ -246,13 +271,13 @@ while True:
     print(f"{mu}|{list(zip(N_bins,P_N))}|{eta}|{Z_frac}")
     
     # Modify it if necessary
-    if Z_frac > 0.01 and Z_frac < 0.05:
+    if Z_frac > 0.10 and Z_frac < 0.20:
         break
     else:
-        if Z_frac < 0.01: 
-            eta *= 0.8
+        if Z_frac < 0.10: 
+            eta *= 0.5
         else:
-            eta *= 1.2
+            eta *= 1.5
         
 # ---------------- Lattice PIMC ---------------- #
     
