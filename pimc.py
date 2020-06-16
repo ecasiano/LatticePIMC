@@ -246,7 +246,8 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        #if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        lol = 3.14
 
     # Calculate the difference in diagonal energy dV = \epsilon_w - \epsilon
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -372,7 +373,8 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        #if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        lol = 3.14
 
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -524,7 +526,9 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        #if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        lol = 3.14
+
 
     # Accept
     data_struct[x][k][0] = tau_new
@@ -621,7 +625,9 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False # int due to precision
+        #if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False # int due to precision
+        lol = 3.14
+
 
     # Count the TOTAL number of particles at tau=0
     N_b = N_zero[0]
@@ -789,7 +795,9 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        #if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        lol = 3.14
+
 
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -948,7 +956,9 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        #if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        lol = 3.14
+
 
     # Count the TOTAL number of particles at tau=beta before insertion
     N_b = N_beta[0]
@@ -1102,7 +1112,9 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
     if canonical:
         # Reject the update if the total number is outside of (N-1,N+1)
-        if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        #if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
+        lol = 3.14
+
 
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
@@ -2137,27 +2149,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 #             if (src_site == 0 and dest_site == L-1):
 #                 plt.hlines(tau_list[i][j],-0.5,0,linewidth=1)
 #                 plt.hlines(tau_list[i][j],L-1,L-1+0.5,linewidth=1)
-
-#             elif (src_site == L-1 and dest_site == 0):
-#                 plt.hlines(tau_list[i][j],-0.5,0,linewidth=1)
-#                 plt.hlines(tau_list[i][j],L-1,L-1+0.5,linewidth=1)
-
-#             else:
-#                 plt.hlines(tau_list[i][j],src_site,dest_site,linewidth=1)
-
-#     plt.xticks(range(0,L))
-#     plt.xlim(-0.5,L-1+0.5)
-#     plt.ylim(0,1)
-#     plt.tick_params(axis='y',which='both',left=False,right=False)
-#     plt.tick_params(axis='x',which='both',top=False,bottom=False)
-#     plt.xlabel(r"$i$")
-#     plt.ylabel(r"$\tau/\beta$")
-#     plt.show()
-#     if figure_name != None:
-#         plt.savefig(figure_name)
-#     #plt.close()
-
-#     return None
+lk;jasldj;ladsadfasd
 
 '----------------------------------------------------------------------------------'
 

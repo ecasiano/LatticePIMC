@@ -5,6 +5,7 @@ import numpy as np
 import fastrand
 import argparse
 import time
+import os
 
 # -------- Set command line arguments -------- #
 
@@ -112,6 +113,8 @@ N_beta = [N]
 N_file_pre = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_N_pre.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
 mu_file_pre = open("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_mu_pre.dat"%(L,N,U,mu,t,beta,M,rseed,D),"w+")
 
+mu_initial = mu
+
 print("Pre-equilibration (1/2): Determining mu...")
 
 print("mu | P(N-1) | P(N) | P(N+1)")
@@ -121,7 +124,7 @@ M_equil = int(M_equil*L**D*beta)
 
 # Iterate until particle distribution P(N) is peaked at target N
 for i in range(2):
-    can_flag = [False,True][i]
+    can_flag = [False,False][i]
     while True:
 
         # Restart the data structure
@@ -135,7 +138,7 @@ for i in range(2):
         skip_ctr = 0
 
         # Equilibrate the system
-        for m in range(M_equil):
+        for m in range(int(M_pre*0.2)):
 
             # Pool of worm algorithm updates
             pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,can_flag,N_tracker,N_flats_tracker,A,N_zero,N_beta)
@@ -176,7 +179,7 @@ for i in range(2):
 
         # Save the index at which the N target bin is
         N_target = N # target number of particles
-        
+            
         if N_target in N_bins:
             N_idx = np.where(N_bins==N_target)[0][0] # Index of bin corresponding to N_target
             
@@ -184,19 +187,20 @@ for i in range(2):
             if P_N.max() == P_N[N_idx]: break
 
 
-            # Determine mu via Eq. 15 in: https://arxiv.org/pdf/1312.6177.pdf
-            mu_gc = mu   
-
-            if N_target-1 in N_bins and N_target+1 in N_bins:
-                mu_right = mu_gc - (1/beta)*np.log(P_N[N_idx+1]/P_N[N_idx])
-                mu_left = mu_gc - (1/beta)*np.log(P_N[N_idx]/P_N[N_idx-1])
-                mu = (mu_left + mu_right)/2 # target mu
-            elif N_target-1 in N-bins:
-                mu_left = mu_gc - (1/beta)*np.log(P_N[N_idx]/P_N[N_idx-1])
-                mu = mu_left
             else:
-                mu_right = mu_gc - (1/beta)*np.log(P_N[N_idx+1]/P_N[N_idx])
-                mu = mu_right               
+                # Determine mu via Eq. 15 in: https://arxiv.org/pdf/1312.6177.pdf
+                mu_gc = mu   
+
+                if ((N_target-1) in N_bins[:-1]) and ((N_target+1) in N_bins[:-1]):
+                    mu_right = mu_gc - (1/beta)*np.log(P_N[N_idx+1]/P_N[N_idx])
+                    mu_left = mu_gc - (1/beta)*np.log(P_N[N_idx]/P_N[N_idx-1])
+                    mu = (mu_left + mu_right)/2 # target mu
+                elif N_target+1 in N_bins[:-1]:
+                    mu_right = mu_gc - (1/beta)*np.log(P_N[N_idx+1]/P_N[N_idx])
+                    mu = mu_right     
+                else:                   
+                    mu_left = mu_gc - (1/beta)*np.log(P_N[N_idx]/P_N[N_idx-1])
+                    mu = mu_left
             
         else:
             peak_idx = np.argmax(P_N)
@@ -207,6 +211,12 @@ for i in range(2):
             else:          
                 mu += 1
                 
+# Rename files using new chemical potential
+os.rename("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_N_pre.dat"%(L,N,U,mu_initial,t,beta,M,rseed,D),
+         "%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_N_pre.dat"%(L,N,U,mu,t,beta,M,rseed,D))
+os.rename("%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_mu_pre.dat"%(L,N,U,mu_initial,t,beta,M,rseed,D),
+         "%i_%i_%.4f_%.4f_%.4f_%.4f_%i_%i_%iD_gc_mu_pre.dat"%(L,N,U,mu,t,beta,M,rseed,D))
+
 N_file_pre.close()
 mu_file_pre.close()
 # ---------------- Pre-equilibration 2: eta calibration  ---------------- #
@@ -227,7 +237,7 @@ while True:
     N_beta = [N]
     skip_ctr = 0
     
-    for m in range(M_equil):
+    for m in range(int(M_pre*0.2)):
         
         # Pool of worm algorithm updates
         pool[fastrand.pcg32bounded(15)](data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta)
@@ -271,10 +281,10 @@ while True:
     print(f"{mu}|{list(zip(N_bins,P_N))}|{eta}|{Z_frac}")
     
     # Modify it if necessary
-    if Z_frac > 0.10 and Z_frac < 0.20:
+    if Z_frac > 0.13 and Z_frac < 0.16:
         break
     else:
-        if Z_frac < 0.10: 
+        if Z_frac < 0.13: 
             eta *= 0.5
         else:
             eta *= 1.5
@@ -282,16 +292,6 @@ while True:
 # ---------------- Lattice PIMC ---------------- #
     
 start = time.time()
-
-# Restart the data structure
-data_struct = pimc.create_data_struct(alpha,L,D)
-head_loc = []
-tail_loc = []
-N_tracker = [N]
-N_flats_tracker = [L]
-N_zero = [N]
-N_beta = [N]
-N_data = []
     
 # Open files that will save data        
 if canonical:
@@ -323,6 +323,7 @@ tau_slices = np.linspace(0,beta,n_slices)[1:-1][::2] # slices were observables a
 tr_kinetic_list = np.zeros_like(tau_slices)
 tr_diagonal_list = np.zeros_like(tau_slices)
 N_list = [] 
+N_data = []
 
 # Length of energies arrays (needed for reshape later down)
 data_len = len(tr_kinetic_list)
@@ -350,7 +351,7 @@ skip_ctr = 0
 
 M *= int(L**D*beta)
 # Randomly an update M times
-for m in range(M): 
+for m in range(M-M_equil): 
 #while measurements[0] < int(M/(L**D*beta)):
     
     # Pool of worm algorithm updates
@@ -417,6 +418,9 @@ for m in range(M):
                         bin_ctr = 0
                         tr_kinetic_list *= 0
                         tr_diagonal_list *= 0
+                        
+                        # Array of measured total particle number. Needed for mu determination.
+                        N_file.write(str(round(N_tracker[0]))+'\n')
                     
                 else: # Worldline doesn't have target particle number
                     #print(N_tracker[0])
@@ -454,7 +458,7 @@ for m in range(M):
                     tr_diagonal_list *= 0
                     
                     # Array of measured total particle number. Needed for mu determination.
-                    N_file.write(str(N_tracker[0])+'\n')
+                    N_file.write(str(round(N_tracker[0]))+'\n')
 
         else: # Not a diagonal configuration. There's a worm end.
             pass
