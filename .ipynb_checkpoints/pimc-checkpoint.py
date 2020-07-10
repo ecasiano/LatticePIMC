@@ -1,6 +1,7 @@
 # Functions to be used in main file (lattice_pimc.py)
 import numpy as np
 import fastrand
+import math
 from scipy.stats import truncexpon
 
 def random_boson_config(L,D,N):
@@ -49,7 +50,7 @@ def tau_resolved_energy(data_struct,beta,n_slices,U,mu,t,L,D):
     # Initialize array that will contain Fock states at all tau_slices
     alphas = np.zeros((len(tau_slices),L**D))
     for col in range(L**D):
-        alphas[:,col]=tau_slices # for now, just store the tau_slices
+        alphas[:,col]=tau_slices # for now, just store the tau_slices themselves
 
     # Kinetic
     for i in range(L**D):
@@ -148,7 +149,7 @@ def n_i_pimc(data_struct,beta,L):
 def get_std_error(mc_data):
     '''Input array and calculate standard error'''
     N_bins = np.shape(mc_data)[0]
-    std_error = np.std(mc_data,axis=0)/np.sqrt(N_bins)
+    std_error = np.std(mc_data,axis=0)/math.sqrt(N_bins)
 
     return std_error
 
@@ -182,7 +183,7 @@ def check_worm(head_loc,tail_loc):
 
 '----------------------------------------------------------------------------------'
 
-def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insert_worm_data,insert_anti_data):
 
     '''Inserts a worm or antiworm'''
 
@@ -214,11 +215,11 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
     else: # antiworm
         insert_worm = False
 
-#     # Add to worm/antiworm PROPOSAL counters
-#     if insert_worm:
-#         insert_worm_data[1] += 1
-#     else:
-#         insert_anti_data[1] += 1
+    # Add to worm/antiworm PROPOSAL counters
+    if insert_worm:
+        insert_worm_data[1] += 1
+    else:
+        insert_anti_data[1] += 1
 
     # Determine the no. of particles after each worm end
     n_i = data_struct[i][k][1]  # initial number of particles in the flat interval
@@ -254,7 +255,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 1,1       # tunable delete and insert probabilities
-    R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
+    R = eta**2 * N_after_tail * math.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
 
     # Metropolis sampling
     if np.random.random() < R: # Accept
@@ -293,11 +294,11 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
             head_loc.extend([i,k+1])
             tail_loc.extend([i,k+2])
 
-#         # Add to ACCEPTANCE counters
-#         if insert_worm:
-#             insert_worm_data[0] += 1
-#         else: # insert antiworm
-#             insert_anti_data[0] += 1
+        # Add to ACCEPTANCE counters
+        if insert_worm:
+            insert_worm_data[0] += 1
+        else: # insert antiworm
+            insert_anti_data[0] += 1
 
         # Modify N and total N_flats trackers
         N_tracker[0] += dN
@@ -311,7 +312,7 @@ def worm_insert(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
 '----------------------------------------------------------------------------------'
 
-def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,delete_worm_data,delete_anti_data):
 
     # Can only propose worm deletion if both worm ends are present
     if not(head_loc) or not(tail_loc) : return None
@@ -359,11 +360,11 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
     # Calculate the length of the flat interval and the length of the worm/antiworm
     tau_flat = tau_next - tau_prev
 
-#     # Add to delete worm/antiworm PROPOSAL counters
-#     if is_worm:
-#         delete_worm_data[1] += 1
-#     else: # delete antiworm
-#         delete_anti_data[1] += 1
+    # Add to delete worm/antiworm PROPOSAL counters
+    if is_worm:
+        delete_worm_data[1] += 1
+    else: # delete antiworm
+        delete_anti_data[1] += 1
 
     # Determine the length of path to be modified
     l_path = tau_h-tau_t
@@ -381,17 +382,17 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
     # Build the Metropolis ratio (R)
     p_dw,p_iw = 1,1      # tunable delete and insert probabilities
-    R = eta**2 * N_after_tail * np.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
+    R = eta**2 * N_after_tail * math.exp(-dV*(tau_h-tau_t)) * (p_dw/p_iw) * L**D * N_flats * tau_flat**2
     R = 1/R
 
     # Metropolis sampling
     if np.random.random() < R:
 
-#         # Add to delete ACCEPTANCE counters
-#         if is_worm:
-#             delete_worm_data[0] += 1
-#         else: # delete antiworm
-#             delete_anti_data[0] += 1
+        # Add to delete ACCEPTANCE counters
+        if is_worm:
+            delete_worm_data[0] += 1
+        else: # delete antiworm
+            delete_anti_data[0] += 1
 
         # Delete the worm ends
         if is_worm: # worm
@@ -416,7 +417,7 @@ def worm_delete(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_
 
 '----------------------------------------------------------------------------------'
 
-def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,advance_head_data,recede_head_data,advance_tail_data,recede_tail_data):
 
     # Reject update if there are is no worm end present
     if head_loc == [] and tail_loc == [] : return None
@@ -497,21 +498,21 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical
         else:
             tau_new = tau_prev + r
 
-#     # Add to ACCEPTANCE and PROPOSAL counter
-#     if shift_head:
-#         if tau_new > tau_h: # advance head
-#             advance_head_data[0] += 1 # acceptance
-#             advance_head_data[1] += 1 # proposal
-#         else: # recede head
-#             recede_head_data[0] += 1
-#             recede_head_data[1] += 1
-#     else: # shift tail
-#         if tau_new > tau_t: # advance tail
-#             advance_tail_data[0] += 1
-#             advance_tail_data[1] += 1
-#         else: # recede tail
-#             recede_tail_data[0] += 1
-#             recede_tail_data[1] += 1
+    # Add to ACCEPTANCE and PROPOSAL counter
+    if shift_head:
+        if tau_new > tau_h: # advance head
+            advance_head_data[0] += 1 # acceptance
+            advance_head_data[1] += 1 # proposal
+        else: # recede head
+            recede_head_data[0] += 1
+            recede_head_data[1] += 1
+    else: # shift tail
+        if tau_new > tau_t: # advance tail
+            advance_tail_data[0] += 1
+            advance_tail_data[1] += 1
+        else: # recede tail
+            recede_tail_data[0] += 1
+            recede_tail_data[1] += 1
 
     # Determine the length of path to be modified
     tau_old = data_struct[x][k][0] # original time of the worm end
@@ -540,7 +541,7 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical
 
 '----------------------------------------------------------------------------------'
 
-def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertZero_worm_data,insertZero_anti_data):
 
     # Cannot insert if there's two worm ends present
     if head_loc and tail_loc: return None
@@ -561,18 +562,18 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     if not(head_loc) and not(tail_loc): # No worm ends present
         if n_i == 0: # can only insert worm if there's no particles
             insert_worm = True
-#             insertZero_worm_data[1] += 1 # insert worm PROPOSAL counter
+            insertZero_worm_data[1] += 1 # insert worm PROPOSAL counter
             p_type = 1
         else: # insert worm or antiworm randomly
             if np.random.random() < 0.5:
                 insert_worm = True
-#                 insertZero_worm_data[1] += 1
+                insertZero_worm_data[1] += 1
             else: # antiworm
                 insert_worm = False
-#                 insertZero_anti_data[1] += 1  # insert anti PROPOSAL counter
+                insertZero_anti_data[1] += 1  # insert anti PROPOSAL counter
             p_type = 0.5
     elif head_loc: # only worm head present, can only insert tail (antiworm)
-#         insertZero_anti_data[1] += 1
+        insertZero_anti_data[1] += 1
         if n_i == 0:
             return False # can't insert antiworm if no particles on flat
         else: # n_i != 0
@@ -580,7 +581,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
             p_type = 1
     else: # only tail present, can only insert head (worm)
        insert_worm = True
-#        insertZero_worm_data[1] += 1
+       insertZero_worm_data[1] += 1
        p_type = 1
 
     # Randomly choose where to insert worm end on the flat interval
@@ -635,13 +636,13 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weigh ratio W'/W
 #     # C = 1 # Ratio of trial wavefn coefficients post/pre update
     if insert_worm:
-        C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
+        C = math.sqrt(N_b+1)/math.sqrt(n_i+1)
         # C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
+        W = eta * math.sqrt(N_after_tail) * C * math.exp(-dV*tau)
     else: # antiworm
-        C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = math.sqrt(n_i)/math.sqrt(N_b)
         # C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
+        W = eta * math.sqrt(N_after_tail) * C * math.exp(dV*tau)
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
@@ -683,10 +684,10 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
         # Add to insertZero ACCEPTANCE counters
         if insert_worm:
             N_zero[0] += 1
-#             insertZero_worm_data[0] += 1
+            insertZero_worm_data[0] += 1
         else: # insert antiworm
             N_zero[0] -= 1
-#             insertZero_anti_data[0] += 1
+            insertZero_anti_data[0] += 1
 
         # Modify N and total N_flats trackers
         N_tracker[0] += dN
@@ -699,7 +700,7 @@ def insertZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
 '----------------------------------------------------------------------------------'
 
-def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,deleteZero_worm_data,deleteZero_anti_data):
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -778,11 +779,11 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
         else: # If there were particles on the flat, either head or tail could've been inserted.
             p_type = 1/2
 
-#     # Add to deleteZero PROPOSAL counters
-#     if delete_head: # delete head (delete worm)
-#         deleteZero_worm_data[1] += 1
-#     else: # delete tail (delete antiworm)
-#         deleteZero_anti_data[1] += 1
+    # Add to deleteZero PROPOSAL counters
+    if delete_head: # delete head (delete worm)
+        deleteZero_worm_data[1] += 1
+    else: # delete tail (delete antiworm)
+        deleteZero_anti_data[1] += 1
 
     # Determine the length of path to be modified
     l_path = tau
@@ -813,13 +814,13 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weigh ratio W'/W
 #     # C = 1 # C_post/C_pre
     if delete_head: # delete worm
-        C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
+        C = math.sqrt(N_b+1)/math.sqrt(n_i+1)
         # C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*tau)
+        W = eta * math.sqrt(N_after_tail) * C * math.exp(-dV*tau)
     else: # delete antiworm
-        C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = math.sqrt(n_i)/math.sqrt(N_b)
         # C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(dV*tau)
+        W = eta * math.sqrt(N_after_tail) * C * math.exp(dV*tau)
 
     # Build the Metropolis Ratio  (R)
     p_dz, p_iz = 0.5,0.5
@@ -850,10 +851,10 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 #         # Add to deleteZero ACCEPTANCE counters
         if delete_head: # delete worm
             N_zero[0] -= 1
-#             deleteZero_worm_data[0] += 1
+            deleteZero_worm_data[0] += 1
         else: # delete antiworm
             N_zero[0] += 1
-#             deleteZero_anti_data[0] += 1
+            deleteZero_anti_data[0] += 1
 
         # Modify N and total N_flats trackers
         N_tracker[0] += dN
@@ -866,7 +867,7 @@ def deleteZero(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
 '----------------------------------------------------------------------------------'
 
-def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,insertBeta_worm_data,insertBeta_anti_data):
 
     # Cannot insert if there's two worm end already present
     if head_loc and tail_loc: return None
@@ -890,18 +891,18 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     if not(head_loc) and not(tail_loc): # No worm ends present
         if n_i == 0: # can only insert worm if there's no particles
             insert_worm = True
-#             insertBeta_worm_data[1] += 1 # insert worm PROPOSAL counter
+            insertBeta_worm_data[1] += 1 # insert worm PROPOSAL counter
             p_type = 1
         else: # if there's particles, insert worm or antiworm randomly
             if np.random.random() < 0.5:
                 insert_worm = True
-#                 insertBeta_worm_data[1] += 1
+                insertBeta_worm_data[1] += 1
             else:
                 insert_worm = False
-#                 insertBeta_anti_data[1] += 1  # insert anti PROPOSAL counter
+                insertBeta_anti_data[1] += 1  # insert anti PROPOSAL counter
             p_type = 0.5
     elif tail_loc: # only worm tail present, can only insert head (antiworm)
-#         insertBeta_anti_data[1] += 1  # insert anti PROPOSAL counter
+        insertBeta_anti_data[1] += 1  # insert anti PROPOSAL counter
         if n_i == 0:
             return False
         else: # if there's particles, insert the antiworm
@@ -909,7 +910,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
             p_type = 1
     else: # only head present, can only insert tail (worm)
        insert_worm = True
-#        insertBeta_worm_data[1] += 1
+       insertBeta_worm_data[1] += 1
        p_type = 1
 
     # Randomly choose where to insert worm end on the flat interval
@@ -966,13 +967,13 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weight ratio W'/W
 #     # C = 1  # C_pre/C_post
     if insert_worm:
-        C = np.sqrt(N_b +1)/np.sqrt(n_i+1)
+        C = math.sqrt(N_b +1)/math.sqrt(n_i+1)
         # C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
+        W = eta * math.sqrt(N_after_tail) * C * math.exp(-dV*(beta-tau))
     else: # antiworm
-        C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = math.sqrt(n_i)/math.sqrt(N_b)
         # C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
+        W = eta * math.sqrt(N_after_tail) * C * math.exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5
@@ -998,10 +999,10 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
         # Add to insertZero ACCEPTANCE counters
         if insert_worm:
-#             insertBeta_worm_data[0] += 1
+            insertBeta_worm_data[0] += 1
             N_beta[0] += 1
         else: # insert antiworm
-#             insertBeta_anti_data[0] += 1
+            insertBeta_anti_data[0] += 1
             N_beta[0] -= 1
 
         # Modify N and total N_flats trackers
@@ -1015,7 +1016,7 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
 '----------------------------------------------------------------------------------'
 
-def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,deleteBeta_worm_data,deleteBeta_anti_data):
 
     # Cannot delete if there are no worm ends present
     if not(head_loc) and not(tail_loc): return None
@@ -1095,11 +1096,11 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
         else: # If there were particles on the flat, either head or tail could've been inserted.
             p_type = 1/2
 
-#     # Add to deleteBeta PROPOSAL counters
-#     if delete_head: # delete head (antiworm)
-#         deleteBeta_anti_data[1] += 1
-#     else: # delete tail (worm)
-#         deleteBeta_worm_data[1] += 1
+    # Add to deleteBeta PROPOSAL counters
+    if delete_head: # delete head (antiworm)
+        deleteBeta_anti_data[1] += 1
+    else: # delete tail (worm)
+        deleteBeta_worm_data[1] += 1
 
     # Determine the length of path to be modified
     l_path = beta-tau
@@ -1130,13 +1131,13 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
     # Build the weight ratio W'/W
 #     # C = 1 # C_post/C_pre
     if not(delete_head): # delete tail (worm)
-        C = np.sqrt(N_b+1)/np.sqrt(n_i+1)
+        C = math.sqrt(N_b+1)/math.sqrt(n_i+1)
         # C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(beta-tau))
+        W = eta * math.sqrt(N_after_tail) * C * math.exp(-dV*(beta-tau))
     else: # delete head (antiworm)
-        C = np.sqrt(n_i)/np.sqrt(N_b)
+        C = math.sqrt(n_i)/math.sqrt(N_b)
         # C = 1
-        W = eta * np.sqrt(N_after_tail) * C * np.exp(-dV*(tau-beta))
+        W = eta * math.sqrt(N_after_tail) * C * math.exp(-dV*(tau-beta))
 
     # Build the Metropolis Ratio
     p_db, p_ib = 0.5, 0.5
@@ -1156,11 +1157,11 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
         # Add to deleteBeta ACCEPTANCE counters
         if delete_head: # delete antiworm
-#             deleteBeta_anti_data[0] += 1
+            deleteBeta_anti_data[0] += 1
             N_beta[0] += 1
         else: # delete worm
             N_beta[0] -= 1
-#             deleteBeta_worm_data[0] += 1
+            deleteBeta_worm_data[0] += 1
 
         # Modify N and total N_flats trackers
         N_tracker[0] += dN
@@ -1173,7 +1174,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,ikbh_data):
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1182,7 +1183,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if L <= 1: return None
 
     # Add to PROPOSAL counter
-#     ikbh_data[1] += 1
+    ikbh_data[1] += 1
 
     # Retrieve worm head indices (i:site,k:kink)
     i = head_loc[0]
@@ -1233,7 +1234,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * n_wj * math.exp((dV_i-dV_j)*(tau_h-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1243,7 +1244,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-#         ikbh_data[0] += 1
+        ikbh_data[0] += 1
 
         # Delete the worm end from site i
         del data_struct[i][k]
@@ -1277,7 +1278,7 @@ def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,dkbh_data):
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1331,7 +1332,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if tau_h >= tau_next_i: return None
 
     # Add to PROPOSAL counter
-#     dkbh_data[1] += 1
+    dkbh_data[1] += 1
 
     # Determine the lowest time at which the kink could've been inserted
     tau_min = max(tau_prev_i,tau_prev_j)
@@ -1348,7 +1349,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_h-tau_kink))
+    W = t * n_wj * math.exp((dV_i-dV_j)*(tau_h-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbh,p_ikbh = 0.5,0.5
@@ -1359,7 +1360,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-#         dkbh_data[0] += 1
+        dkbh_data[0] += 1
 
         # Delete the kink structure on both sites
         del data_struct[j][k] # deletes the worm head from j
@@ -1391,7 +1392,7 @@ def delete_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,ikah_data):
 
     # Update only possible if there is a worm head present
     if not(head_loc): return None
@@ -1400,7 +1401,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if len(data_struct) <= 1: return None
 
     # Add to PROPOSAL counter
-#     ikah_data[1] += 1
+    ikah_data[1] += 1
 
     # Retrieve worm head indices (i:site,k:kink)
     i = head_loc[0]
@@ -1464,7 +1465,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * n_wj * math.exp((-dV_i+dV_j)*(tau_kink-tau_h))
 
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1474,7 +1475,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-#         ikah_data[0] += 1
+        ikah_data[0] += 1
 
         # Delete the worm end from site i
         del data_struct[i][k]
@@ -1508,7 +1509,7 @@ def insert_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,dkah_data):
 
     # Update only possible if there is worm head present
     if not(head_loc): return None
@@ -1562,7 +1563,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if tau_h <= tau_prev_i: return None
 
     # Add to PROPOSAL counter
-#     dkah_data[1] += 1
+    dkah_data[1] += 1
 
     # Determine tau_next_i
     if tau_prev_i_idx+1 == len(data_struct[i])-1:
@@ -1585,7 +1586,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_kink-tau_h))
+    W = t * n_wj * math.exp((-dV_i+dV_j)*(tau_kink-tau_h))
 
     # Build the Metropolis ratio (R)
     p_dkah,p_ikah = 0.5,0.5
@@ -1596,7 +1597,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-#         dkah_data[0] += 1
+        dkah_data[0] += 1
 
         # Delete the kink structure on both sites
         del data_struct[j][k+1] # deletes the kink from j
@@ -1628,7 +1629,7 @@ def delete_kink_after_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,ikbt_data):
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1637,7 +1638,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if len(data_struct) <= 1: return None
 
     # Add to PROPOSAL counter
-#     ikbt_data[1] += 1
+    ikbt_data[1] += 1
 
     # Retrieve worm tail indices (i:site,k:kink)
     i = tail_loc[0]
@@ -1689,7 +1690,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * n_wj * math.exp((-dV_i+dV_j)*(tau_t-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1699,7 +1700,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-#         ikbt_data[0] += 1
+        ikbt_data[0] += 1
 
         # Delete the worm end from site i
         del data_struct[i][k]
@@ -1733,7 +1734,7 @@ def insert_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,dkbt_data):
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1787,7 +1788,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if tau_t >= tau_next_i: return None
 
     # Add to PROPOSAL counter
-#     dkbt_data[1] += 1
+    dkbt_data[1] += 1
 
     # Determine the lowest time at which the kink could've been inserted
     tau_min = max(tau_prev_i,tau_prev_j)
@@ -1804,7 +1805,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((-dV_i+dV_j)*(tau_t-tau_kink))
+    W = t * n_wj * math.exp((-dV_i+dV_j)*(tau_t-tau_kink))
 
     # Build the Metropolis ratio (R)
     p_dkbt,p_ikbt = 0.5,0.5
@@ -1815,7 +1816,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-#         dkbt_data[0] += 1
+        dkbt_data[0] += 1
 
         # Delete the kink structure on both sites
         del data_struct[j][k] # deletes the worm tail from j
@@ -1847,7 +1848,7 @@ def delete_kink_before_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,
 
 '----------------------------------------------------------------------------------'
 
-def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,ikat_data):
 
     # Update only possible if there is a worm tail present
     if not(tail_loc): return None
@@ -1856,7 +1857,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if L <= 1: return None
 
     # Add to PROPOSAL counter
-#     ikat_data[1] += 1
+    ikat_data[1] += 1
 
     # Retrieve worm tail indices (i:site,k:kink)
     i = tail_loc[0]
@@ -1918,7 +1919,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * n_wj * math.exp((dV_i-dV_j)*(tau_kink-tau_t))
 
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
@@ -1928,7 +1929,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-#         ikat_data[0] += 1
+        ikat_data[0] += 1
 
         # Delete the worm end from site i
         del data_struct[i][k]
@@ -1962,7 +1963,7 @@ def insert_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 
 '----------------------------------------------------------------------------------'
 
-def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta):
+def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,dkat_data):
 
     # Update only possible if there is worm tail present
     if not(tail_loc): return None
@@ -2016,7 +2017,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if tau_t <= tau_prev_i: return None
 
     # Add to PROPOSAL counter
-#     dkat_data[1] += 1
+    dkat_data[1] += 1
 
     # Determine tau_next_i
     if tau_prev_i_idx+1 == len(data_struct[i])-1:
@@ -2039,7 +2040,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     dV_j = (U/2)*(n_wj*(n_wj-1)-n_j*(n_j-1)) - mu*(n_wj-n_j)
 
     # Calculate the weight ratio W'/W
-    W = t * n_wj * np.exp((dV_i-dV_j)*(tau_kink-tau_t))
+    W = t * n_wj * math.exp((dV_i-dV_j)*(tau_kink-tau_t))
 
     # Build the Metropolis ratio (R)
     p_dkat,p_ikat = 0.5,0.5
@@ -2050,7 +2051,7 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
     if np.random.random() < R: # Accept
 
         # Add to ACCEPTANCE counter
-#         dkat_data[0] += 1
+        dkat_data[0] += 1
 
         # Delete the kink structure on both sites
         del data_struct[j][k+1] # deletes the kink from j
@@ -2149,27 +2150,6 @@ def delete_kink_after_tail(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,c
 #             if (src_site == 0 and dest_site == L-1):
 #                 plt.hlines(tau_list[i][j],-0.5,0,linewidth=1)
 #                 plt.hlines(tau_list[i][j],L-1,L-1+0.5,linewidth=1)
-
-#             elif (src_site == L-1 and dest_site == 0):
-#                 plt.hlines(tau_list[i][j],-0.5,0,linewidth=1)
-#                 plt.hlines(tau_list[i][j],L-1,L-1+0.5,linewidth=1)
-
-#             else:
-#                 plt.hlines(tau_list[i][j],src_site,dest_site,linewidth=1)
-
-#     plt.xticks(range(0,L))
-#     plt.xlim(-0.5,L-1+0.5)
-#     plt.ylim(0,1)
-#     plt.tick_params(axis='y',which='both',left=False,right=False)
-#     plt.tick_params(axis='x',which='both',top=False,bottom=False)
-#     plt.xlabel(r"$i$")
-#     plt.ylabel(r"$\tau/\beta$")
-#     plt.show()
-#     if figure_name != None:
-#         plt.savefig(figure_name)
-#     #plt.close()
-
-#     return None
 
 '----------------------------------------------------------------------------------'
 
