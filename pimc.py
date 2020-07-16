@@ -471,16 +471,25 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical
         dV = (U/2)*(n_f*(n_f-1)-n_o*(n_o-1)) - mu*(n_f-n_o)
         # n_o = n_f-1
         
-        
-    if shift_head:
-        dV = (U/2)*((n_f+1)*(n_f)-n_f*(n_f-1)) - mu
-#        n_f^2 + n_f - n_f^2+ n_f - mu
-#        2 n_f - mu
-        # n_o = n_f+1
-    else:
-        dV = (U/2)*(n_f*(n_f-1)-(n_f-1)*((n_f-1)-1)) - mu
-        
-        # n_o = n_f-1
+    #------------------------------ Simplified form ---------------------------#
+#    if shift_head:
+#        # n_o = n_f+1
+#        dV = (U/2)*(n_o*(n_o-1)-n_f*(n_f-1)) - mu*(n_o-n_f)
+#           = (U/2)*((n_f+1)*(n_f+1-1))-n_f*(n_f-1)) - mu*(n_f+1-n_f)
+#           = (U/2)*((n_f+1)*n_f-n_f*(n_f-1)) - mu
+#           = (U/2)*(n_f^2+n_f-n_f^2+n_f) - mu
+#           = (U/2)*(2*n_f) - mu
+#        dV = U*n_f - mu
+#    else:
+#        # n_o = n_f-1
+#        dV = (U/2)*(n_f*(n_f-1)-n_o*(n_o-1)) - mu*(n_f-n_o)
+#           = (U/2)*(n_f*(n_f-1)-(n_f-1)*(n_f-1-1)) - mu*(n_f-(n_f-1))
+#           = (U/2)*(n_f*(n_f-1)-(n_f-1)*(n_f-2)) - mu
+#           = (U/2)*(n_f^2-n_f-(n_f^2-3*n_f+2)) - mu
+#           = (U/2)*(n_f^2-n_f-n_f^2+3*n_f-2)) - mu
+#           = (U/2)*(2*n_f-2) - mu
+#        dV = U*(n_f-1) - mu
+    #--------------------------------------------------------------------------#
 
     # Determine the lower and upper bounds of the worm end to be timeshifted
     # Get tau_next
@@ -1180,7 +1189,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
         return False
 
 '----------------------------------------------------------------------------------'
-f
+
 def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,ikbh_data):
 
     # Update only possible if there is a worm head present
