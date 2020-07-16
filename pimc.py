@@ -466,8 +466,21 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical
     # the energy of the segment of path adjacent the moving worm end with more particles.
     if shift_head:
         dV = (U/2)*(n_o*(n_o-1)-n_f*(n_f-1)) - mu*(n_o-n_f)
+        # n_o = n_f+1
     else:
         dV = (U/2)*(n_f*(n_f-1)-n_o*(n_o-1)) - mu*(n_f-n_o)
+        # n_o = n_f-1
+        
+        
+    if shift_head:
+        dV = (U/2)*((n_f+1)*(n_f)-n_f*(n_f-1)) - mu
+#        n_f^2 + n_f - n_f^2+ n_f - mu
+#        2 n_f - mu
+        # n_o = n_f+1
+    else:
+        dV = (U/2)*(n_f*(n_f-1)-(n_f-1)*((n_f-1)-1)) - mu
+        
+        # n_o = n_f-1
 
     # Determine the lower and upper bounds of the worm end to be timeshifted
     # Get tau_next
@@ -956,7 +969,6 @@ def insertBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
         if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
         lol = 3.14
 
-
     # Count the TOTAL number of particles at tau=beta before insertion
     N_b = N_beta[0]
 
@@ -1112,7 +1124,6 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
         if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
         lol = 3.14
 
-
     # Calculate diagonal energy difference
     dV = (U/2)*(N_after_tail*(N_after_tail-1)-N_after_head*(N_after_head-1)) - mu*(N_after_tail-N_after_head)
 
@@ -1169,7 +1180,7 @@ def deleteBeta(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_t
         return False
 
 '----------------------------------------------------------------------------------'
-
+f
 def insert_kink_before_head(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical,N_tracker,N_flats_tracker,A,N_zero,N_beta,ikbh_data):
 
     # Update only possible if there is a worm head present
