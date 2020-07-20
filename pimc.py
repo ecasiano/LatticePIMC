@@ -552,7 +552,6 @@ def worm_timeshift(data_struct,beta,head_loc,tail_loc,t,U,mu,eta,L,D,N,canonical
         if (N_tracker[0]+dN) <= N-1 or (N_tracker[0]+dN) >= N+1: return False
         lol = 3.14
 
-
     # Accept
     data_struct[x][k][0] = tau_new
 
